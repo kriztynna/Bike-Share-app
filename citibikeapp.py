@@ -1,3 +1,4 @@
+from datetime import datetime
 import json, urllib2, webapp2
 from google.appengine.ext import db
 
@@ -69,7 +70,7 @@ class StationStatus(db.Model):
         totalDocks = db.IntegerProperty(required = True)
         statusKey = db.IntegerProperty(required = True)
         availableBikes = db.IntegerProperty(required = True)
-        date_time = db.StringProperty(required = True)
+        date_time = db.DateTimeProperty(required = True)
 
 class StatusInfo(db.Model):
         statusValue = db.StringProperty(required = True)
@@ -103,6 +104,8 @@ class Update(MainPage):
                 raw_data = self.getData()
                 data = json.loads(raw_data)
                 execution_time = data['executionTime']
+                #2013-06-27 09:01:01 PM
+                et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
                 self.write(execution_time)
                 self.write('<br><br>')
                 station_list = data['stationBeanList']
@@ -122,7 +125,7 @@ class Update(MainPage):
                         statusKey = station_list[i]['statusKey']
                         availableBikes = station_list[i]['availableBikes']
                         made_key = str(station_id)+'_'+execution_time
-			r = StationStatus(key_name = made_key, date_time = execution_time, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes, )
+			r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes, )
 			r_key = r.put()
 			
 			#update StatusInfo
