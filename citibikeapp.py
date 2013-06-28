@@ -1,5 +1,5 @@
 from datetime import datetime
-import json, urllib2, webapp2
+import json, urllib2, time, webapp2
 from google.appengine.ext import db
 
 '''
@@ -76,36 +76,14 @@ class StatusInfo(db.Model):
         statusValue = db.StringProperty(required = True)
         statusKey = db.IntegerProperty(required = True)
 
-class UpdateStationInfo(MainPage):
-	def render_station_info(self):
-                self.write('hello yes this is station info shuttle <br><br>')
-                raw_data = self.getData()
-                data = json.loads(raw_data)
-                execution_time = data['executionTime']
-                self.write(execution_time)
-                self.write('<br><br>')
-                station_list = data['stationBeanList']
-                for i in range(len(station_list)):
-                        station_id = station_list[i]['id']
-                        name = station_list[i]['stationName']
-                        coordinates = str(station_list[i]['latitude'])+', '+str(station_list[i]['longitude'])
-                        stAddress1 = station_list[i]['stAddress1']
-                        stAddress2 = station_list[i]['stAddress2']
-			r = StationInfo(key_name = str(station_id), station_id = station_id, name = name, coordinates = coordinates, stAddress1 = stAddress1, stAddress2 = stAddress2)
-			r_key = r.put()
-			self.write(name)
-			self.write('<br><br>')
-	def get(self):
-		self.render_station_info()
-
 class Update(MainPage):
 	def render_station_status(self):
                 self.write('hello yes this is station status shuttle <br><br>')
                 raw_data = self.getData()
                 data = json.loads(raw_data)
                 execution_time = data['executionTime']
-                #2013-06-27 09:01:01 PM
                 et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
+                et_UNIX = int(time.mktime(et.timetuple()))
                 self.write(execution_time)
                 self.write('<br><br>')
                 station_list = data['stationBeanList']
@@ -124,7 +102,7 @@ class Update(MainPage):
                         totalDocks = station_list[i]['totalDocks']
                         statusKey = station_list[i]['statusKey']
                         availableBikes = station_list[i]['availableBikes']
-                        made_key = str(station_id)+'_'+execution_time
+                        made_key = str(station_id)+'_'+str(et_UNIX)
 			r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes, )
 			r_key = r.put()
 			
