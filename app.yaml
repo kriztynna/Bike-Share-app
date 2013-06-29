@@ -18,5 +18,5 @@ handlers:
 - url: /.*
   script: bikeshareapp.app
 - url: /update
-  script: cron.yaml
+  script: bikeshareapp.app
   login: admin
