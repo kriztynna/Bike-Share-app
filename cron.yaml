@@ -1,0 +1,4 @@
+cron:
+- description: update bike share data
+  url: /update
+  schedule: every 30 minutes
