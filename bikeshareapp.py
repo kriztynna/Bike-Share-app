@@ -76,7 +76,35 @@ class StatusInfo(db.Model):
         statusValue = db.StringProperty(required = True)
         statusKey = db.IntegerProperty(required = True)
 
-class Update(MainPage):
+class UpdateStatus(MainPage):
+	def render_station_status(self):
+                self.write('hello yes this is station status shuttle <br><br>')
+                raw_data = self.getData()
+                data = json.loads(raw_data)
+                execution_time = data['executionTime']
+                et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
+                et_UNIX = int(time.mktime(et.timetuple()))
+                self.write(execution_time)
+                self.write('<br><br>')
+                station_list = data['stationBeanList']
+                for i in range(len(station_list)):
+                        #update StationStatus
+			station_id = station_list[i]['id']
+			availableDocks = station_list[i]['availableDocks']
+                        totalDocks = station_list[i]['totalDocks']
+                        statusKey = station_list[i]['statusKey']
+                        availableBikes = station_list[i]['availableBikes']
+                        made_key = str(station_id)+'_'+str(et_UNIX)
+			r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes)
+			r_key = r.put()
+			
+                        #print success message
+			message = str(station_id)+'<br>'+statusValue+'<br><br>'
+			self.write(message)
+	def get(self):
+		self.render_station_status()
+
+class UpdateAll(MainPage):
 	def render_station_status(self):
                 self.write('hello yes this is station status shuttle <br><br>')
                 raw_data = self.getData()
@@ -117,5 +145,5 @@ class Update(MainPage):
 	def get(self):
 		self.render_station_status()
 
-app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/update',Update)], 
+app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll], 
 debug=True)
