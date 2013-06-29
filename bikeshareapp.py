@@ -98,15 +98,12 @@ class UpdateStatus(MainPage):
 		self.update_station_status()
 
 class UpdateAll(MainPage):
-	def render_station_status(self):
-                self.write('hello yes this is station status shuttle <br><br>')
+	def update_all_data(self):
                 raw_data = self.getData()
                 data = json.loads(raw_data)
                 execution_time = data['executionTime']
                 et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
                 et_UNIX = int(time.mktime(et.timetuple()))
-                self.write(execution_time)
-                self.write('<br><br>')
                 station_list = data['stationBeanList']
                 for i in range(len(station_list)):
                         #update StationInfo
@@ -131,12 +128,8 @@ class UpdateAll(MainPage):
 			statusValue = station_list[i]['statusValue']
 			r = StatusInfo(key_name = statusValue, statusKey = statusKey, statusValue = statusValue)
                         r_key = r.put()
-                        
-                        #print success message
-			message = name+' '+str(station_id)+'<br>'+statusValue+'<br><br>'
-			self.write(message)
 	def get(self):
-		self.render_station_status()
+		self.update_all_data()
 
 app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll)], 
 debug=True)
