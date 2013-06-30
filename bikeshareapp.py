@@ -44,12 +44,14 @@ class MainPage(webapp2.RequestHandler):
 class ShowStationData(MainPage):
         def render_show_data(self):
 		self.write("hello here is the data you have stored!<br><br>")
-		stations = db.GqlQuery("SELECT * FROM StationInfo ORDER BY station_id DESC")
-		for station in stations:
+		#stations = db.GqlQuery("SELECT * FROM StationInfo ORDER BY station_id DESC")
+		for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
+                #for station in stations:
                         status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
                         avail = status.availableBikes
                         message = station.name+' has '+str(avail)+' available bikes'+'<br><br>'
                         self.write(message)
+
 	def get(self):
 		self.render_show_data()
 
@@ -79,6 +81,11 @@ class StatusInfo(db.Model):
         statusKey = db.IntegerProperty(required = True)
 
 class UpdateAll(webapp2.RequestHandler):
+        #this code needs to use writes more efficiently
+        #app engine charges the following number of writes
+        #New Entity Put: 2 writes + 2 writes per indexed property value + 1 write per composite index value
+        #Existing Entity Put: 1 write + 4 writes per modified indexed property value + 2 writes per modified composite index value
+        #source: https://developers.google.com/appengine/docs/billing#Enabling_Paid_Apps
 	def getData(self):
                 bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
                 response = urllib2.urlopen(bikeShareJSON)
