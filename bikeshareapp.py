@@ -85,11 +85,11 @@ class UpdateAll(webapp2.RequestHandler):
 	def getData(self):
                 bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
                 response = urllib2.urlopen(bikeShareJSON)
-                the_page = response.read()
-                return the_page
-	def update_all_data(self):
-                raw_data = self.getData()
+                raw_data = response.read()
                 data = json.loads(raw_data)
+                return data
+	def update_all_data(self):
+                data = self.getData()
                 execution_time = data['executionTime']
                 et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
                 et_UNIX = int(time.mktime(et.timetuple()))
@@ -122,8 +122,7 @@ class UpdateAll(webapp2.RequestHandler):
 
 class UpdateStatus(UpdateAll):
 	def update_station_status(self):
-                raw_data = self.getData()
-                data = json.loads(raw_data)
+                data = self.getData()
                 execution_time = data['executionTime']
                 et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
                 et_UNIX = int(time.mktime(et.timetuple()))
