@@ -43,8 +43,12 @@ class MainPage(webapp2.RequestHandler):
 
 class ShowStationData(MainPage):
         def render_show_data(self):
-		self.write("hello this is data shuttle <br><br>")
-                raw_data = self.getData()
+		self.write("hello here is the data you have stored!<br><br>")
+		stations = db.GqlQuery("SELECT * FROM StationInfo ORDER BY station_id DESC")
+		for station in stations:
+                        message = station.name+'<br><br>'
+                        self.write(message)
+                '''raw_data = self.getData()
                 data = json.loads(raw_data)
                 execution_time = data['executionTime']
 		self.write(execution_time)
@@ -53,7 +57,7 @@ class ShowStationData(MainPage):
 		for i in range(len(station_list)):
                         name = station_list[i]['stationName']
         		self.write(name)
-                        self.write('<br>')
+                        self.write('<br>')'''
 	def get(self):
 		self.render_show_data()
 
@@ -76,28 +80,12 @@ class StatusInfo(db.Model):
         statusValue = db.StringProperty(required = True)
         statusKey = db.IntegerProperty(required = True)
 
-class UpdateStatus(MainPage):
-	def update_station_status(self):
-                raw_data = self.getData()
-                data = json.loads(raw_data)
-                execution_time = data['executionTime']
-                et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
-                et_UNIX = int(time.mktime(et.timetuple()))
-                station_list = data['stationBeanList']
-                for i in range(len(station_list)):
-                        #update StationStatus
-			station_id = station_list[i]['id']
-			availableDocks = station_list[i]['availableDocks']
-                        totalDocks = station_list[i]['totalDocks']
-                        statusKey = station_list[i]['statusKey']
-                        availableBikes = station_list[i]['availableBikes']
-                        made_key = str(station_id)+'_'+str(et_UNIX)
-			r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes)
-			r_key = r.put()
-	def get(self):
-		self.update_station_status()
-
-class UpdateAll(MainPage):
+class UpdateAll(webapp2.RequestHandler):
+	def getData(self):
+                bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
+                response = urllib2.urlopen(bikeShareJSON)
+                the_page = response.read()
+                return the_page
 	def update_all_data(self):
                 raw_data = self.getData()
                 data = json.loads(raw_data)
@@ -130,6 +118,27 @@ class UpdateAll(MainPage):
                         r_key = r.put()
 	def get(self):
 		self.update_all_data()
+
+class UpdateStatus(UpdateAll):
+	def update_station_status(self):
+                raw_data = self.getData()
+                data = json.loads(raw_data)
+                execution_time = data['executionTime']
+                et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
+                et_UNIX = int(time.mktime(et.timetuple()))
+                station_list = data['stationBeanList']
+                for i in range(len(station_list)):
+                        #update StationStatus
+			station_id = station_list[i]['id']
+			availableDocks = station_list[i]['availableDocks']
+                        totalDocks = station_list[i]['totalDocks']
+                        statusKey = station_list[i]['statusKey']
+                        availableBikes = station_list[i]['availableBikes']
+                        made_key = str(station_id)+'_'+str(et_UNIX)
+			r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes)
+			r_key = r.put()
+	def get(self):
+		self.update_station_status()
 
 app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll)], 
 debug=True)
