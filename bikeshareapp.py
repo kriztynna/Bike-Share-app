@@ -46,7 +46,8 @@ class ShowStationData(MainPage):
 		self.write("hello here is the data you have stored!<br><br>")
 		stations = db.GqlQuery("SELECT * FROM StationInfo ORDER BY station_id DESC")
 		for station in stations:
-                        status = StationStatus.by_id(station.station_id)
+                        status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
+                        #status = status_list.get()
                         avail = status.availableBikes
                         message = station.name+' has '+str(avail)+' available bikes'+'<br><br>'
                         self.write(message)
