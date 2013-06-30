@@ -46,18 +46,10 @@ class ShowStationData(MainPage):
 		self.write("hello here is the data you have stored!<br><br>")
 		stations = db.GqlQuery("SELECT * FROM StationInfo ORDER BY station_id DESC")
 		for station in stations:
-                        message = station.name+'<br><br>'
+                        status = StationStatus.by_id(station.station_id)
+                        avail = status.availableBikes
+                        message = station.name+' has '+str(avail)+' available bikes'+'<br><br>'
                         self.write(message)
-                '''raw_data = self.getData()
-                data = json.loads(raw_data)
-                execution_time = data['executionTime']
-		self.write(execution_time)
-		self.write('<br><br>')
-		station_list = data['stationBeanList']
-		for i in range(len(station_list)):
-                        name = station_list[i]['stationName']
-        		self.write(name)
-                        self.write('<br>')'''
 	def get(self):
 		self.render_show_data()
 
@@ -75,6 +67,12 @@ class StationStatus(db.Model):
         statusKey = db.IntegerProperty(required = True)
         availableBikes = db.IntegerProperty(required = True)
         date_time = db.DateTimeProperty(required = True)
+
+        @classmethod
+	def by_id(cls, sid):
+                status = StationStatus.all().filter('station_id =', sid).get()
+		return status
+
 
 class StatusInfo(db.Model):
         statusValue = db.StringProperty(required = True)
