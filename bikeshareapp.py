@@ -112,13 +112,13 @@ class UpdateAll(webapp2.RequestHandler):
 			r_key = r.put()
 			
                         #update StationStatus
-                        availableDocks = station_list[i]['availableDocks']
-                        totalDocks = station_list[i]['totalDocks']
+                        #availableDocks = station_list[i]['availableDocks']
+                        #totalDocks = station_list[i]['totalDocks']
                         statusKey = station_list[i]['statusKey']
-                        availableBikes = station_list[i]['availableBikes']
-                        made_key = str(station_id)+'_'+str(et_UNIX)
-			r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes, )
-			r_key = r.put()
+                        #availableBikes = station_list[i]['availableBikes']
+                        #made_key = str(station_id)+'_'+str(et_UNIX)
+			#r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes, )
+			#r_key = r.put()
 			
 			#update StatusInfo
 			statusValue = station_list[i]['statusValue']
