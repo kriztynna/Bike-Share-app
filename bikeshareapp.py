@@ -57,6 +57,23 @@ class ShowStationData(MainPage):
 	def get(self):
 		self.render_show_data()
 
+class StationErrorChecker(MainPage):
+        def render_error_checker(self):
+		q = StationStatus.all().order('-date_time').get()
+		last = q.date_time
+		last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
+		msg = 'Last update: '+last_update+'.'+'<br><br>'
+		self.write(msg)
+		for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
+                        status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
+                        if (status.availableBikes+status.availableDocks) == status.totalDocks:
+                                message = station.name+' looks good.<br>'
+                        else:
+                                message = station.name+' has '+str(status.availableBikes)+' bikes and '+str(status.availableDocks)+' docks, but supposedly '+str(status.totalDocks)+' docks overall.<br>'
+                        self.write(message)
+	def get(self):
+		self.render_error_checker()
+
 class StationInfo(db.Model):
         station_id = db.IntegerProperty(required = True)
         name = db.StringProperty(required = True)
@@ -151,5 +168,5 @@ class UpdateStatus(UpdateAll):
 	def get(self):
 		self.update_station_status()
 
-app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll)], 
+app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll),('/errors',StationErrorChecker)], 
 debug=True)
