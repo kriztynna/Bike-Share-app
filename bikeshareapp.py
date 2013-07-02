@@ -1,4 +1,6 @@
 from datetime import datetime
+from time import sleep
+import traceback
 import json, urllib2, time, webapp2
 from google.appengine.ext import db
 
@@ -82,12 +84,17 @@ class UpdateAll(webapp2.RequestHandler):
         #New Entity Put: 2 writes + 2 writes per indexed property value + 1 write per composite index value
         #Existing Entity Put: 1 write + 4 writes per modified indexed property value + 2 writes per modified composite index value
         #source: https://developers.google.com/appengine/docs/billing#Enabling_Paid_Apps
-	def getData(self):
-                bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
-                response = urllib2.urlopen(bikeShareJSON)
-                raw_data = response.read()
-                data = json.loads(raw_data)
-                return data
+	def getData(self, i=1):
+                try:
+                        bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
+                        response = urllib2.urlopen(bikeShareJSON)
+                        raw_data = response.read()
+                        data = json.loads(raw_data)
+                        return data
+                except ValueError:
+                        print traceback.format_exc()
+                        time.sleep(60*i)
+                        self.getData(i+0.25)
 	def update_all_data(self):
                 data = self.getData()
                 execution_time = data['executionTime']
