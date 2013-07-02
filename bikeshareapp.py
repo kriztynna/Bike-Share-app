@@ -74,6 +74,24 @@ class StationErrorChecker(MainPage):
 	def get(self):
 		self.render_error_checker()
 
+class TotalBikesAndDocks(MainPage):
+        def render_total_bikes(self):
+		q = StationStatus.all().order('-date_time').get()
+		last = q.date_time
+		last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
+		msg = 'Last update: '+last_update+'.'+'<br><br>'
+		self.write(msg)
+		total_bikes = 0
+		total_docks = 0
+		for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
+                        status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
+                        total_bikes+=status.availableBikes
+                        total_docks+=status.availableDocks
+                message = 'There are '+str(total_bikes)+' bikes and '+str(total_docks)+' docks available in all of the NYC bike share.<br><br><br><br>hai :D'
+                self.write(message)
+	def get(self):
+		self.render_total_bikes()
+
 class StationInfo(db.Model):
         station_id = db.IntegerProperty(required = True)
         name = db.StringProperty(required = True)
@@ -168,5 +186,5 @@ class UpdateStatus(UpdateAll):
 	def get(self):
 		self.update_station_status()
 
-app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll),('/errors',StationErrorChecker)], 
+app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll),('/errors',StationErrorChecker),('/totals',TotalBikesAndDocks)], 
 debug=True)
