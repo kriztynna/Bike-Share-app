@@ -45,10 +45,14 @@ class MainPage(webapp2.RequestHandler):
 
 class ShowStationData(MainPage):
         def render_show_data(self):
-		self.write("hello here is the data you have stored!<br><br>")
+		q = StationStatus.all().order('-date_time').get()
+		last = q.date_time
+		last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
+		msg = 'Last update: '+last_update+'.'+'<br><br>'
+		self.write(msg)
 		for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
                         status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
-                        message = station.name+' has '+str(status.availableBikes)+' available bikes'+'<br><br>'
+                        message = station.name+' has '+str(status.availableBikes)+' available bikes'+'<br>'
                         self.write(message)
 	def get(self):
 		self.render_show_data()
