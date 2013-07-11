@@ -1,7 +1,7 @@
 cron:
 - description: update station status
   url: /updatestatus
-  schedule: every 2 hours from 06:00 to 23:59
+  schedule: every 2 hours synchronized
 - description: update bike share data
   url: /updateall
-  schedule: every day 03:00
+  schedule: every day 07:00
