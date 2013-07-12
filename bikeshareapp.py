@@ -4,6 +4,7 @@ import traceback
 import json, urllib2, time, webapp2
 from google.appengine.ext import db
 
+########## This is where the web page handlers go ##########
 '''
 class Handler(webapp2.RequestHandler):
 	def write(self, *a, **kw):
@@ -92,6 +93,7 @@ class TotalBikesAndDocks(MainPage):
 	def get(self):
 		self.render_total_bikes()
 
+########## This is where the database models go ##########
 class StationInfo(db.Model):
         station_id = db.IntegerProperty(required = True)
         name = db.StringProperty(required = True)
@@ -117,12 +119,8 @@ class StatusInfo(db.Model):
         statusValue = db.StringProperty(required = True)
         statusKey = db.IntegerProperty(required = True)
 
+########## This is where the cron jobs go ##########
 class UpdateAll(webapp2.RequestHandler):
-        #this code needs to use writes more efficiently
-        #app engine charges the following number of writes
-        #New Entity Put: 2 writes + 2 writes per indexed property value + 1 write per composite index value
-        #Existing Entity Put: 1 write + 4 writes per modified indexed property value + 2 writes per modified composite index value
-        #source: https://developers.google.com/appengine/docs/billing#Enabling_Paid_Apps
 	def getData(self, i=1):
                 try:
                         bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
@@ -142,6 +140,7 @@ class UpdateAll(webapp2.RequestHandler):
                 station_list = data['stationBeanList']
                 for i in range(len(station_list)):
                         #update StationInfo
+                        
                         station_id = station_list[i]['id']
                         name = station_list[i]['stationName']
                         coordinates = str(station_list[i]['latitude'])+', '+str(station_list[i]['longitude'])
@@ -150,19 +149,18 @@ class UpdateAll(webapp2.RequestHandler):
 			r = StationInfo(key_name = str(station_id), station_id = station_id, name = name, coordinates = coordinates, stAddress1 = stAddress1, stAddress2 = stAddress2)
 			r_key = r.put()
 			
-                        #update StationStatus
-                        #availableDocks = station_list[i]['availableDocks']
-                        #totalDocks = station_list[i]['totalDocks']
-                        statusKey = station_list[i]['statusKey']
-                        #availableBikes = station_list[i]['availableBikes']
-                        #made_key = str(station_id)+'_'+str(et_UNIX)
-			#r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes, )
-			#r_key = r.put()
-			
 			#update StatusInfo
-			statusValue = station_list[i]['statusValue']
-			r = StatusInfo(key_name = statusValue, statusKey = statusKey, statusValue = statusValue)
-                        r_key = r.put()
+                        statusKey = station_list[i]['statusKey']
+                        if statusKey == 1:
+                                continue
+                        elif statusKey == 3:
+                                continue
+                        else:
+                                statusValue = station_list[i]['statusValue']
+                                print 'Found a new status: statusKey = '+str(statusKey)+' and statusValue = '+statusValue+'.'
+                                print 'I added this new status to the database BUT *you need to manually update* this code to prevent unnecessary rewrites.'
+                                r = StatusInfo(key_name = statusValue, statusKey = statusKey, statusValue = statusValue)
+                                r_key = r.put()
 	def get(self):
 		self.update_all_data()
 
