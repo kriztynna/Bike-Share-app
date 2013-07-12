@@ -1,6 +1,6 @@
 from datetime import datetime
 from time import sleep
-import traceback
+import jinja2, traceback
 import json, urllib2, time, webapp2
 from google.appengine.ext import db
 
