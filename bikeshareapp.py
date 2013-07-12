@@ -1,11 +1,14 @@
 from datetime import datetime
 from time import sleep
-import jinja2, traceback
+import jinja2, os, traceback
 import json, urllib2, time, webapp2
 from google.appengine.ext import db
 
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape=True)
+
 ########## This is where the web page handlers go ##########
-'''
+
 class Handler(webapp2.RequestHandler):
 	def write(self, *a, **kw):
 		self.response.out.write(*a, **kw)
@@ -26,21 +29,30 @@ class Handler(webapp2.RequestHandler):
 		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 	def initialize(self, *a, **kw):
 		webapp2.RequestHandler.initialize(self, *a, **kw)
-		self.uid = self.read_secure_cookie('user_id')
-		self.user = self.uid and User.by_id(int(self.uid))
-'''
+		# don't need this yet: self.uid = self.read_secure_cookie('user_id')
+		# don't need this yet either: self.user = self.uid and User.by_id(int(self.uid))
+	#more things I will probably need later, but don't right now:
+	'''
+        def set_secure_cookie(self, user_id, val):
+		cookie_val = make_secure_val(val)
+		self.response.headers.add_header('Set-Cookie', '%s=%s; Path=/' % (user_id, cookie_val))
+	def read_secure_cookie(self, user_id):
+		cookie_val = self.request.cookies.get(user_id)
+		return cookie_val and check_secure_val(cookie_val)
+	def login(self, user):
+		self.set_secure_cookie('user_id', str(user.key().id()))
+	def logout(self):
+		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')'''
 
-class MainPage(webapp2.RequestHandler):
-	def write(self, *a, **kw):
-		self.response.out.write(*a, **kw)
+class MainPage(Handler):
 	def getData(self):
                 bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
                 response = urllib2.urlopen(bikeShareJSON)
                 the_page = response.read()
                 return the_page
-	def render_front(self):
-		self.write("hello world <br><br>")
-		self.write(self.getData())
+	def render_front(self, the_page=""):
+                the_page = self.getData()
+                self.render('front.html', the_page=the_page)
 	def get(self):
 		self.render_front()
 
