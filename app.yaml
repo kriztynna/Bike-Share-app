@@ -17,6 +17,9 @@ handlers:
   static_dir: stylesheets
 - url: /.*
   script: bikeshareapp.app
-- url: /update
+- url: /updatestatus
+  script: bikeshareapp.app
+  login: admin
+- url: /updateall
   script: bikeshareapp.app
   login: admin
