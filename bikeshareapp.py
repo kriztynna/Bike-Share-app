@@ -1,7 +1,6 @@
 from datetime import datetime
 from time import sleep
-import jinja2, os, traceback
-import json, urllib2, time, webapp2
+import jinja2, json, os, time, traceback, urllib2, webapp2
 from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -80,14 +79,8 @@ class ShowStationHistory(MainPage):
                 history = db.GqlQuery("SELECT * FROM StationStatus WHERE station_id = 357 ORDER BY date_time ASC")
                 for h in history:
                         availableBikesSeries.append(int(h.availableBikes))
-                        print 'added '+str(h.availableBikes)+' to the bikes list.'
                         availableDocksSeries.append(int(h.availableDocks))
-                        print 'added '+str(h.availableDocks)+' to the docks list.'
                         x_axis.append(h.date_time)
-                        print 'added '+str(h.date_time)+' to the time stamps.'
-                print availableBikesSeries
-                print availableDocksSeries
-                print x_axis
                 self.render('history.html', history=history, date_time=date_time, availableBikes=availableBikes, availableDocks=availableDocks)
 	def get(self):
 		self.render_show_history()
