@@ -1,19 +1,30 @@
 {% extends "base.html" %}
-	{% block head %}
-		<title>bike share app</title>
-		<!--skipping CSS for now
-		<link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-		-->
-	{% endblock %}
+    {% block head %}
+        <title>bike share app</title>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+        <script type="text/javascript">
+            google.load('visualization', '1.0', {'packages':['corechart']});
+            google.setOnLoadCallback(drawChart);
+            function drawChart() {
+                var data = new google.visualization.DataTable();
+                    data.addColumn('string', 'Time');
+                    data.addColumn('number', 'Available bikes');
+                    data.addRows( {{data_set|safe}} );
+                var options = {
+                    title:'Available bikes at E 11 St & Broadway',
+                    width:800,
+                    height:600,
+                    };
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(data, options);
+            }
+        </script>
+    {% endblock %}
 	
-	{%block body%}
-		<h1>station history</h1>
-		<p>this page shows the historical data for one station, E 11 St & Broadway</p>
-		<hr>
-		<h2>Date & Time    Bikes    Docks</h2>
-		
-		{% for h in history %}
-                    <p>{{h.date_time}}    {{h.availableBikes}}    {{h.availableDocks}}</p>
-		{% endfor %}
-	
-	{% endblock %}
+    {%block body%}
+        <h1>station history</h1>
+            <p>this page shows the historical data for one station, E 11 St & Broadway</p>
+	    <hr>
+	    <div id="chart_div"></div>
+    {% endblock %}

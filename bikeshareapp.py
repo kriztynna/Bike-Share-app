@@ -71,17 +71,14 @@ class ShowStationData(MainPage):
 		self.render_show_data()
 
 class ShowStationHistory(MainPage):
-        def render_show_history(self, history="", date_time="", availableBikes="", availableDocks=""):
+        def render_show_history(self, data_set="", history="", date_time="", availableBikes="", availableDocks=""):
                 station_req = 357
-                availableBikesSeries = []
-                availableDocksSeries = []
-                x_axis = []
+                data_set = []
                 history = db.GqlQuery("SELECT * FROM StationStatus WHERE station_id = 357 ORDER BY date_time ASC")
                 for h in history:
-                        availableBikesSeries.append(int(h.availableBikes))
-                        availableDocksSeries.append(int(h.availableDocks))
-                        x_axis.append(h.date_time)
-                self.render('history.html', history=history, date_time=date_time, availableBikes=availableBikes, availableDocks=availableDocks)
+                        new_row = [str(h.date_time),int(h.availableBikes)]
+                        data_set.append(new_row)
+                self.render('history.html', data_set=data_set, history=history, date_time=date_time, availableBikes=availableBikes, availableDocks=availableDocks)
 	def get(self):
 		self.render_show_history()
 
