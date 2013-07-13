@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+	{% block head %}
+		<title>bike share app</title>
+		<!--skipping CSS for now
+		<link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+		-->
+	{% endblock %}
+	
+	{%block body%}
+		<h1>all station data</h1>
+		<p>this webpage just shows a list of stations along with the number of bikes each has available.</p>
+		<hr>
+		<h2>{{date_time}}</h2>
+		
+		{% for message in status_messages %}
+                    <p>{{message}}</p>
+		{% endfor %}
+	
+	{% endblock %}

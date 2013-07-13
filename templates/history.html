@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+	{% block head %}
+		<title>bike share app</title>
+		<!--skipping CSS for now
+		<link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+		-->
+	{% endblock %}
+	
+	{%block body%}
+		<h1>station history</h1>
+		<p>this page shows the historical data for one station, E 11 St & Broadway</p>
+		<hr>
+		<h2>Date & Time    Bikes    Docks</h2>
+		
+		{% for h in history %}
+                    <p>{{h.date_time}}    {{h.availableBikes}}    {{h.availableDocks}}</p>
+		{% endfor %}
+	
+	{% endblock %}

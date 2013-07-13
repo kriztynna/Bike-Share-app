@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		{% block head %}
+		{% endblock %}
+	</head>
+
+	<body>
+		<div class="header">
+			{% block header %}
+			<p><a href="/" id='title'>cristinaquis</a></p>
+			<ul class = "header">
+				<li><a href="main">main</a></li>
+				<li><a href="bikeshareapp">bike share</a></li>
+				<li><a href="lasercutting">laser cutting</a></li>
+				<li><a href="about">about</a></li>
+				<li><a href="foodlab">food lab</a></li>
+			</ul>
+			<hr>
+			{% endblock %}
+		</div>
+		{% block body %}
+		{% endblock %}
+		<div class="footer">
+			{% block footer %}
+			&copy; Copyright 2013 by a cristinaquis.
+			{% endblock %}
+		</div>
+	</body>
+</html>

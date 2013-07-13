@@ -57,18 +57,41 @@ class MainPage(Handler):
 		self.render_front()
 
 class ShowStationData(MainPage):
-        def render_show_data(self):
-		q = StationStatus.all().order('-date_time').get()
+        def render_show_data(self, date_time="", status_messages=""):
+                q = StationStatus.all().order('-date_time').get()
 		last = q.date_time
 		last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
-		msg = 'Last update: '+last_update+'.'+'<br><br>'
-		self.write(msg)
-		for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
+		date_time = 'Last update: '+last_update+'.'
+		status_messages = []
+                for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
                         status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
-                        message = station.name+' has '+str(status.availableBikes)+' available bikes'+'<br>'
-                        self.write(message)
+                        message = station.name+' has '+str(status.availableBikes)+' available bikes.'
+                        status_messages.append(message)
+                self.render('show.html', date_time=date_time, status_messages=status_messages)
 	def get(self):
 		self.render_show_data()
+
+class ShowStationHistory(MainPage):
+        def render_show_history(self, history="", date_time="", availableBikes="", availableDocks=""):
+                station_req = 357
+                availableBikesSeries = []
+                availableDocksSeries = []
+                x_axis = []
+                history = db.GqlQuery("SELECT * FROM StationStatus WHERE station_id = 357 ORDER BY date_time ASC")
+                for h in history:
+                        availableBikesSeries.append(int(h.availableBikes))
+                        print 'added '+str(h.availableBikes)+' to the bikes list.'
+                        availableDocksSeries.append(int(h.availableDocks))
+                        print 'added '+str(h.availableDocks)+' to the docks list.'
+                        x_axis.append(h.date_time)
+                        print 'added '+str(h.date_time)+' to the time stamps.'
+                print availableBikesSeries
+                print availableDocksSeries
+                print x_axis
+                self.render('history.html', history=history, date_time=date_time, availableBikes=availableBikes, availableDocks=availableDocks)
+	def get(self):
+		self.render_show_history()
+
 
 class StationErrorChecker(MainPage):
         def render_error_checker(self):
@@ -196,5 +219,5 @@ class UpdateStatus(UpdateAll):
 	def get(self):
 		self.update_station_status()
 
-app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll),('/errors',StationErrorChecker),('/totals',TotalBikesAndDocks)], 
+app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll),('/errors',StationErrorChecker),('/totals',TotalBikesAndDocks), ('/history',ShowStationHistory)], 
 debug=True)
