@@ -31,6 +31,13 @@
     {%block body%}
         <h1>station history</h1>
             <p>this page shows the historical data for one station, E 11 St & Broadway</p>
+            <form action="/history" method="post">
+                <select name="station_req" onchange="this.form.submit()">
+                    {% for s in stations %}
+                    <option value={{s.station_id}}>{{s.name}}</option>
+                    {% endfor %}
+                    </select>
+            </form>
 	    <hr>
 	    <div id="chart_div"></div>
     {% endblock %}

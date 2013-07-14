@@ -16,20 +16,9 @@ class Handler(webapp2.RequestHandler):
 		return t.render(params)
 	def render(self, template, **kw):
 		self.write(self.render_str(template, **kw))
-	def set_secure_cookie(self, user_id, val):
-		cookie_val = make_secure_val(val)
-		self.response.headers.add_header('Set-Cookie', '%s=%s; Path=/' % (user_id, cookie_val))
-	def read_secure_cookie(self, user_id):
-		cookie_val = self.request.cookies.get(user_id)
-		return cookie_val and check_secure_val(cookie_val)
-	def login(self, user):
-		self.set_secure_cookie('user_id', str(user.key().id()))
-	def logout(self):
-		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 	def initialize(self, *a, **kw):
 		webapp2.RequestHandler.initialize(self, *a, **kw)
-		# don't need this yet: self.uid = self.read_secure_cookie('user_id')
-		# don't need this yet either: self.user = self.uid and User.by_id(int(self.uid))
+	# don't need this yet: self.uid = self.read_secure_cookie('user_id')		# don't need this yet either: self.user = self.uid and User.by_id(int(self.uid))
 	#more things I will probably need later, but don't right now:
 	'''
         def set_secure_cookie(self, user_id, val):
@@ -71,12 +60,17 @@ class ShowStationData(MainPage):
 		self.render_show_data()
 
 class ShowStationHistory(MainPage):
-        def render_show_history(self, history=""):
-                station_req = 357
-                history = db.GqlQuery("SELECT * FROM StationStatus WHERE station_id = 357 ORDER BY date_time ASC")
-                self.render('history.html', history=history)
+        def render_show_history(self, station_req=""):
+                stations = db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC")
+                if station_req == "": station_req = 357
+                q = "SELECT * FROM StationStatus WHERE station_id = "+str(station_req)+" ORDER BY date_time ASC"
+                history = db.GqlQuery(q)
+                self.render('history.html', history=history, stations=stations)
 	def get(self):
 		self.render_show_history()
+	def post(self):
+                station_req = self.request.get('station_req')
+                self.render_show_history(station_req=station_req)
 
 
 class StationErrorChecker(MainPage):
