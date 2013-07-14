@@ -8,13 +8,19 @@
             google.setOnLoadCallback(drawChart);
             function drawChart() {
                 var data = new google.visualization.DataTable();
-                    data.addColumn('string', 'Time');
+                    data.addColumn('datetime', 'Time');
                     data.addColumn('number', 'Available bikes');
-                    data.addRows( {{data_set|safe}} );
+                    {% for h in history %}
+                        {% set t=h.date_time %}
+                        {% set real_month=t.month-1 %}
+                        {% set t=t.replace(month=real_month)%}
+                        {% set tj = t.strftime('new Date(%Y,%m,%d,%H,%M,%S)') %}
+                        data.addRows([[{{tj}}, {{h.availableBikes}} ]]);
+                    {% endfor %}                                              
                 var options = {
                     title:'Available bikes at E 11 St & Broadway',
-                    width:800,
-                    height:600,
+                    width:1000,
+                    height:500,
                     };
                 var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
                 chart.draw(data, options);
