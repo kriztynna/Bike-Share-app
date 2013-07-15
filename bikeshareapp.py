@@ -65,11 +65,14 @@ class ShowStationHistory(MainPage):
                 if station_req == "": station_req = 357
                 q = "SELECT * FROM StationStatus WHERE station_id = "+str(station_req)+" ORDER BY date_time ASC"
                 history = db.GqlQuery(q)
-                self.render('history.html', history=history, stations=stations)
+                n = StationInfo.all().filter('station_id', int(station_req)).get()
+                name = n.name
+                print name
+                self.render('history.html', history=history, stations=stations, name=name, station_req=station_req)
 	def get(self):
 		self.render_show_history()
 	def post(self):
-                station_req = self.request.get('station_req')
+                station_req = int(self.request.get('station_req'))
                 self.render_show_history(station_req=station_req)
 
 
@@ -92,19 +95,26 @@ class StationErrorChecker(MainPage):
 
 class TotalBikesAndDocks(MainPage):
         def render_total_bikes(self):
-		q = StationStatus.all().order('-date_time').get()
-		last = q.date_time
-		last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
-		msg = 'Last update: '+last_update+'.'+'<br><br>'
-		self.write(msg)
-		total_bikes = 0
-		total_docks = 0
-		for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
-                        status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
-                        total_bikes+=status.availableBikes
-                        total_docks+=status.availableDocks
-                message = 'There are '+str(total_bikes)+' bikes and '+str(total_docks)+' docks available in all of the NYC bike share.<br><br><br><br>hai :D'
-                self.write(message)
+		history = db.GqlQuery("SELECT * FROM StationStatus WHERE station_id = 72 ORDER BY date_time ASC LIMIT 8")
+		totals = []
+		for h in history:
+                        dt = h.date_time
+                        dt_UNIX = str(int(dt.strftime('%s'))*1000)
+                        java_time = 'new Date('+str(dt_UNIX)+')'
+                        def give_totals():
+                                total_bikes = 0
+                                total_docks = 0
+                                for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
+                                        status = StationStatus.all().filter('station_id',station.station_id).filter('date_time', h.date_time).get()
+                                        if status == None:
+                                                continue
+                                        else:
+                                                total_bikes+=status.availableBikes
+                                                total_docks+=status.availableDocks
+                                return total_bikes, total_docks
+        		total_bikes, total_docks = give_totals()
+                        totals.append([dt_UNIX, total_bikes, total_docks])
+                self.render('totals.html', totals=totals)                                
 	def get(self):
 		self.render_total_bikes()
 

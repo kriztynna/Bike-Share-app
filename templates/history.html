@@ -12,13 +12,12 @@
                     data.addColumn('number', 'Available bikes');
                     {% for h in history %}
                         {% set t=h.date_time %}
-                        {% set real_month=t.month-1 %}
-                        {% set t=t.replace(month=real_month)%}
-                        {% set tj = t.strftime('new Date(%Y,%m,%d,%H,%M,%S)') %}
+                        {% set t_UNIX=t.strftime('%s')+'000' %}
+                        {% set tj = 'new Date('+t_UNIX+')' %}
                         data.addRows([[{{tj}}, {{h.availableBikes}} ]]);
                     {% endfor %}                                              
                 var options = {
-                    title:'Available bikes at E 11 St & Broadway',
+                    title:'Available bikes at {{name|safe}}',
                     width:1000,
                     height:500,
                     };
@@ -30,11 +29,15 @@
 	
     {%block body%}
         <h1>station history</h1>
-            <p>this page shows the historical data for one station, E 11 St & Broadway</p>
+            <p>this page shows the historical data for one station, {{name}}</p>
             <form action="/history" method="post">
                 <select name="station_req" onchange="this.form.submit()">
                     {% for s in stations %}
-                    <option value={{s.station_id}}>{{s.name}}</option>
+                    {% set sel="" %}
+                    {% if s.station_id == station_req %}
+                        {% set sel="selected" %}
+                    {% endif %}
+                    <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
                     {% endfor %}
                     </select>
             </form>
