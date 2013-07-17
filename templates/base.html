@@ -1,30 +1,53 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<!-- Bootstrap -->
+	    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
 		{% block head %}
 		{% endblock %}
 	</head>
 
 	<body>
-		<div class="header">
-			{% block header %}
-			<p><a href="/" id='title'>cristinaquis</a></p>
-			<ul class = "header">
-				<li><a href="/">bike share</a></li>
-				<li><a href="show">show station data</a></li>
-				<li><a href="errors">station error checker</a></li>
-				<li><a href="totals">total bikes and docks</a></li>
-				<li><a href="history">station history</a></li>
-			</ul>
-			<hr>
-			{% endblock %}
+
+	{% block header %}
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+
+					<a class="brand" href="/">cristinaquis</a>
+					<div class="nav-collapse collapse">
+						<ul class = "nav">
+							<li><a href="/">bike share</a></li>
+							<li><a href="show">show station data</a></li>
+							<li><a href="errors">station error checker</a></li>
+							<li><a href="totals">total bikes and docks</a></li>
+							<li><a href="history">station history</a></li>
+						</ul>
+					</div><!--/.nav-collapse -->
+				</div>
+			</div>
 		</div>
-		{% block body %}
-		{% endblock %}
-		<div class="footer">
+		<hr>
+	{% endblock %}
+
+	{% block body %}
+	{% endblock %}
+	
+	<div id="footer">
+		<div class="container">	
 			{% block footer %}
-			&copy; Copyright 2013 by a cristinaquis.
+				<p class="muted credit">&copy; Copyright 2013 by a cristinaquis.</p>
 			{% endblock %}
 		</div>
+	</div>
+	
+	<!-- Javascript -->
+		<script src="http://code.jquery.com/jquery.js"></script>
+		<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 	</body>
 </html>

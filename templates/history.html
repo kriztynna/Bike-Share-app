@@ -1,8 +1,27 @@
 {% extends "base.html" %}
     {% block head %}
         <title>bike share app</title>
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    {% endblock %}
+	
+    {%block body%}
+        <h1>station history</h1>
+            <p>this page shows the historical data for one station, {{name}}</p>
+            <form action="/history" method="post">
+                <select name="station_req" onchange="this.form.submit()">
+                    {% for s in stations %}
+                    {% set sel="" %}
+                    {% if s.station_id == station_req %}
+                        {% set sel="selected" %}
+                    {% endif %}
+                    <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
+                    {% endfor %}
+                    </select>
+            </form>
+	    <hr>
+	    <div id="chart_div"></div>
 
+        <!-- Javascript -->
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
         <script type="text/javascript">
             google.load('visualization', '1.0', {'packages':['corechart']});
             google.setOnLoadCallback(drawChart);
@@ -25,22 +44,5 @@
                 chart.draw(data, options);
             }
         </script>
-    {% endblock %}
-	
-    {%block body%}
-        <h1>station history</h1>
-            <p>this page shows the historical data for one station, {{name}}</p>
-            <form action="/history" method="post">
-                <select name="station_req" onchange="this.form.submit()">
-                    {% for s in stations %}
-                    {% set sel="" %}
-                    {% if s.station_id == station_req %}
-                        {% set sel="selected" %}
-                    {% endif %}
-                    <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
-                    {% endfor %}
-                    </select>
-            </form>
-	    <hr>
-	    <div id="chart_div"></div>
+
     {% endblock %}
