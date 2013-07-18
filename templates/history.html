@@ -29,11 +29,8 @@
                 var data = new google.visualization.DataTable();
                     data.addColumn('datetime', 'Time');
                     data.addColumn('number', 'Available bikes');
-                    {% for h in history %}
-                        {% set t=h.date_time %}
-                        {% set t_UNIX=t.strftime('%s')+'000' %}
-                        {% set tj = 'new Date('+t_UNIX+')' %}
-                        data.addRows([[{{tj}}, {{h.availableBikes}} ]]);
+                    {% for d in data_set %}
+                        data.addRows([[{{d[0]}}, {{d[1]}} ]]);
                     {% endfor %}                                              
                 var options = {
                     title:'Available bikes at {{name|safe}}',

@@ -12,8 +12,7 @@
                     data.addColumn('number', 'Total bikes');
                     data.addColumn('number', 'Total docks');
                     {% for t in totals %}
-                        {% set tj="new Date ("+t[0]+")" %}
-                        data.addRows([[ {{tj}},{{t[1]}}, {{t[2]}} ]]);
+                        data.addRows([[ {{t[0]}},{{t[1]}}, {{t[2]}} ]]);
                     {% endfor %}                                              
                 var options = {
                     title:'Total bikes and docks over time',
