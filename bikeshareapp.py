@@ -61,16 +61,34 @@ class ShowStationData(MainPage):
 
 class ShowStationHistory(MainPage):
         def render_show_history(self, station_req=""):
+		#pull up every known station_id, and the name, bc the projection only seems to work with at least two fields
                 stations = db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC")
+
+                #default to station 357 (E 11 St & Broadway) if none selected
                 if station_req == "": station_req = 357
+
+                #filtered for one station, using the provided ID, provide all the status information sorted from most to least recent, returning the first result
                 q = "SELECT * FROM StationStatus WHERE station_id = "+str(station_req)+" ORDER BY date_time ASC"
                 history = db.GqlQuery(q)
+
+                #prep data for insertion into html template
+                data_set = []
+                for h in history:
+                        tj = makeJavaScriptTimeForCharts(h)
+                        #t=h.date_time
+                        #t_UNIX=t.strftime('%s')+'000'
+                        #tj = 'new Date(' + t_UNIX + ')'
+                        data_set.append([tj, h.availableBikes])
+
+                #find the name of the station for the provided ID
                 n = StationInfo.all().filter('station_id', int(station_req)).get()
                 name = n.name
-                print name
-                self.render('history.html', history=history, stations=stations, name=name, station_req=station_req)
+                print name #will print to the app engine logs for later reference
+                self.render('history.html', data_set=data_set, history=history, stations=stations, name=name, station_req=station_req)
+
 	def get(self):
 		self.render_show_history()
+
 	def post(self):
                 station_req = int(self.request.get('station_req'))
                 self.render_show_history(station_req=station_req)
@@ -78,12 +96,16 @@ class ShowStationHistory(MainPage):
 
 class StationErrorChecker(MainPage):
         def render_error_checker(self):
-		q = StationStatus.all().order('-date_time').get()
+		#pull all updates, sorted most to least recent, and get the first result
+                q = StationStatus.all().order('-date_time').get()
 		last = q.date_time
 		last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
 		msg = 'Last update: '+last_update+'.'+'<br><br>'
 		self.write(msg)
-		for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
+		#pull up every known station_id, and the name, bc the projection only works with two or more fields
+		stations = db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC")
+		for station in stations:
+                        #filtered for one station, using the provided ID, provide all the status information sorted from most to least recent, returning the first result
                         status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
                         if (status.availableBikes+status.availableDocks) == status.totalDocks:
                                 message = station.name+' looks good.<br>'
@@ -98,9 +120,7 @@ class TotalBikesAndDocks(MainPage):
 		history = db.GqlQuery("SELECT * FROM StationStatus WHERE station_id = 72 ORDER BY date_time ASC LIMIT 8")
 		totals = []
 		for h in history:
-                        dt = h.date_time
-                        dt_UNIX = str(int(dt.strftime('%s'))*1000)
-                        java_time = 'new Date('+str(dt_UNIX)+')'
+                        java_time = makeJavaScriptTimeForCharts(h)
                         def give_totals():
                                 total_bikes = 0
                                 total_docks = 0
@@ -113,10 +133,18 @@ class TotalBikesAndDocks(MainPage):
                                                 total_docks+=status.availableDocks
                                 return total_bikes, total_docks
         		total_bikes, total_docks = give_totals()
-                        totals.append([dt_UNIX, total_bikes, total_docks])
+                        totals.append([java_time, total_bikes, total_docks])
                 self.render('totals.html', totals=totals)                                
 	def get(self):
 		self.render_total_bikes()
+
+
+########## This is where the utils go ##########
+def makeJavaScriptTimeForCharts(db_entry):
+        t=db_entry.date_time #extract date_time from a data store object
+        t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
+        return 'new Date(' + t_UNIX + ')' #return JavaScript to add dates and times to charts
+
 
 ########## This is where the database models go ##########
 class StationInfo(db.Model):
