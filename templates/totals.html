@@ -1,8 +1,16 @@
 {% extends "base.html" %}
     {% block head %}
         <title>bike share app</title>
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    {% endblock %}
+	
+    {%block body%}
+        <h1>total bikes and docks</h1>
+            <p>This page shows total bikes and docks over time</p>
+	    <hr>
+	    <div id="chart_div"></div>
 
+        <!-- JavaScript -->
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
         <script type="text/javascript">
             google.load('visualization', '1.0', {'packages':['corechart']});
             google.setOnLoadCallback(drawChart);
@@ -23,11 +31,4 @@
                 chart.draw(data, options);
             }
         </script>
-    {% endblock %}
-	
-    {%block body%}
-        <h1>total bikes and docks</h1>
-            <p>This page shows total bikes and docks over time</p>
-	    <hr>
-	    <div id="chart_div"></div>
     {% endblock %}
