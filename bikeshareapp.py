@@ -33,58 +33,39 @@ class Handler(webapp2.RequestHandler):
 		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')'''
 
 class MainPage(Handler):
-	def getData(self):
-                bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
-                response = urllib2.urlopen(bikeShareJSON)
-                the_page = response.read()
-                return the_page
-	def render_front(self, the_page=""):
-                the_page = self.getData()
-                self.render('front.html', the_page=the_page)
+	def render_front(self):
+                self.render('front.html')
 	def get(self):
 		self.render_front()
 
-class ShowStationData(MainPage):
-        def render_show_data(self, date_time="", status_messages=""):
-                q = StationStatus.all().order('-date_time').get()
-		last = q.date_time
-		last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
-		date_time = 'Last update: '+last_update+'.'
-		status_messages = []
-                for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
-                        status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
-                        message = station.name+' has '+str(status.availableBikes)+' available bikes.'
-                        status_messages.append(message)
-                self.render('show.html', date_time=date_time, status_messages=status_messages)
-	def get(self):
-		self.render_show_data()
-
 class ShowStationHistory(MainPage):
         def render_show_history(self, station_req=""):
-		#pull up every known station_id, and the name, bc the projection only seems to work with at least two fields
-                stations = db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC")
+		# Pull up every known station_id, and the name, bc the projection only seems
+                # to work with at least two fields
+                stations = db.GqlQuery("SELECT station_id, name \
+                        FROM StationInfo \
+                        ORDER BY station_id ASC")
 
-                #default to station 357 (E 11 St & Broadway) if none selected
                 if station_req == "": station_req = 357
 
-                #filtered for one station, using the provided ID, provide all the status information sorted from most to least recent, returning the first result
-                q = "SELECT * FROM StationStatus WHERE station_id = "+str(station_req)+" ORDER BY date_time ASC"
+                #filtered for one station, using the provided ID, provide all the status
+                # information sorted from most to least recent, returning the first result
+                q = "SELECT * FROM StationStatus \
+                        WHERE station_id = "+str(station_req)+" \
+                        ORDER BY date_time ASC"
                 history = db.GqlQuery(q)
 
                 #prep data for insertion into html template
                 data_set = []
                 for h in history:
                         tj = makeJavaScriptTimeForCharts(h)
-                        #t=h.date_time
-                        #t_UNIX=t.strftime('%s')+'000'
-                        #tj = 'new Date(' + t_UNIX + ')'
                         data_set.append([tj, h.availableBikes])
 
                 #find the name of the station for the provided ID
                 n = StationInfo.all().filter('station_id', int(station_req)).get()
                 name = n.name
                 print name #will print to the app engine logs for later reference
-                self.render('history.html', data_set=data_set, history=history, stations=stations, name=name, station_req=station_req)
+                self.render('history.html', data_set=data_set, stations=stations, name=name, station_req=station_req)
 
 	def get(self):
 		self.render_show_history()
@@ -96,23 +77,30 @@ class ShowStationHistory(MainPage):
 
 class StationErrorChecker(MainPage):
         def render_error_checker(self):
-		#pull all updates, sorted most to least recent, and get the first result
+		# pull all updates, sorted most to least recent, and get the first result
                 q = StationStatus.all().order('-date_time').get()
 		last = q.date_time
 		last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
-		msg = 'Last update: '+last_update+'.'+'<br><br>'
-		self.write(msg)
-		#pull up every known station_id, and the name, bc the projection only works with two or more fields
-		stations = db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC")
+		last_update_msg = 'Last update: '+last_update+'.'
+		
+		# pull up every known station_id, and the name, bc the projection only works
+		# with two or more fields
+		stations = db.GqlQuery("SELECT station_id, name \
+                                        FROM StationInfo ORDER BY station_id ASC")
+		data_set = []
 		for station in stations:
-                        #filtered for one station, using the provided ID, provide all the status information sorted from most to least recent, returning the first result
+                        # filtered for one station, using the provided ID,
+                        # provide all the status information sorted from most
+                        # to least recent, returning the first result
                         status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
-                        if (status.availableBikes+status.availableDocks) == status.totalDocks:
-                                message = station.name+' looks good.<br>'
-                        else:
-                                message = station.name+' has '+str(status.availableBikes)+' bikes and '+str(status.availableDocks)+' docks, but supposedly '+str(status.totalDocks)+' docks overall.<br>'
-                        self.write(message)
-	def get(self):
+                        ooo_docks = int(status.totalDocks - (status.availableBikes+status.availableDocks))
+                        java_name = '"'+station.name+'"'
+                        data_set.append([java_name, ooo_docks])
+                sorted_set = sorted(data_set, key=lambda arg: arg[1], reverse=True)
+                sorted_set = sorted_set[:9]
+                self.render('errors.html', data_set=sorted_set, last_update_msg=last_update_msg)
+
+        def get(self):
 		self.render_error_checker()
 
 class TotalBikesAndDocks(MainPage):
@@ -237,5 +225,5 @@ class UpdateStatus(UpdateAll):
 	def get(self):
 		self.update_station_status()
 
-app = webapp2.WSGIApplication([('/', MainPage),('/show',ShowStationData),('/updatestatus',UpdateStatus),('/updateall',UpdateAll),('/errors',StationErrorChecker),('/totals',TotalBikesAndDocks), ('/history',ShowStationHistory)], 
+app = webapp2.WSGIApplication([('/', MainPage),('/updatestatus',UpdateStatus),('/updateall',UpdateAll),('/errors',StationErrorChecker),('/totals',TotalBikesAndDocks), ('/history',ShowStationHistory)], 
 debug=True)
