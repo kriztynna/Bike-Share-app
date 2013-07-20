@@ -24,9 +24,13 @@
                     {% endfor %}                                              
                 var options = {
                     title:'Total bikes and docks over time',
+                    colors: ['#4ECDC4', '#FF6B6B', '#556270', '#C7F464', '#C44D58'], 
                     width:1000,
                     height:500,
                     };
+                // color palette: "cheer up emo kid" by electrikmonk at ColourLovers
+                // available at http://www.colourlovers.com/palette/1930/cheer_up_emo_kid
+                
                 var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
                 chart.draw(data, options);
             }
