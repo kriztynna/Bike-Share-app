@@ -1,6 +1,12 @@
-from datetime import datetime
+import datetime
 from time import sleep
-import jinja2, json, os, time, traceback, urllib2, webapp2
+import jinja2
+import json
+import os
+import time
+import traceback
+import urllib2
+import webapp2
 from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -39,20 +45,37 @@ class MainPage(Handler):
 		self.render_front()
 
 class ShowStationHistory(MainPage):
-        def render_show_history(self, station_req=""):
+        def render_show_history(self, station_req="", time_req=""):
+                # options for drop down, name and value in seconds
+                # (UNIX time for python)
+                timespans = [
+                        ['past 24 hours', 86400],
+                        ['past 48 hours', 172800],
+                        ['past 72 hours', 259000],
+                        ['past 7 days', 604800],
+                        ['past 30 days', 2592000]
+                        ]
+                if time_req == "":
+                        time_req = timespans[4][1]
+                min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
+                min_time = min_time.replace(microsecond=0)
+                print min_time
+                
 		# Pull up every known station_id, and the name, bc the projection only seems
                 # to work with at least two fields
                 stations = db.GqlQuery("SELECT station_id, name \
                         FROM StationInfo \
                         ORDER BY station_id ASC")
 
-                if station_req == "": station_req = 357
+                if station_req == "":
+                        station_req = 357
 
                 #filtered for one station, using the provided ID, provide all the status
                 # information sorted from most to least recent, returning the first result
-                q = "SELECT * FROM StationStatus \
-                        WHERE station_id = "+str(station_req)+" \
-                        ORDER BY date_time ASC"
+                q_id = "station_id = "+str(station_req)
+                q_time = "date_time > DATETIME('"+str(min_time)+"')"
+                q = "SELECT * FROM StationStatus WHERE "+q_id+" AND "+q_time+" ORDER BY date_time ASC"
+                print q
                 history = db.GqlQuery(q)
 
                 #prep data for insertion into html template
@@ -65,14 +88,15 @@ class ShowStationHistory(MainPage):
                 n = StationInfo.all().filter('station_id', int(station_req)).get()
                 name = n.name
                 print name #will print to the app engine logs for later reference
-                self.render('history.html', data_set=data_set, stations=stations, name=name, station_req=station_req)
+                self.render('history.html', data_set=data_set, stations=stations, timespans=timespans, time_req=time_req, name=name, station_req=station_req)
 
 	def get(self):
 		self.render_show_history()
 
 	def post(self):
                 station_req = int(self.request.get('station_req'))
-                self.render_show_history(station_req=station_req)
+                time_req = int(self.request.get('time_req'))
+                self.render_show_history(station_req=station_req, time_req=time_req)
 
 
 class StationErrorChecker(MainPage):
@@ -133,6 +157,9 @@ def makeJavaScriptTimeForCharts(db_entry):
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return 'new Date(' + t_UNIX + ')' #return JavaScript to add dates and times to charts
 
+def makeUNIXTimeFromDateTime(dt):
+        t_UNIX = dt.strftime('%s')
+        return int(t_UNIX)
 
 ########## This is where the database models go ##########
 class StationInfo(db.Model):
