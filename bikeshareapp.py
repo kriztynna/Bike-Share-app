@@ -1,5 +1,6 @@
+from dbmodels import *
+from cronjobs import *
 import datetime
-from time import sleep
 import jinja2
 import json
 import os
@@ -26,7 +27,7 @@ class Handler(webapp2.RequestHandler):
 		webapp2.RequestHandler.initialize(self, *a, **kw)
 	# don't need this yet: self.uid = self.read_secure_cookie('user_id')
 	# don't need this yet either: self.user = self.uid and User.by_id(int(self.uid))
-	#more things I will probably need later, but don't right now:
+	# more things I will probably need later, but don't right now:
 	'''
         def set_secure_cookie(self, user_id, val):
 		cookie_val = make_secure_val(val)
@@ -46,9 +47,9 @@ class MainPage(Handler):
 		self.render_front()
 
 class ShowStationHistory(MainPage):
-        def render_show_history(self, station_req="", time_req=""):
-                # options for drop down, name and value in seconds
-                # (UNIX time for python)
+        def render_show_history(self, station_req="", time_req="", bikes_req="", docks_req=""):
+                # options for time range dropdown menu, with name and value in 
+                # seconds (UNIX time for python)
                 timespans = [
                         ['past 24 hours', 86400],
                         ['past 48 hours', 172800],
@@ -56,39 +57,67 @@ class ShowStationHistory(MainPage):
                         ['past 7 days', 604800],
                         ['past 30 days', 2592000]
                         ]
-                if time_req == "":
-                        time_req = timespans[0][1]
-                min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
-                min_time = min_time.replace(microsecond=0)
-                
-		# Pull up every known station_id, and the name, bc the projection only seems
-                # to work with at least two fields
+
+                # Options for the dropdown menu of bike stations. Pulls up 
+                # every known station_id, and the name. Note: The projection 
+                # seems to only work with at least two fields projected.
                 stations = db.GqlQuery("SELECT station_id, name \
                         FROM StationInfo \
                         ORDER BY station_id ASC")
 
+                # set defaults
                 if station_req == "":
                         station_req = 357
+                if time_req == "":
+                        time_req = timespans[0][1]
+                if (bikes_req and docks_req) == "":
+                        bikes_req = "checked"
 
+                min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
+                min_time = min_time.replace(microsecond=0)
+                
                 # filtered for one station, using the provided ID,
                 # filtered for a given time range, using min_time
                 # provide all the status info sorted from old to new
                 q_id = "station_id = "+str(station_req)
                 q_time = "date_time > DATETIME('"+str(min_time)+"')"
-                q = "SELECT * FROM StationStatus WHERE " + q_id + " AND " + q_time +" ORDER BY date_time ASC"
+                q = "SELECT * \
+                        FROM StationStatus \
+                        WHERE " + q_id + " AND " + q_time + \
+                        " ORDER BY date_time ASC"
                 history = db.GqlQuery(q)
 
                 # prep data for insertion into html template
                 data_set = []
-                for h in history:
-                        tj = makeJavaScriptTimeForCharts(h)
-                        data_set.append([tj, h.availableBikes])
+                if (bikes_req and docks_req) == "checked":
+                        for h in history:
+                                tj = makeJavaScriptTimeForCharts(h)
+                                data_set.append([tj, h.availableBikes, h.availableDocks])
+                elif bikes_req == "checked":
+                        for h in history:
+                                tj = makeJavaScriptTimeForCharts(h)
+                                data_set.append([tj, h.availableBikes])
+                elif docks_req == "checked":
+                        for h in history:
+                                tj = makeJavaScriptTimeForCharts(h)
+                                data_set.append([tj, h.availableDocks])
 
                 # find the name of the station for the provided ID
                 n = StationInfo.all().filter('station_id', int(station_req)).get()
                 name = n.name
-                print name # will print to the app engine logs for later reference
-                self.render('history.html', data_set=data_set, stations=stations, timespans=timespans, time_req=time_req, name=name, station_req=station_req)
+                msg = name+", "+str(time_req)+", bikes: "+bikes_req+", docks: "+docks_req
+                print msg # will print to the app engine logs for later reference
+                self.render(
+                        'history.html',
+                        bikes_req=bikes_req,
+                        data_set=data_set,
+                        docks_req=docks_req, 
+                        name=name,
+                        station_req=station_req,
+                        stations=stations,
+                        time_req=time_req,
+                        timespans=timespans
+                        )
 
 	def get(self):
 		self.render_show_history()
@@ -96,7 +125,14 @@ class ShowStationHistory(MainPage):
 	def post(self):
                 station_req = int(self.request.get('station_req'))
                 time_req = int(self.request.get('time_req'))
-                self.render_show_history(station_req=station_req, time_req=time_req)
+                bikes_req = self.request.get('bikes_req')
+                docks_req = self.request.get('docks_req')
+                self.render_show_history(
+                        station_req=station_req,
+                        time_req=time_req,
+                        bikes_req=bikes_req,
+                        docks_req=docks_req
+                        )
 
 
 class StationErrorChecker(MainPage):
@@ -129,14 +165,24 @@ class StationErrorChecker(MainPage):
 
 class TotalBikesAndDocks(MainPage):
         def render_total_bikes(self):
-		history = db.GqlQuery("SELECT * FROM StationStatus WHERE station_id = 72 ORDER BY date_time ASC LIMIT 8")
-		totals = []
+                totals = []
+
+		# using station 72 as a filter because have not been able to
+                # implement a better method to ensure unique date_time values
+		history = db.GqlQuery("SELECT * FROM StationStatus \
+                        WHERE station_id = 72 \
+                        ORDER BY date_time ASC \
+                        LIMIT 8")
+		
 		for h in history:
                         java_time = makeJavaScriptTimeForCharts(h)
                         def give_totals():
                                 total_bikes = 0
                                 total_docks = 0
-                                for station in db.GqlQuery("SELECT station_id, name FROM StationInfo ORDER BY station_id ASC"):
+                                s_query = db.GqlQuery("SELECT station_id, name \
+                                        FROM StationInfo \
+                                        ORDER BY station_id ASC")
+                                for station in s_query:
                                         status = StationStatus.all().filter('station_id',station.station_id).filter('date_time', h.date_time).get()
                                         if status == None:
                                                 continue
@@ -156,97 +202,6 @@ def makeJavaScriptTimeForCharts(db_entry):
         t=db_entry.date_time #extract date_time from a data store object
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return 'new Date(' + t_UNIX + ')' #return JavaScript to add dates and times to charts
-
-########## This is where the database models go ##########
-class StationInfo(db.Model):
-        station_id = db.IntegerProperty(required = True)
-        name = db.StringProperty(required = True)
-        coordinates = db.GeoPtProperty(required = True)
-        stAddress1 = db.StringProperty(required = True)
-        stAddress2 = db.StringProperty(required = False)
-
-class StationStatus(db.Model):
-        station_id = db.IntegerProperty(required = True)
-        availableDocks = db.IntegerProperty(required = True)
-        totalDocks = db.IntegerProperty(required = True)
-        statusKey = db.IntegerProperty(required = True)
-        availableBikes = db.IntegerProperty(required = True)
-        date_time = db.DateTimeProperty(required = True)
-
-        @classmethod
-	def by_id(cls, sid):
-                status = StationStatus.all().filter('station_id =', sid).get()
-		return status
-
-
-class StatusInfo(db.Model):
-        statusValue = db.StringProperty(required = True)
-        statusKey = db.IntegerProperty(required = True)
-
-########## This is where the cron jobs go ##########
-class UpdateAll(webapp2.RequestHandler):
-	def getData(self, i=1):
-                try:
-                        bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
-                        response = urllib2.urlopen(bikeShareJSON)
-                        raw_data = response.read()
-                        data = json.loads(raw_data)
-                        return data
-                except ValueError:
-                        print traceback.format_exc()
-                        time.sleep(60*i)
-                        self.getData(i+0.25)
-	def update_all_data(self):
-                data = self.getData()
-                execution_time = data['executionTime']
-                et = datetime.datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
-                et_UNIX = int(time.mktime(et.timetuple()))
-                station_list = data['stationBeanList']
-                for i in range(len(station_list)):
-                        #update StationInfo
-                        
-                        station_id = station_list[i]['id']
-                        name = station_list[i]['stationName']
-                        coordinates = str(station_list[i]['latitude'])+', '+str(station_list[i]['longitude'])
-                        stAddress1 = station_list[i]['stAddress1']
-                        stAddress2 = station_list[i]['stAddress2']
-			r = StationInfo(key_name = str(station_id), station_id = station_id, name = name, coordinates = coordinates, stAddress1 = stAddress1, stAddress2 = stAddress2)
-			r_key = r.put()
-			
-			#update StatusInfo
-                        statusKey = station_list[i]['statusKey']
-                        if statusKey == 1:
-                                continue
-                        elif statusKey == 3:
-                                continue
-                        else:
-                                statusValue = station_list[i]['statusValue']
-                                print 'Found a new status: statusKey = '+str(statusKey)+' and statusValue = '+statusValue+'.'
-                                print 'I added this new status to the database BUT *you need to manually update* this code to prevent unnecessary rewrites.'
-                                r = StatusInfo(key_name = statusValue, statusKey = statusKey, statusValue = statusValue)
-                                r_key = r.put()
-	def get(self):
-		self.update_all_data()
-
-class UpdateStatus(UpdateAll):
-	def update_station_status(self):
-                data = self.getData()
-                execution_time = data['executionTime']
-                et = datetime.datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
-                et_UNIX = int(time.mktime(et.timetuple()))
-                station_list = data['stationBeanList']
-                for i in range(len(station_list)):
-                        #update StationStatus
-			station_id = station_list[i]['id']
-			availableDocks = station_list[i]['availableDocks']
-                        totalDocks = station_list[i]['totalDocks']
-                        statusKey = station_list[i]['statusKey']
-                        availableBikes = station_list[i]['availableBikes']
-                        made_key = str(station_id)+'_'+str(et_UNIX)
-			r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes)
-			r_key = r.put()
-	def get(self):
-		self.update_station_status()
 
 app = webapp2.WSGIApplication([('/', MainPage),('/updatestatus',UpdateStatus),('/updateall',UpdateAll),('/errors',StationErrorChecker),('/totals',TotalBikesAndDocks), ('/history',ShowStationHistory)], 
 debug=True)

@@ -25,6 +25,15 @@
                         <option value={{t[1]}} {{sel}}>{{t[0]}}</option>
                     {% endfor %}
                 </select>
+                <label class="checkbox">
+                    <input type="checkbox" name="bikes_req" value="checked" {{bikes_req}}>
+                    Available bikes
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" name="docks_req" value="checked" {{docks_req}}>
+                    Available docks
+                </label>
+                <input type="submit" value="Submit">
             </form>
 	    <hr>
 	    <div id="chart_div"></div>
@@ -37,9 +46,14 @@
             function drawChart() {
                 var data = new google.visualization.DataTable();
                     data.addColumn('datetime', 'Time');
-                    data.addColumn('number', 'Available bikes');
+                    {% if bikes_req == "checked" %}
+                        data.addColumn('number', 'Available bikes');
+                    {% endif %}
+                    {% if docks_req == "checked" %}
+                        data.addColumn('number', 'Available docks');
+                    {% endif %}
                     {% for d in data_set %}
-                        data.addRows([[{{d[0]}}, {{d[1]}} ]]);
+                        data.addRows([[{{d[0]}}, {{d[1]}}, {{d[2]}} ]]);
                     {% endfor %}                                              
                 var options = {
                     title:'Available bikes at {{name|safe}}',

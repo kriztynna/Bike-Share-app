@@ -23,3 +23,5 @@ handlers:
 - url: /updateall
   script: bikeshareapp.app
   login: admin
+- url: /.*
+  script: cc-testing.app
