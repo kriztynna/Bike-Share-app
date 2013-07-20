@@ -24,7 +24,8 @@ class Handler(webapp2.RequestHandler):
 		self.write(self.render_str(template, **kw))
 	def initialize(self, *a, **kw):
 		webapp2.RequestHandler.initialize(self, *a, **kw)
-	# don't need this yet: self.uid = self.read_secure_cookie('user_id')		# don't need this yet either: self.user = self.uid and User.by_id(int(self.uid))
+	# don't need this yet: self.uid = self.read_secure_cookie('user_id')
+	# don't need this yet either: self.user = self.uid and User.by_id(int(self.uid))
 	#more things I will probably need later, but don't right now:
 	'''
         def set_secure_cookie(self, user_id, val):
@@ -59,7 +60,6 @@ class ShowStationHistory(MainPage):
                         time_req = timespans[4][1]
                 min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
                 min_time = min_time.replace(microsecond=0)
-                print min_time
                 
 		# Pull up every known station_id, and the name, bc the projection only seems
                 # to work with at least two fields
@@ -70,24 +70,24 @@ class ShowStationHistory(MainPage):
                 if station_req == "":
                         station_req = 357
 
-                #filtered for one station, using the provided ID, provide all the status
-                # information sorted from most to least recent, returning the first result
+                # filtered for one station, using the provided ID,
+                # filtered for a given time range, using min_time
+                # provide all the status info sorted from old to new
                 q_id = "station_id = "+str(station_req)
                 q_time = "date_time > DATETIME('"+str(min_time)+"')"
-                q = "SELECT * FROM StationStatus WHERE "+q_id+" AND "+q_time+" ORDER BY date_time ASC"
-                print q
+                q = "SELECT * FROM StationStatus WHERE " + q_id + " AND " + q_time +" ORDER BY date_time ASC"
                 history = db.GqlQuery(q)
 
-                #prep data for insertion into html template
+                # prep data for insertion into html template
                 data_set = []
                 for h in history:
                         tj = makeJavaScriptTimeForCharts(h)
                         data_set.append([tj, h.availableBikes])
 
-                #find the name of the station for the provided ID
+                # find the name of the station for the provided ID
                 n = StationInfo.all().filter('station_id', int(station_req)).get()
                 name = n.name
-                print name #will print to the app engine logs for later reference
+                print name # will print to the app engine logs for later reference
                 self.render('history.html', data_set=data_set, stations=stations, timespans=timespans, time_req=time_req, name=name, station_req=station_req)
 
 	def get(self):
@@ -156,10 +156,6 @@ def makeJavaScriptTimeForCharts(db_entry):
         t=db_entry.date_time #extract date_time from a data store object
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return 'new Date(' + t_UNIX + ')' #return JavaScript to add dates and times to charts
-
-def makeUNIXTimeFromDateTime(dt):
-        t_UNIX = dt.strftime('%s')
-        return int(t_UNIX)
 
 ########## This is where the database models go ##########
 class StationInfo(db.Model):
