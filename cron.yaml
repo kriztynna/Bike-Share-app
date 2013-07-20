@@ -1,9 +1,9 @@
 cron:
-- description: update station status during 6AM to 7:59PM window eastern time
+- description: update station status during 6AM to 11:59PM
   url: /updatestatus
   schedule: every 2 hours from 06:00 to 23:59
   timezone: America/New_York
 - description: update bike share data at 3AM eastern time
   url: /updateall
-  schedule: every day 03:00
+  schedule: every wednesday 03:00
   timezone: America/New_York
