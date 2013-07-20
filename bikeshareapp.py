@@ -57,7 +57,7 @@ class ShowStationHistory(MainPage):
                         ['past 30 days', 2592000]
                         ]
                 if time_req == "":
-                        time_req = timespans[4][1]
+                        time_req = timespans[0][1]
                 min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
                 min_time = min_time.replace(microsecond=0)
                 
@@ -199,7 +199,7 @@ class UpdateAll(webapp2.RequestHandler):
 	def update_all_data(self):
                 data = self.getData()
                 execution_time = data['executionTime']
-                et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
+                et = datetime.datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
                 et_UNIX = int(time.mktime(et.timetuple()))
                 station_list = data['stationBeanList']
                 for i in range(len(station_list)):
@@ -232,7 +232,7 @@ class UpdateStatus(UpdateAll):
 	def update_station_status(self):
                 data = self.getData()
                 execution_time = data['executionTime']
-                et = datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
+                et = datetime.datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
                 et_UNIX = int(time.mktime(et.timetuple()))
                 station_list = data['stationBeanList']
                 for i in range(len(station_list)):
