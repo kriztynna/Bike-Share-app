@@ -35,11 +35,20 @@
 
           // Set chart options
           var options = {
-            title:'Potential docks out of order',
-            colors: ['#4ECDC4', '#FF6B6B', '#556270', '#C7F464', '#C44D58'], 
-            width:1000,
-            height:500,
-          };
+              title:'    Potential docks out of order',
+              colors: ['#4ECDC4', '#FF6B6B', '#556270', '#C7F464', '#C44D58'],
+              backgroundColor:{stroke:"#FFFFFF"},
+              width:1000,
+              height:500,
+              chartArea:{top:50,width:"60%",height:"80%"},
+              fontSize:14,
+              fontName:"Arial",
+              hAxis:{baselineColor:"#556270",gridlines:{color:"#556270"}},
+              vAxis:{baselineColor:"#FFFFFF",gridlines:{color:"#FFFFFF"}},
+              lineWidth:3,
+              legend: {position: 'top'},
+              };
+
           // color palette: "cheer up emo kid" by electrikmonk at ColourLovers
           // available at http://www.colourlovers.com/palette/1930/cheer_up_emo_kid
           

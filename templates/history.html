@@ -1,9 +1,8 @@
-{% extends "base.html" %}
-    {% block head %}
+{%- extends "base.html" -%}
+    {%- block head -%}
         <title>bike share app</title>
-    {% endblock %}
-	
-    {%block body%}
+    {%- endblock -%}
+    {%- block body -%}
         <h1>station history</h1>
             <p>this page shows the historical data for one station, {{name}}</p>
             <form action="/history" method="post">
@@ -29,7 +28,7 @@
                     <input type="checkbox" name="bikes_req" value="checked" {{bikes_req}}>
                     Available bikes
                 </label>
-                <label class="checkbox">
+                <label class="checkbox" display:inline>
                     <input type="checkbox" name="docks_req" value="checked" {{docks_req}}>
                     Available docks
                 </label>
@@ -56,10 +55,18 @@
                         data.addRows([[{{d[0]}}, {{d[1]}}, {{d[2]}} ]]);
                     {% endfor %}                                              
                 var options = {
-                    title:'Available bikes at {{name|safe}}',
-                    colors: ['#4ECDC4', '#FF6B6B', '#556270', '#C7F464', '#C44D58'], 
+                    title:'    {{name|safe}}',
+                    colors: ['#4ECDC4', '#FF6B6B', '#556270', '#C7F464', '#C44D58'],
+                    backgroundColor:{stroke:"#FFFFFF"},
                     width:1000,
                     height:500,
+                    chartArea:{left:25,top:50,width:"80%",height:"80%"},
+                    fontSize:14,
+                    fontName:"Arial",
+                    hAxis:{baselineColor:"#FFFFFF",gridlines:{color:"#FFFFFF"}},
+                    vAxis:{baselineColor:"#556270",gridlines:{color:"#556270"}},
+                    lineWidth:3,
+                    legend: {position: 'top'},
                     };
                 // color palette: "cheer up emo kid" by electrikmonk at ColourLovers
                 // available at http://www.colourlovers.com/palette/1930/cheer_up_emo_kid

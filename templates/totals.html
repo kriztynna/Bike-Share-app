@@ -23,10 +23,17 @@
                         data.addRows([[ {{t[0]}},{{t[1]}}, {{t[2]}} ]]);
                     {% endfor %}                                              
                 var options = {
-                    title:'Total bikes and docks over time',
-                    colors: ['#4ECDC4', '#FF6B6B', '#556270', '#C7F464', '#C44D58'], 
+                    colors: ['#4ECDC4', '#FF6B6B', '#556270', '#C7F464', '#C44D58'],
+                    backgroundColor:{stroke:"#FFFFFF"},
                     width:1000,
                     height:500,
+                    chartArea:{left:50,top:50,width:"80%",height:"80%"},
+                    fontSize:14,
+                    fontName:"Arial",
+                    hAxis:{baselineColor:"#FFFFFF",gridlines:{color:"#FFFFFF"}},
+                    vAxis:{baselineColor:"#556270",gridlines:{color:"#556270"}},
+                    lineWidth:3,
+                    legend: {position: 'top'},
                     };
                 // color palette: "cheer up emo kid" by electrikmonk at ColourLovers
                 // available at http://www.colourlovers.com/palette/1930/cheer_up_emo_kid

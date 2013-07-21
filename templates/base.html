@@ -7,21 +7,16 @@
 		{% block head %}
 		{% endblock %}
 	</head>
-
 	<body>
-
     <!-- styles -->
 	    <style>
 	      body {
-	        padding: 40px; /* for some padding all the way around */
-	        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+	        padding: 20px; /* for some padding all the way around */
+	        padding-top: 20px; /* 60px to make the container go all the way to the bottom of the topbar */
 	      }
 	    </style>
-
     <!-- Fav and touch icons -->
-    
-
-	{% block header %}
+    {%- block header -%}
 		<div class="navbar navbar navbar-fixed-top">
 			<div class="navbar-inner">
 				<div class="container">
@@ -44,19 +39,16 @@
 			</div>
 		</div>
 		<hr>
-	{% endblock %}
-
-	{% block body %}
-	{% endblock %}
-	
+	{%- endblock -%}
+	{%- block body -%}
+	{%- endblock -%}
 	<div id="footer">
 		<div class="container">	
-			{% block footer %}
+			{%- block footer -%}
 				<p class="muted credit">&copy; Copyright 2013 by a cristinaquis.</p>
-			{% endblock %}
+			{%- endblock -%}
 		</div>
 	</div>
-	
 	<!-- Javascript -->
 		<script src="http://code.jquery.com/jquery.js"></script>
 		<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
