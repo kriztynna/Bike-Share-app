@@ -5,6 +5,8 @@ import traceback
 import time
 import urllib2
 import webapp2
+
+import pytz
 from google.appengine.ext import db
 
 ########## This is where the cron jobs go ##########
@@ -25,6 +27,7 @@ class UpdateAll(webapp2.RequestHandler):
                 data = self.getData()
                 execution_time = data['executionTime']
                 et = datetime.datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
+                et = et.replace(tzinfo=pytz.timezone("America/New_York"))
                 et_UNIX = int(time.mktime(et.timetuple()))
                 station_list = data['stationBeanList']
                 for i in range(len(station_list)):
@@ -58,6 +61,7 @@ class UpdateStatus(UpdateAll):
                 data = self.getData()
                 execution_time = data['executionTime']
                 et = datetime.datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
+                et = et.replace(tzinfo=pytz.timezone("America/New_York"))
                 et_UNIX = int(time.mktime(et.timetuple()))
                 station_list = data['stationBeanList']
                 for i in range(len(station_list)):
@@ -72,3 +76,4 @@ class UpdateStatus(UpdateAll):
 			r_key = r.put()
 	def get(self):
 		self.update_station_status()
+
