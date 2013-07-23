@@ -16,7 +16,7 @@
 		        padding-top: 20px; /* 60px to make the container go all the way to the bottom of the topbar */
 		      }
 		    </style>
-    {%- block header -%}
+    {% block header %}
 		<div class="navbar navbar navbar-fixed-top">
 			<div class="navbar-inner">
 				<div class="container">
@@ -38,9 +38,11 @@
 			</div>
 		</div>
 		<hr>
-	{%- endblock -%}
-	{%- block body -%}
-	{%- endblock -%}
+	{% endblock %}
+	<div class="container">
+		{% block body %}
+		{% endblock %}
+	</div>
 	<div id="footer">
 		<div class="container">	
 			{%- block footer -%}
