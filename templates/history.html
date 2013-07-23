@@ -1,10 +1,10 @@
-{%- extends "base.html" -%}
+{% extends "base.html" %}
     {%- block head -%}
-        <title>bike share app</title>
-    {%- endblock -%}
-    {%- block body -%}
-        <h1>station history</h1>
-            <p>this page shows the historical data for one station, {{name}}</p>
+        <title>bici vizi: history</title>
+    {% endblock %}
+    {% block body %}
+        <h1>historical station data</h1>
+            <p>bici vizi has been collecting data on NYC bike share since late June 2013. Use this page to see how each station's availability of bikes and docks has trended over time.</p>
             <form action="/history" method="post">
                 <select name="station_req" onchange="this.form.submit()">
                     {% for s in stations %}
@@ -53,18 +53,18 @@
                     {% endif %}
                     {% for d in data_set %}
                         data.addRows([[{{d[0]}}, {{d[1]}}, {{d[2]}} ]]);
-                    {% endfor %}                                              
+                    {% endfor %}
                 var options = {
                     title:'    {{name|safe}}',
-                    colors: ['#4ECDC4', '#FF6B6B', '#556270', '#C7F464', '#C44D58'],
+                    colors: {{color|safe}},
                     backgroundColor:{stroke:"#FFFFFF"},
                     width:1000,
                     height:500,
-                    chartArea:{left:25,top:50,width:"80%",height:"80%"},
+                    chartArea:{left:35,top:50,width:"80%",height:"80%"},
                     fontSize:14,
                     fontName:"Arial",
                     hAxis:{baselineColor:"#FFFFFF",gridlines:{color:"#FFFFFF"}},
-                    vAxis:{baselineColor:"#556270",gridlines:{color:"#556270"}},
+                    vAxis:{baselineColor:"#556270",gridlines:{color:"#556270"},format:'#'},
                     lineWidth:3,
                     legend: {position: 'top'},
                     };
@@ -75,5 +75,4 @@
                 chart.draw(data, options);
             }
         </script>
-
     {% endblock %}
