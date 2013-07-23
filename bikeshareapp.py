@@ -47,7 +47,11 @@ class MainPage(Handler):
 		self.render_front()
 
 class ShowStationHistory(MainPage):
-        def render_show_history(self, station_req="", time_req="", bikes_req="", docks_req=""):
+        def render_show_history(
+                self, station_req="",
+                time_req="",
+                bikes_req="",
+                docks_req=""):
                 # options for time range dropdown menu, with name and value in 
                 # seconds (UNIX time for python)
                 timespans = [
@@ -70,7 +74,7 @@ class ShowStationHistory(MainPage):
                         station_req = 357
                 if time_req == "":
                         time_req = timespans[0][1]
-                if (bikes_req and docks_req) == "":
+                if bikes_req=="" and docks_req == "":
                         bikes_req = "checked"
 
                 min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
@@ -89,18 +93,21 @@ class ShowStationHistory(MainPage):
 
                 # prep data for insertion into html template
                 data_set = []
-                if (bikes_req and docks_req) == "checked":
+                if bikes_req=="checked" and docks_req == "checked":
                         for h in history:
                                 tj = makeJavaScriptTimeForCharts(h)
                                 data_set.append([tj, h.availableBikes, h.availableDocks])
+                                color = ['#4ECDC4', '#FF6B6B']
                 elif bikes_req == "checked":
                         for h in history:
                                 tj = makeJavaScriptTimeForCharts(h)
                                 data_set.append([tj, h.availableBikes])
+                                color = ['#4ECDC4']
                 elif docks_req == "checked":
                         for h in history:
                                 tj = makeJavaScriptTimeForCharts(h)
                                 data_set.append([tj, h.availableDocks])
+                                color = ['#FF6B6B']
 
                 # find the name of the station for the provided ID
                 n = StationInfo.all().filter('station_id', int(station_req)).get()
@@ -116,7 +123,8 @@ class ShowStationHistory(MainPage):
                         station_req=station_req,
                         stations=stations,
                         time_req=time_req,
-                        timespans=timespans
+                        timespans=timespans,
+                        color=color
                         )
 
 	def get(self):
@@ -157,7 +165,7 @@ class StationErrorChecker(MainPage):
                         java_name = '"'+station.name+'"'
                         data_set.append([java_name, ooo_docks])
                 sorted_set = sorted(data_set, key=lambda arg: arg[1], reverse=True)
-                sorted_set = sorted_set[:9]
+                sorted_set = sorted_set[:10]
                 self.render('errors.html', data_set=sorted_set, last_update_msg=last_update_msg)
 
         def get(self):
@@ -203,5 +211,10 @@ def makeJavaScriptTimeForCharts(db_entry):
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return 'new Date(' + t_UNIX + ')' #return JavaScript to add dates and times to charts
 
-app = webapp2.WSGIApplication([('/', MainPage),('/updatestatus',UpdateStatus),('/updateall',UpdateAll),('/errors',StationErrorChecker),('/totals',TotalBikesAndDocks), ('/history',ShowStationHistory)], 
-debug=True)
+app = webapp2.WSGIApplication([('/', MainPage),
+                               ('/updatestatus',UpdateStatus),
+                               ('/updateall',UpdateAll),
+                               ('/errors',StationErrorChecker),
+                               ('/totals',TotalBikesAndDocks),
+                               ('/history',ShowStationHistory)],
+                              debug=True)
