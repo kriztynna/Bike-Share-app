@@ -72,8 +72,40 @@ class UpdateStatus(UpdateAll):
                         statusKey = station_list[i]['statusKey']
                         availableBikes = station_list[i]['availableBikes']
                         made_key = str(station_id)+'_'+str(et_UNIX)
-			r = StationStatus(key_name = made_key, date_time = et, station_id = station_id, availableDocks = availableDocks, totalDocks = totalDocks, statusKey = statusKey, availableBikes = availableBikes)
+			r = StationStatus(
+                                key_name = made_key,
+                                date_time = et,
+                                station_id = station_id,
+                                availableDocks = availableDocks,
+                                totalDocks = totalDocks,
+                                statusKey = statusKey,
+                                availableBikes = availableBikes)
 			r_key = r.put()
 	def get(self):
 		self.update_station_status()
 
+'''
+class FixTimes(UpdateStatus):
+        def fix_times(self):
+                # 5 hours time offset
+                offset = datetime.timedelta(seconds=18000)
+                counter = 0
+                print counter
+                # here's the real query we're going to use on the real datastore
+                # the_times = db.GqlQuery("SELECT * FROM StationStatus WHERE date_time < DATETIME('2013-07-22 00:58:01)")
+
+                # and here's the test one
+                the_times = db.GqlQuery("SELECT * \
+                        FROM StationStatus \
+                        WHERE date_time < DATETIME('2013-07-23 02:25:25')")
+                for e in the_times:
+                        old_time = e.date_time
+                        new_time = old_time + offset
+                        new_time_UNIX = new_time.strftime('%s')
+                        e.date_time = new_time
+                        e_key = e.put()
+                        counter+=1
+                print counter
+        def get(self):
+                self.fix_times()
+'''
