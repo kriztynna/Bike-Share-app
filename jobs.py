@@ -1,6 +1,7 @@
 from dbmodels import *
 import datetime
 import json
+import logging
 import traceback
 import time
 import urllib2
@@ -8,6 +9,8 @@ import webapp2
 
 import pytz
 from google.appengine.ext import db
+from google.appengine.ext import deferred
+
 
 ########## This is where the cron jobs go ##########
 
@@ -84,28 +87,40 @@ class UpdateStatus(UpdateAll):
 	def get(self):
 		self.update_station_status()
 
-'''
-class FixTimes(UpdateStatus):
-        def fix_times(self):
-                # 5 hours time offset
-                offset = datetime.timedelta(seconds=18000)
-                counter = 0
-                print counter
-                # here's the real query we're going to use on the real datastore
-                # the_times = db.GqlQuery("SELECT * FROM StationStatus WHERE date_time < DATETIME('2013-07-22 00:58:01)")
+########## This is where the task queue things go ##########
+def FixTimes(cursor=None):
+        # 5 hours time offset
+        offset = datetime.timedelta(seconds=18000)
+        limit = 1000
+        if cursor == None:
+                cursor = 0
+        counter = 0
+        counter_updated = 0
 
-                # and here's the test one
-                the_times = db.GqlQuery("SELECT * \
-                        FROM StationStatus \
-                        WHERE date_time < DATETIME('2013-07-23 02:25:25')")
-                for e in the_times:
+
+        prep = "SELECT * FROM StationStatus WHERE date_time < DATETIME('2013-07-22 00:58:01') ORDER BY date_time ASC LIMIT "+str(cursor)+", "+str(limit)
+        print prep
+
+        the_times = db.GqlQuery(prep)
+        for e in the_times:
+                if e.tzFixed != True:
                         old_time = e.date_time
                         new_time = old_time + offset
                         new_time_UNIX = new_time.strftime('%s')
                         e.date_time = new_time
+                        e.tzFixed = True
                         e_key = e.put()
                         counter+=1
-                print counter
-        def get(self):
-                self.fix_times()
-'''
+                        counter_updated+=1
+                else:
+                        counter+=1
+                        continue
+        cursor += counter
+        if counter > 0:
+                logging.debug('Cycled through %d entities and updated %d of them. Cumulative total entities reviewed: %d', counter, counter_updated, cursor)
+                deferred.defer(FixTimes, cursor=cursor)
+        else:
+                logging.debug("I think I'm done??? I updated %d entities in total!", cursor)
+
+
+

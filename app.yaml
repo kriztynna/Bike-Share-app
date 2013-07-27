@@ -12,6 +12,9 @@ libraries:
 - name: markupsafe                                                              
   version: latest
 
+builtins:
+- deferred: on
+
 handlers:
 - url: /stylesheets
   static_dir: stylesheets
@@ -23,5 +26,8 @@ handlers:
 - url: /updateall
   script: bikeshareapp.app
   login: admin
+- url: /fixtimes
+  script: bikeshareapp.app
+  login: admin
 - url: /.*
-  script: cc-testing.app
+  script: bikeshareapp.app

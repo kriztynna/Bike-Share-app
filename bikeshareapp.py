@@ -1,5 +1,6 @@
 from dbmodels import *
-from cronjobs import *
+from jobs import *
+
 import datetime
 import jinja2
 import json
@@ -8,7 +9,9 @@ import time
 import traceback
 import urllib2
 import webapp2
+
 from google.appengine.ext import db
+from google.appengine.ext import deferred
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape=True)
@@ -211,10 +214,18 @@ def makeJavaScriptTimeForCharts(db_entry):
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return 'new Date(' + t_UNIX + ')' #return JavaScript to add dates and times to charts
 
+########## This is where the task queue handlers go ##########
+class FixTimesQ(webapp2.RequestHandler):
+    def get(self):
+        deferred.defer(FixTimes)
+        self.response.out.write('Successfully initiated.')
+
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/updatestatus',UpdateStatus),
                                ('/updateall',UpdateAll),
                                ('/errors',StationErrorChecker),
                                ('/totals',TotalBikesAndDocks),
-                               ('/history',ShowStationHistory)],
+                               ('/history',ShowStationHistory),
+                               ('/fixtimes',FixTimesQ)
+                               ],
                               debug=True)
