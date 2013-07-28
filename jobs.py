@@ -122,5 +122,40 @@ def FixTimes(cursor=None):
         else:
                 logging.debug("I think I'm done??? I updated %d entities in total!", cursor)
 
+def RemoveTzFixed(cursor=0,cum_updated=0,cum_missing=0):
+        limit = 500
+        counter = 0
+        counter_updated = 0
+        counter_missing = 0
+
+
+        prep = "SELECT * FROM StationStatus WHERE date_time < DATETIME('2013-07-22 00:58:01') ORDER BY date_time ASC LIMIT "+str(cursor)+", "+str(limit)
+        logging.debug(prep)
+
+        the_list = db.GqlQuery(prep)
+        for e in the_list:
+                if e.tzFixed == True:
+                        ''' The function deletes the named attribute, 
+                        provided the object allows it. For example, 
+                        delattr(x, 'foobar') is equivalent 
+                        to del x.foobar.'''
+                        del e.tzFixed
+                        e_key = e.put()
+                        counter+=1
+                        counter_updated+=1
+                else:
+                        counter+=1
+                        counter_missing+=1
+
+        cursor += counter
+        cum_updated += counter_updated
+        cum_missing += counter_missing
+
+        if counter > 0:
+                logging.debug('Cycled through %d entities and updated %d of them. Cumulative totals: reviewed: %d, updated: %d, missing: %d.', counter, counter_updated, cursor, cum_updated, cum_missing)
+                deferred.defer(RemoveTzFixed, cursor=cursor, cum_updated=cum_updated, cum_missing=cum_missing)
+        else:
+                logging.debug("All done. Totals: reviewed: %d, updated: %d, missing: %d.", cursor, cum_updated, cum_missing)
+
 
 

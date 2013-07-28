@@ -215,9 +215,22 @@ def makeJavaScriptTimeForCharts(db_entry):
         return 'new Date(' + t_UNIX + ')' #return JavaScript to add dates and times to charts
 
 ########## This is where the task queue handlers go ##########
+
 class FixTimesQ(webapp2.RequestHandler):
+    # No longer in use. Removed from webapp2 to prevent it from being 
+    # run again by accident. Can re-enable this handler simply by adding
+    # ('/fixtimes',FixTimesQ) or similar to "app" at the bottom of this script.
     def get(self):
         deferred.defer(FixTimes)
+        self.response.out.write('Successfully initiated.')
+
+class RemoveTzFixedQ(webapp2.RequestHandler):
+    # No longer in use. Removed from webapp2 to prevent it from being 
+    # run again by accident. Can re-enable this handler simply by adding
+    # ('/removetzfixed',RemoveTzFixedQ) or similar to "app" at the bottom 
+    # of this script.
+    def get(self):
+        deferred.defer(RemoveTzFixed)
         self.response.out.write('Successfully initiated.')
 
 app = webapp2.WSGIApplication([('/', MainPage),
@@ -225,7 +238,6 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/updateall',UpdateAll),
                                ('/errors',StationErrorChecker),
                                ('/totals',TotalBikesAndDocks),
-                               ('/history',ShowStationHistory),
-                               ('/fixtimes',FixTimesQ)
+                               ('/history',ShowStationHistory)
                                ],
                               debug=True)

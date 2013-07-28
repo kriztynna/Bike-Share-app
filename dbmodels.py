@@ -16,8 +16,6 @@ class StationStatus(db.Model):
         statusKey = db.IntegerProperty(required = True)
         availableBikes = db.IntegerProperty(required = True)
         date_time = db.DateTimeProperty(required = True)
-        # tzFixed is only needed temporarily.
-        tzFixed = db.BooleanProperty(required = False)
 
         @classmethod
 	def by_id(cls, sid):
