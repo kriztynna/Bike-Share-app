@@ -222,7 +222,7 @@ class FixTimesQ(webapp2.RequestHandler):
     # ('/fixtimes',FixTimesQ) or similar to "app" at the bottom of this script.
     def get(self):
         deferred.defer(FixTimes)
-        self.response.out.write('Successfully initiated.')
+        self.response.out.write('Successfully initiated FixTimes.')
 
 class RemoveTzFixedQ(webapp2.RequestHandler):
     # No longer in use. Removed from webapp2 to prevent it from being 
@@ -231,7 +231,16 @@ class RemoveTzFixedQ(webapp2.RequestHandler):
     # of this script.
     def get(self):
         deferred.defer(RemoveTzFixed)
-        self.response.out.write('Successfully initiated.')
+        self.response.out.write('Successfully initiated RemoveTzFixed.')
+
+class BackfillErrorsDataQ(webapp2.RequestHandler):
+    # No longer in use. Removed from webapp2 to prevent it from being 
+    # run again by accident. Can re-enable this handler simply by adding
+    # ('/backfillerrorsdata',BackfillErrorsDataQ) or similar to "app" at the 
+    # bottom of this script.
+    def get(self):
+        deferred.defer(BackfillErrorsData)
+        self.response.out.write('Successfully initiated BackfillErrorsData.')
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/updatestatus',UpdateStatus),

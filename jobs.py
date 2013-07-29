@@ -75,6 +75,7 @@ class UpdateStatus(UpdateAll):
                         statusKey = station_list[i]['statusKey']
                         availableBikes = station_list[i]['availableBikes']
                         made_key = str(station_id)+'_'+str(et_UNIX)
+                        errors = totalDocks - (availableBikes + availableDocks)
 			r = StationStatus(
                                 key_name = made_key,
                                 date_time = et,
@@ -82,7 +83,9 @@ class UpdateStatus(UpdateAll):
                                 availableDocks = availableDocks,
                                 totalDocks = totalDocks,
                                 statusKey = statusKey,
-                                availableBikes = availableBikes)
+                                availableBikes = availableBikes,
+                                errors = errors
+                                )
 			r_key = r.put()
 	def get(self):
 		self.update_station_status()
@@ -122,40 +125,68 @@ def FixTimes(cursor=None):
         else:
                 logging.debug("I think I'm done??? I updated %d entities in total!", cursor)
 
-def RemoveTzFixed(cursor=0,cum_updated=0,cum_missing=0):
-        limit = 500
+def RemoveTzFixed(cursor=0):
+        limit = 600
         counter = 0
-        counter_updated = 0
-        counter_missing = 0
 
+        prep = "SELECT * FROM StationStatus \
+                WHERE date_time < DATETIME('2013-07-22 00:58:01') \
+                ORDER BY date_time \
+                ASC LIMIT "+str(cursor)+", "+str(limit)
 
-        prep = "SELECT * FROM StationStatus WHERE date_time < DATETIME('2013-07-22 00:58:01') ORDER BY date_time ASC LIMIT "+str(cursor)+", "+str(limit)
         logging.debug(prep)
 
         the_list = db.GqlQuery(prep)
         for e in the_list:
-                if e.tzFixed == True:
-                        ''' The function deletes the named attribute, 
-                        provided the object allows it. For example, 
-                        delattr(x, 'foobar') is equivalent 
-                        to del x.foobar.'''
-                        del e.tzFixed
-                        e_key = e.put()
-                        counter+=1
-                        counter_updated+=1
-                else:
-                        counter+=1
-                        counter_missing+=1
+                delattr(e,'tzFixed')
+                e_key = e.put()
+                counter+=1
 
         cursor += counter
-        cum_updated += counter_updated
-        cum_missing += counter_missing
 
         if counter > 0:
-                logging.debug('Cycled through %d entities and updated %d of them. Cumulative totals: reviewed: %d, updated: %d, missing: %d.', counter, counter_updated, cursor, cum_updated, cum_missing)
-                deferred.defer(RemoveTzFixed, cursor=cursor, cum_updated=cum_updated, cum_missing=cum_missing)
+                logging.debug(
+                        'Cycled through %d entities this round, %d in total.', 
+                        counter, 
+                        cursor
+                        )
+                deferred.defer(RemoveTzFixed, cursor=cursor)
         else:
-                logging.debug("All done. Totals: reviewed: %d, updated: %d, missing: %d.", cursor, cum_updated, cum_missing)
+                logging.debug("All done. Total: %d.", cursor)
+
+def BackfillErrorsData(cursor=0):
+        # Through experience making the previous two task queue functions, 
+        # I think the optimal batch size is between 500 and 1000
+        # 500 is too small, but with 1000, sometimes the operation times out.
+        # even with a batch size of 750, sometimes it times out.
+        limit = 750
+        counter = 0
+
+        prep = "SELECT * FROM StationStatus \
+                        WHERE date_time < DATETIME('2013-07-28 22:59:01') \
+                        ORDER BY date_time \
+                        ASC LIMIT "+str(cursor)+", "+str(limit)
+        
+        logging.debug(prep)
+
+        the_list = db.GqlQuery(prep)
+        for e in the_list:
+                errors = e.totalDocks - (e.availableBikes + e.availableDocks)
+                e.errors = errors
+                e_key = e.put()
+                counter+=1
+
+        cursor += counter
+
+        if counter > 0:
+                logging.debug(
+                        'Filled in errors attribute for %d entities. Cumulative total: %d', 
+                        counter, 
+                        cursor
+                        )
+                deferred.defer(BackfillErrorsData, cursor=cursor)
+        else:
+                logging.debug("All done. Filled in errors attribute for %d entities in total.", cursor)
 
 
 
