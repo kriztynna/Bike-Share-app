@@ -17,7 +17,7 @@ class StationStatus(db.Model):
         availableBikes = db.IntegerProperty(required = True)
         date_time = db.DateTimeProperty(required = True)
         # Introducing new errors property. I have made it not required 
-        # because older entities will not have it (yet).
+        # because it wasn't always in the model.
         errors = db.IntegerProperty(required = False)
 
         @classmethod

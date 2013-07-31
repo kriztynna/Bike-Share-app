@@ -26,5 +26,8 @@ handlers:
 - url: /updateall
   script: bikeshareapp.app
   login: admin
+- url: /removetzfixed
+  script: bikeshareapp.app
+  login: admin
 - url: /.*
   script: bikeshareapp.app

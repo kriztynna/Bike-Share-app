@@ -26,16 +26,18 @@ class UpdateAll(webapp2.RequestHandler):
                         print traceback.format_exc()
                         time.sleep(60*i)
                         self.getData(i+0.25)
-	def update_all_data(self):
-                data = self.getData()
+        def get_et(self, data):
                 execution_time = data['executionTime']
                 et = datetime.datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
-                et = et.replace(tzinfo=pytz.timezone("America/New_York"))
+                newyork = pytz.timezone('America/New_York')
+                et = newyork.localize(et)
                 et_UNIX = int(time.mktime(et.timetuple()))
+                return et, et_UNIX
+	def update_all_data(self):
+                data = self.getData()
                 station_list = data['stationBeanList']
                 for i in range(len(station_list)):
                         #update StationInfo
-                        
                         station_id = station_list[i]['id']
                         name = station_list[i]['stationName']
                         coordinates = str(station_list[i]['latitude'])+', '+str(station_list[i]['longitude'])
@@ -62,10 +64,7 @@ class UpdateAll(webapp2.RequestHandler):
 class UpdateStatus(UpdateAll):
 	def update_station_status(self):
                 data = self.getData()
-                execution_time = data['executionTime']
-                et = datetime.datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
-                et = et.replace(tzinfo=pytz.timezone("America/New_York"))
-                et_UNIX = int(time.mktime(et.timetuple()))
+                et, et_UNIX = self.get_et(data)
                 station_list = data['stationBeanList']
                 for i in range(len(station_list)):
                         #update StationStatus
@@ -78,7 +77,7 @@ class UpdateStatus(UpdateAll):
                         errors = totalDocks - (availableBikes + availableDocks)
 			r = StationStatus(
                                 key_name = made_key,
-                                date_time = et,
+                                date_time = et, 
                                 station_id = station_id,
                                 availableDocks = availableDocks,
                                 totalDocks = totalDocks,
@@ -91,24 +90,24 @@ class UpdateStatus(UpdateAll):
 		self.update_station_status()
 
 ########## This is where the task queue things go ##########
-def FixTimes(cursor=None):
+def FixTimes(cursor=None, cum_updated=0):
         # 5 hours time offset
-        offset = datetime.timedelta(seconds=18000)
-        limit = 1000
+        offset = datetime.timedelta(seconds=3600)
+        limit = 10000
         if cursor == None:
                 cursor = 0
         counter = 0
         counter_updated = 0
 
 
-        prep = "SELECT * FROM StationStatus WHERE date_time < DATETIME('2013-07-22 00:58:01') ORDER BY date_time ASC LIMIT "+str(cursor)+", "+str(limit)
-        print prep
+        prep = "SELECT * FROM StationStatus WHERE date_time <= DATETIME('2013-07-30 02:59:01') ORDER BY date_time ASC LIMIT "+str(cursor)+", "+str(limit)
+        logging.debug(prep)
 
         the_times = db.GqlQuery(prep)
         for e in the_times:
                 if e.tzFixed != True:
                         old_time = e.date_time
-                        new_time = old_time + offset
+                        new_time = old_time - offset
                         new_time_UNIX = new_time.strftime('%s')
                         e.date_time = new_time
                         e.tzFixed = True
@@ -119,40 +118,81 @@ def FixTimes(cursor=None):
                         counter+=1
                         continue
         cursor += counter
+        cum_updated += counter_updated
         if counter > 0:
-                logging.debug('Cycled through %d entities and updated %d of them. Cumulative total entities reviewed: %d', counter, counter_updated, cursor)
-                deferred.defer(FixTimes, cursor=cursor)
+                logging.debug(
+                        'Cycled through %d entities and updated %d of them. \
+                        Cumulative total entities reviewed: %d, updated: %d', 
+                        counter, 
+                        counter_updated, 
+                        cursor,
+                        cum_updated
+                        )
+                deferred.defer(FixTimes, cursor=cursor, cum_updated=cum_updated)
         else:
-                logging.debug("I think I'm done??? I updated %d entities in total!", cursor)
+                logging.debug(
+                        "All done. Reviewed %d entities \
+                        and updated %d of them in total!", 
+                        cursor, 
+                        cum_updated
+                        )
 
-def RemoveTzFixed(cursor=0):
-        limit = 600
+def RemoveTzFixed(cursor=0, cum_deleted=0, cum_skipped=0):
+        limit = 5000
         counter = 0
+        deleted = 0
+        skipped = 0
+        to_put = []
 
         prep = "SELECT * FROM StationStatus \
-                WHERE date_time < DATETIME('2013-07-22 00:58:01') \
+                WHERE date_time <= DATETIME('2013-07-30 11:59:01') \
                 ORDER BY date_time \
                 ASC LIMIT "+str(cursor)+", "+str(limit)
 
         logging.debug(prep)
 
         the_list = db.GqlQuery(prep)
+        
         for e in the_list:
-                delattr(e,'tzFixed')
-                e_key = e.put()
-                counter+=1
+                if hasattr(e,'tzFixed'):
+                        delattr(e,'tzFixed')
+                        to_put.append(e)
+                        counter+=1
+                        deleted+=1
+                else:
+                        counter+=1
+                        skipped+=1
+                        continue
 
         cursor += counter
+        cum_deleted+=deleted
+        cum_skipped+=skipped
 
         if counter > 0:
+                db.put(to_put)
                 logging.debug(
-                        'Cycled through %d entities this round, %d in total.', 
+                        'Cycled through %d entities this round. Deleted %d, skipped %d. \
+                        Totals: reviewed: %d, deleted: %d, skipped: %d.', 
                         counter, 
-                        cursor
+                        deleted,
+                        skipped,
+                        cursor,
+                        cum_deleted,
+                        cum_skipped
                         )
-                deferred.defer(RemoveTzFixed, cursor=cursor)
+                deferred.defer(
+                        RemoveTzFixed, 
+                        cursor=cursor, 
+                        cum_deleted=cum_deleted, 
+                        cum_skipped=cum_skipped
+                        )
         else:
-                logging.debug("All done. Total: %d.", cursor)
+                logging.debug(
+                        "All done. Totals: reviewed: %d, deleted: %d, skipped: %d.", 
+                        cursor,
+                        cum_deleted,
+                        cum_skipped
+                        )
 
 def BackfillErrorsData(cursor=0):
         # Through experience making the previous two task queue functions, 
