@@ -183,7 +183,7 @@ class TotalBikesAndDocks(MainPage):
                 # implement a better method to ensure unique date_time values
 		history = db.GqlQuery("SELECT * FROM StationStatus \
                         WHERE station_id = 72 \
-                        ORDER BY date_time ASC \
+                        ORDER BY date_time DESC \
                         LIMIT 8")
 		
 		for h in history:
@@ -212,16 +212,8 @@ class TotalBikesAndDocks(MainPage):
 ########## This is where the utils go ##########
 def makeJavaScriptTimeForCharts(db_entry):
         t=db_entry.date_time #extract date_time from a data store object
-
-        # the old way
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return 'new Date(' + t_UNIX + ')' #return JavaScript to add dates and times to charts
-
-        # working on a new way to do the above. still in progress
-        # t = t.replace(tzinfo=pytz.timezone("America/New_York"))
-        # t_UNIX = int(time.mktime(t.timetuple()))
-        # java_time = 'new Date ('+t.strftime('%Y, %m, %d, %H, %M, %S')+')'
-        # return java_time #return JavaScript to add dates and times to charts
 
 ########## This is where the task queue handlers go ##########
 
@@ -256,7 +248,6 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/updateall',UpdateAll),
                                ('/errors',StationErrorChecker),
                                ('/totals',TotalBikesAndDocks),
-                               ('/history',ShowStationHistory),
-                               ('/removetzfixed',RemoveTzFixedQ)
+                               ('/history',ShowStationHistory)
                                ],
                               debug=True)
