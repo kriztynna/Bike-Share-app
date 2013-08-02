@@ -112,13 +112,17 @@ class ShowStationHistory(MainPage):
                         tj = makeJavaScriptTimeForCharts(h)
                         data_set.append([tj, h.availableDocks])
                         color = ['#FF6B6B']
-                print data_set
 
                 # find the name of the station for the provided ID
                 n = StationInfo.all().filter('station_id', int(station_req)).get()
                 name = n.name
-                msg = name+", "+str(time_req)+", bikes: "+bikes_req+", docks: "+docks_req
-                print msg # will print to the app engine logs for later reference
+                logging.info(
+                    '%s, %s, bikes: %s, docks: %s',
+                    name,
+                    time_req,
+                    bikes_req,
+                    docks_req
+                    )
                 self.render(
                         'history.html',
                         bikes_req=bikes_req,

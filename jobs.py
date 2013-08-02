@@ -89,7 +89,7 @@ class UpdateStatus(UpdateAll):
                                 availableBikes = availableBikes,
                                 errors = errors
                                 )
-			#r_key = r.put()
+
                         to_put_status.append(r)
                         all_bikes += availableBikes
                         all_docks += availableDocks
