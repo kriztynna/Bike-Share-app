@@ -28,3 +28,8 @@ class StationStatus(db.Model):
 class StatusInfo(db.Model):
         statusValue = db.StringProperty(required = True)
         statusKey = db.IntegerProperty(required = True)
+
+class Totals(db.Model):
+        bikes = db.IntegerProperty(required = True)
+        docks = db.IntegerProperty(required = True)
+        errors = db.IntegerProperty(required = True)

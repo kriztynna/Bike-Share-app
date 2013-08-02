@@ -75,11 +75,11 @@ class ShowStationHistory(MainPage):
 
                 # set defaults
                 if station_req == "":
-                        station_req = 357
+                    station_req = 357
                 if time_req == "":
-                        time_req = timespans[0][1]
+                    time_req = timespans[0][1]
                 if bikes_req=="" and docks_req == "":
-                        bikes_req = "checked"
+                    bikes_req = "checked"
 
                 min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
                 min_time = min_time.replace(microsecond=0)
@@ -98,20 +98,21 @@ class ShowStationHistory(MainPage):
                 # prep data for insertion into html template
                 data_set = []
                 if bikes_req=="checked" and docks_req == "checked":
-                        for h in history:
-                                tj = makeJavaScriptTimeForCharts(h)
-                                data_set.append([tj, h.availableBikes, h.availableDocks])
-                                color = ['#4ECDC4', '#FF6B6B']
+                    for h in history:
+                        tj = makeJavaScriptTimeForCharts(h)
+                        data_set.append([tj, h.availableBikes, h.availableDocks])
+                        color = ['#4ECDC4', '#FF6B6B']
                 elif bikes_req == "checked":
-                        for h in history:
-                                tj = makeJavaScriptTimeForCharts(h)
-                                data_set.append([tj, h.availableBikes])
-                                color = ['#4ECDC4']
+                    for h in history:
+                        tj = makeJavaScriptTimeForCharts(h)
+                        data_set.append([tj, h.availableBikes])
+                        color = ['#4ECDC4']
                 elif docks_req == "checked":
-                        for h in history:
-                                tj = makeJavaScriptTimeForCharts(h)
-                                data_set.append([tj, h.availableDocks])
-                                color = ['#FF6B6B']
+                    for h in history:
+                        tj = makeJavaScriptTimeForCharts(h)
+                        data_set.append([tj, h.availableDocks])
+                        color = ['#FF6B6B']
+                print data_set
 
                 # find the name of the station for the provided ID
                 n = StationInfo.all().filter('station_id', int(station_req)).get()

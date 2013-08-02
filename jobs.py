@@ -66,6 +66,10 @@ class UpdateStatus(UpdateAll):
                 data = self.getData()
                 et, et_UNIX = self.get_et(data)
                 station_list = data['stationBeanList']
+                all_bikes = 0
+                all_docks = 0
+                all_errors = 0
+                to_put_status = []
                 for i in range(len(station_list)):
                         #update StationStatus
 			station_id = station_list[i]['id']
@@ -85,7 +89,22 @@ class UpdateStatus(UpdateAll):
                                 availableBikes = availableBikes,
                                 errors = errors
                                 )
-			r_key = r.put()
+			#r_key = r.put()
+                        to_put_status.append(r)
+                        all_bikes += availableBikes
+                        all_docks += availableDocks
+                        all_errors += errors
+                t = Totals(
+                        date_time = et,
+                        key_name = str(et_UNIX),
+                        bikes = all_bikes,
+                        docks = all_docks,
+                        errors = all_errors
+                        )
+
+                db.put(t)
+                db.put(to_put_status)
+
 	def get(self):
 		self.update_station_status()
 
