@@ -30,6 +30,7 @@ class StatusInfo(db.Model):
         statusKey = db.IntegerProperty(required = True)
 
 class Totals(db.Model):
+        date_time = db.DateTimeProperty(required = True)
         bikes = db.IntegerProperty(required = True)
         docks = db.IntegerProperty(required = True)
         errors = db.IntegerProperty(required = True)
