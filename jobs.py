@@ -247,5 +247,70 @@ def BackfillErrorsData(cursor=0):
         else:
                 logging.debug("All done. Filled in errors attribute for %d entities in total.", cursor)
 
+def BackfillTotalsData(cursor=0,counter=0):
 
+        prep = "SELECT * FROM StationStatus \
+                WHERE station_id = 116 \
+                ORDER BY date_time ASC"
+
+        logging.debug(prep)
+        query = db.GqlQuery(prep)
+
+        the_times = []
+        for q in query:
+                if q == None:
+                        logging.debug('We got a q that was null.')
+                        continue
+                elif hasattr(q,'date_time'):
+                        if q.date_time in the_times:
+                                logging.debug('We somehow ran into a time we already had.')
+                                continue
+                        else:
+                                the_totals = Totals.all().filter('date_time =',q.date_time).get()
+                                if the_totals == None: #means there isn't already an entry for this time
+                                        the_times.append(q.date_time)
+                                        t = q.date_time
+                                        t_UNIX=t.strftime('%s')+'000'
+                                        logging.debug('We appended a date_time, %s',t_UNIX)
+                                        counter+=1
+                                else:
+                                        continue
+                else:
+                        logging.debug("We ran into a q that didn't have a date_time property. Odd.")
+                        continue
+        cursor+=counter
+        
+        to_put = []
+        for t in the_times:
+                bikes=0
+                docks=0
+                errors=0
+                statuses = db.GqlQuery(
+                        "SELECT * FROM StationStatus \
+                        WHERE date_time = :1",
+                        t
+                        )
+                for s in statuses:
+                        bikes+=s.availableBikes
+                        docks+=s.availableDocks
+                        errors+=s.errors
+
+                t_UNIX = int(time.mktime(t.timetuple()))
+                total = Totals(
+                        date_time = t,
+                        key_name = str(t_UNIX),
+                        bikes = bikes,
+                        docks = docks,
+                        errors = errors
+                        )
+                to_put.append(total)
+                counter+=1
+                
+        if counter > 0:
+                db.put(to_put)
+                logging.debug('Another round done. Counter: %d entries, cursor: %d.', counter, cursor)
+                deferred.defer(BackfillTotalsData, cursor=cursor)
+        else:
+                logging.debug('All done. Cursor: %d.', cursor)
+        
 
