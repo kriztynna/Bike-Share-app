@@ -87,13 +87,15 @@ class ShowStationHistory(MainPage):
                 # filtered for one station, using the provided ID,
                 # filtered for a given time range, using min_time
                 # provide all the status info sorted from old to new
-                q_id = "station_id = "+str(station_req)
-                q_time = "date_time > DATETIME('"+str(min_time)+"')"
-                q = "SELECT * \
-                        FROM StationStatus \
-                        WHERE " + q_id + " AND " + q_time + \
-                        " ORDER BY date_time ASC"
-                history = db.GqlQuery(q)
+
+                history = db.GqlQuery(
+                    "SELECT * FROM StationStatus \
+                     WHERE station_id = :1 \
+                     AND date_time > :2 \
+                     ORDER BY date_time ASC",
+                     station_req,
+                     min_time
+                     )
 
                 # prep data for insertion into html template
                 data_set = []
@@ -154,28 +156,34 @@ class ShowStationHistory(MainPage):
 
 class StationErrorChecker(MainPage):
         def render_error_checker(self):
-		# pull all updates, sorted most to least recent, and get the first result
-                q = StationStatus.all().order('-date_time').get()
-		last = q.date_time
-		last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
-		last_update_msg = 'Last update: '+last_update+'.'
-		
-		# pull up every known station_id, and the name, bc the projection only works
-		# with two or more fields
-		stations = db.GqlQuery("SELECT station_id, name \
-                                        FROM StationInfo ORDER BY station_id ASC")
-		data_set = []
-		for station in stations:
-                        # filtered for one station, using the provided ID,
-                        # provide all the status information sorted from most
-                        # to least recent, returning the first result
-                        status = StationStatus.all().filter('station_id =',station.station_id).order('-date_time').get()
-                        ooo_docks = int(status.totalDocks - (status.availableBikes+status.availableDocks))
-                        java_name = '"'+station.name+'"'
-                        data_set.append([java_name, ooo_docks])
-                sorted_set = sorted(data_set, key=lambda arg: arg[1], reverse=True)
-                sorted_set = sorted_set[:10]
-                self.render('errors.html', data_set=sorted_set, last_update_msg=last_update_msg)
+            # pull all updates, sorted most to least recent, and get the first result    
+            q = StationStatus.all().order('-date_time').get()
+            last = q.date_time
+            last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
+            last_update_msg = 'Last update: '+last_update+'.'
+
+            stations = db.GqlQuery(
+                "SELECT station_id, errors \
+                 FROM StationStatus \
+                 WHERE date_time = :1 \
+                 ORDER BY station_id ASC",
+                 last
+                 )
+
+            data_set = []
+            for station in stations:
+                name_lookup = StationInfo.all().filter('station_id =',station.station_id).get()
+                if name_lookup == None:
+                    logging.debug("We have a station_id without info: %d", station.station_id)
+                    continue
+                else:
+                    station_name = name_lookup.name
+                    ooo_docks = station.errors
+                    java_name = '"'+station_name+'"'
+                    data_set.append([java_name, ooo_docks])
+            sorted_set = sorted(data_set, key=lambda arg: arg[1], reverse=True)
+            sorted_set = sorted_set[:10]
+            self.render('errors.html', data_set=sorted_set, last_update_msg=last_update_msg)
 
         def get(self):
 		self.render_error_checker()
@@ -247,6 +255,15 @@ class BackfillErrorsDataQ(webapp2.RequestHandler):
     def get(self):
         deferred.defer(BackfillErrorsData)
         self.response.out.write('Successfully initiated BackfillErrorsData.')
+
+class BackfillTotalsDataQ(webapp2.RequestHandler):
+    # No longer in use. Removed from webapp2 to prevent it from being 
+    # run again by accident. Can re-enable this handler simply by adding
+    # ('/backfilltotalsdata',BackfillErrorsDataQ) or similar to "app" at the 
+    # bottom of this script.
+    def get(self):
+        deferred.defer(BackfillTotalsData)
+        self.response.out.write('Successfully initiated BackfillTotalsData.')
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/updatestatus',UpdateStatus),
