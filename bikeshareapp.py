@@ -55,7 +55,9 @@ class ShowStationHistory(MainPage):
                 self, station_req="",
                 time_req="",
                 bikes_req="",
-                docks_req=""):
+                docks_req="",
+                errors_req=""
+                ):
                 # options for time range dropdown menu, with name and value in 
                 # seconds (UNIX time for python)
                 timespans = [
@@ -78,7 +80,7 @@ class ShowStationHistory(MainPage):
                     station_req = 357
                 if time_req == "":
                     time_req = timespans[0][1]
-                if bikes_req=="" and docks_req == "":
+                if bikes_req=="" and docks_req=="" and errors_req=="":
                     bikes_req = "checked"
 
                 min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
@@ -99,11 +101,26 @@ class ShowStationHistory(MainPage):
 
                 # prep data for insertion into html template
                 data_set = []
-                if bikes_req=="checked" and docks_req == "checked":
+                if bikes_req=="checked" and docks_req=="checked" and errors_req=="checked":
+                    for h in history:
+                        tj = makeJavaScriptTimeForCharts(h)
+                        data_set.append([tj, h.availableBikes, h.availableDocks, h.errors])
+                        color = ['#4ECDC4', '#FF6B6B', '#C44D58']
+                elif bikes_req=="checked" and docks_req == "checked":
                     for h in history:
                         tj = makeJavaScriptTimeForCharts(h)
                         data_set.append([tj, h.availableBikes, h.availableDocks])
                         color = ['#4ECDC4', '#FF6B6B']
+                elif bikes_req=="checked" and errors_req=="checked":
+                    for h in history:
+                        tj = makeJavaScriptTimeForCharts(h)
+                        data_set.append([tj, h.availableBikes, h.errors])
+                        color = ['#4ECDC4', '#C44D58']
+                elif docks_req=="checked" and errors_req=="checked":
+                    for h in history:
+                        tj = makeJavaScriptTimeForCharts(h)
+                        data_set.append([tj, h.availableDocks, h.errors])
+                        color = ['#FF6B6B', '#C44D58']
                 elif bikes_req == "checked":
                     for h in history:
                         tj = makeJavaScriptTimeForCharts(h)
@@ -114,7 +131,12 @@ class ShowStationHistory(MainPage):
                         tj = makeJavaScriptTimeForCharts(h)
                         data_set.append([tj, h.availableDocks])
                         color = ['#FF6B6B']
-
+                elif errors_req=="checked":
+                    for h in history:
+                        tj = makeJavaScriptTimeForCharts(h)
+                        data_set.append([tj, h.errors])
+                        color = ['#C44D58']
+                print data_set
                 # find the name of the station for the provided ID
                 n = StationInfo.all().filter('station_id', int(station_req)).get()
                 name = n.name
@@ -130,6 +152,7 @@ class ShowStationHistory(MainPage):
                         bikes_req=bikes_req,
                         data_set=data_set,
                         docks_req=docks_req, 
+                        errors_req=errors_req,
                         name=name,
                         station_req=station_req,
                         stations=stations,
@@ -146,11 +169,13 @@ class ShowStationHistory(MainPage):
                 time_req = int(self.request.get('time_req'))
                 bikes_req = self.request.get('bikes_req')
                 docks_req = self.request.get('docks_req')
+                errors_req = self.request.get('errors_req')
                 self.render_show_history(
                         station_req=station_req,
                         time_req=time_req,
                         bikes_req=bikes_req,
-                        docks_req=docks_req
+                        docks_req=docks_req,
+                        errors_req=errors_req
                         )
 
 
