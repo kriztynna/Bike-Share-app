@@ -312,5 +312,30 @@ def BackfillTotalsData(cursor=0,counter=0):
                 deferred.defer(BackfillTotalsData, cursor=cursor)
         else:
                 logging.debug('All done. Cursor: %d.', cursor)
-        
+
+def ClearBadTimes(cursor=0):
+        bad_times = [
+        '2013-07-25 01:58:01'
+        ]
+
+        to_delete = []
+        for t in bad_times:
+                prep = "SELECT * FROM StationStatus \
+                        WHERE date_time = DATETIME("+"'"+t+"')"
+                logging.debug(prep)
+                statuses = db.GqlQuery(prep)
+                for s in statuses:
+                        to_delete.append(s)
+        db.delete(to_delete)
+
+        to_delete2 = []
+        for t in bad_times:
+                prep2 = "SELECT * FROM Totals \
+                        WHERE date_time = DATETIME("+"'"+t+"')"
+                logging.debug(prep)
+                statuses = db.GqlQuery(prep2)
+                for s in statuses:
+                        to_delete2.append(s)
+        db.delete(to_delete2)
+
 
