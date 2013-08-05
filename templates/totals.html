@@ -19,11 +19,12 @@
                     data.addColumn('datetime', 'Time');
                     data.addColumn('number', 'Total bikes');
                     data.addColumn('number', 'Total docks');
+                    data.addColumn('number', 'Total errors');
                     {% for t in totals %}
-                        data.addRows([[ {{t[0]}},{{t[1]}}, {{t[2]}} ]]);
+                        data.addRows([[ {{t[0]}},{{t[1]}}, {{t[2]}}, {{t[3]}} ]]);
                     {% endfor %}                                              
                 var options = {
-                    colors: ['#4ECDC4', '#FF6B6B', '#556270', '#C7F464', '#C44D58'],
+                    colors: ['#4ECDC4', '#FF6B6B', '#C44D58', '#556270', '#C7F464'],
                     backgroundColor:{stroke:"#FFFFFF"},
                     width:1000,
                     height:500,
@@ -34,11 +35,12 @@
                     vAxis:{baselineColor:"#556270",gridlines:{color:"#556270"}},
                     lineWidth:3,
                     legend: {position: 'top'},
+                    isStacked: true,
                     };
                 // color palette: "cheer up emo kid" by electrikmonk at ColourLovers
                 // available at http://www.colourlovers.com/palette/1930/cheer_up_emo_kid
                 
-                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
                 chart.draw(data, options);
             }
         </script>

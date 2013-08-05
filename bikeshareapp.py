@@ -136,16 +136,17 @@ class ShowStationHistory(MainPage):
                         tj = makeJavaScriptTimeForCharts(h)
                         data_set.append([tj, h.errors])
                         color = ['#C44D58']
-                print data_set
+
                 # find the name of the station for the provided ID
                 n = StationInfo.all().filter('station_id', int(station_req)).get()
                 name = n.name
                 logging.info(
-                    '%s, %s, bikes: %s, docks: %s',
+                    '%s, %s, bikes: %s, docks: %s, errors: %s',
                     name,
                     time_req,
                     bikes_req,
-                    docks_req
+                    docks_req,
+                    errors_req
                     )
                 self.render(
                         'history.html',
@@ -214,37 +215,20 @@ class StationErrorChecker(MainPage):
 		self.render_error_checker()
 
 class TotalBikesAndDocks(MainPage):
-        def render_total_bikes(self):
-                totals = []
+    def render_total_bikes(self):
+        totals = []
+        history = db.GqlQuery(
+            "SELECT * FROM Totals \
+             ORDER BY date_time ASC"
+             )
 
-		# using station 72 as a filter because have not been able to
-                # implement a better method to ensure unique date_time values
-		history = db.GqlQuery("SELECT * FROM StationStatus \
-                        WHERE station_id = 72 \
-                        ORDER BY date_time DESC \
-                        LIMIT 8")
-		
-		for h in history:
-                        java_time = makeJavaScriptTimeForCharts(h)
-                        def give_totals():
-                                total_bikes = 0
-                                total_docks = 0
-                                s_query = db.GqlQuery("SELECT station_id, name \
-                                        FROM StationInfo \
-                                        ORDER BY station_id ASC")
-                                for station in s_query:
-                                        status = StationStatus.all().filter('station_id',station.station_id).filter('date_time', h.date_time).get()
-                                        if status == None:
-                                                continue
-                                        else:
-                                                total_bikes+=status.availableBikes
-                                                total_docks+=status.availableDocks
-                                return total_bikes, total_docks
-        		total_bikes, total_docks = give_totals()
-                        totals.append([java_time, total_bikes, total_docks])
-                self.render('totals.html', totals=totals)                                
-	def get(self):
-		self.render_total_bikes()
+    	for h in history:
+            java_time = makeJavaScriptTimeForCharts(h)
+            totals.append([java_time, h.bikes, h.docks, h.errors])
+        self.render('totals.html', totals=totals)
+
+    def get(self):
+        self.render_total_bikes()
 
 
 ########## This is where the utils go ##########
@@ -289,6 +273,16 @@ class BackfillTotalsDataQ(webapp2.RequestHandler):
     def get(self):
         deferred.defer(BackfillTotalsData)
         self.response.out.write('Successfully initiated BackfillTotalsData.')
+
+class ClearBadTimesQ(webapp2.RequestHandler):
+    # No longer in use. Removed from webapp2 to prevent it from being 
+    # run again by accident. Can re-enable this handler simply by adding
+    # ('/clearbadtimes',ClearBadTimesQ) or similar to "app" at the 
+    # bottom of this script.
+    def get(self):
+        deferred.defer(ClearBadTimes)
+        self.response.out.write('Successfully initiated ClearBadTimes.')
+
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/updatestatus',UpdateStatus),
