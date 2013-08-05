@@ -16,9 +16,7 @@ class StationStatus(db.Model):
         statusKey = db.IntegerProperty(required = True)
         availableBikes = db.IntegerProperty(required = True)
         date_time = db.DateTimeProperty(required = True)
-        # Introducing new errors property. I have made it not required 
-        # because it wasn't always in the model.
-        errors = db.IntegerProperty(required = False)
+        errors = db.IntegerProperty(required = True)
 
         @classmethod
 	def by_id(cls, sid):
