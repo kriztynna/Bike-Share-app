@@ -2,10 +2,33 @@
     {% block head %}
         <title>bici vizi: totals</title>
     {% endblock %}
-	
-    {%block body%}
+    {% block body %}
         <h1>total bikes and docks</h1>
             <p>This page shows total bikes available and total docks available, and how these have changed over a recent period of time. I'm still working on making this data set more useful. One of the things I'd like to be able to do is show an estimate of the total bikes in circulation over time.</p>
+            <form action="/totals" method="post">
+                <select name="time_req" onchange="this.form.submit()">
+                    {% for t in timespans %}
+                        {% set sel="" %}
+                        {% if t[1] == time_req %}
+                            {% set sel="selected" %}
+                        {% endif %}
+                        <option value={{t[1]}} {{sel}}>{{t[0]}}</option>
+                    {% endfor %}
+                </select>
+                <label class="checkbox">
+                    <input type="checkbox" name="bikes_req" value="checked" {{bikes_req}}>
+                    Available bikes
+                </label>
+                <label class="checkbox" display:inline>
+                    <input type="checkbox" name="docks_req" value="checked" {{docks_req}}>
+                    Available docks
+                </label>
+                <label class="checkbox" display:inline>
+                    <input type="checkbox" name="errors_req" value="checked" {{errors_req}}>
+                    Station errors
+                </label>
+                <input type="submit" value="Submit">
+            </form>
 	    <hr>
 	    <div id="chart_div"></div>
 
@@ -17,14 +40,32 @@
             function drawChart() {
                 var data = new google.visualization.DataTable();
                     data.addColumn('datetime', 'Time');
-                    data.addColumn('number', 'Total bikes');
-                    data.addColumn('number', 'Total docks');
-                    data.addColumn('number', 'Total errors');
-                    {% for t in totals %}
-                        data.addRows([[ {{t[0]}},{{t[1]}}, {{t[2]}}, {{t[3]}} ]]);
-                    {% endfor %}                                              
+                    {% set single=0 %}
+                    {% if bikes_req == "checked" %}
+                        data.addColumn('number', 'Total available bikes');
+                        {% set single = single + 1 %}
+                    {% endif %}
+                    {% if docks_req == "checked" %}
+                        data.addColumn('number', 'Total available docks');
+                        {% set single = single + 1 %}
+                    {% endif %}
+                    {% if errors_req == "checked" %}
+                        data.addColumn('number', 'Total station errors');
+                        {% set single = single + 1 %}
+                    {% endif %}
+                    {% if single > 1 %}
+                        {% for d in data_set %}
+                            data.addRows([[ {{d[0]}}, {{d[1]}}, {{d[2]}}, {{d[3]}} ]]);
+                        {% endfor %}
+                    {% elif single == 1 %}
+                        {% for d in data_set %}
+                            data.addRows([[ {{d[0]}}, {{d[1]}} ]]);
+                        {% endfor %}
+                    {% endif %}
+
                 var options = {
-                    colors: ['#4ECDC4', '#FF6B6B', '#C44D58', '#556270', '#C7F464'],
+                    title:'    {{name|safe}}',
+                    colors: {{color|safe}},
                     backgroundColor:{stroke:"#FFFFFF"},
                     width:1000,
                     height:500,
@@ -32,10 +73,10 @@
                     fontSize:14,
                     fontName:"Arial",
                     hAxis:{baselineColor:"#FFFFFF",gridlines:{color:"#FFFFFF"}},
-                    vAxis:{baselineColor:"#556270",gridlines:{color:"#556270"}},
+                    vAxis:{baselineColor:"#556270",gridlines:{color:"#556270"},format:'#,###'},
                     lineWidth:3,
                     legend: {position: 'top'},
-                    isStacked: true,
+                    isStacked:true,
                     };
                 // color palette: "cheer up emo kid" by electrikmonk at ColourLovers
                 // available at http://www.colourlovers.com/palette/1930/cheer_up_emo_kid

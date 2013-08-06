@@ -51,134 +51,133 @@ class MainPage(Handler):
 		self.render_front()
 
 class ShowStationHistory(MainPage):
-        def render_show_history(
-                self, station_req="",
-                time_req="",
-                bikes_req="",
-                docks_req="",
-                errors_req=""
-                ):
-                # options for time range dropdown menu, with name and value in 
-                # seconds (UNIX time for python)
-                timespans = [
-                        ['past 24 hours', 86400],
-                        ['past 48 hours', 172800],
-                        ['past 72 hours', 259000],
-                        ['past 7 days', 604800],
-                        ['past 30 days', 2592000]
-                        ]
+    def render_show_history(
+            self, station_req="",
+            time_req="",
+            bikes_req="",
+            docks_req="",
+            errors_req=""
+            ):
+        # options for time range dropdown menu, with name and value in 
+        # seconds (UNIX time for python)
+        timespans = [
+                ['past 24 hours', 86400],
+                ['past 48 hours', 172800],
+                ['past 72 hours', 259000],
+                ['past 7 days', 604800],
+                ['past 30 days', 2592000]
+                ]
 
-                # Options for the dropdown menu of bike stations. Pulls up 
-                # every known station_id, and the name. Note: The projection 
-                # seems to only work with at least two fields projected.
-                stations = db.GqlQuery("SELECT station_id, name \
-                        FROM StationInfo \
-                        ORDER BY station_id ASC")
+        # Options for the dropdown menu of bike stations. Pulls up 
+        # every known station_id, and the name. Note: The projection 
+        # seems to only work with at least two fields projected.
+        stations = db.GqlQuery("SELECT station_id, name \
+                FROM StationInfo \
+                ORDER BY station_id ASC")
 
-                # set defaults
-                if station_req == "":
-                    station_req = 357
-                if time_req == "":
-                    time_req = timespans[0][1]
-                if bikes_req=="" and docks_req=="" and errors_req=="":
-                    bikes_req = "checked"
+        # set defaults
+        if station_req == "":
+            station_req = 357
+        if time_req == "":
+            time_req = timespans[0][1]
+        if bikes_req=="" and docks_req=="" and errors_req=="":
+            bikes_req = "checked"
 
-                min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
-                min_time = min_time.replace(microsecond=0)
-                
-                # filtered for one station, using the provided ID,
-                # filtered for a given time range, using min_time
-                # provide all the status info sorted from old to new
+        min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
+        min_time = min_time.replace(microsecond=0)
+        
+        # filtered for one station, using the provided ID,
+        # filtered for a given time range, using min_time
+        # provide all the status info sorted from old to new
 
-                history = db.GqlQuery(
-                    "SELECT * FROM StationStatus \
-                     WHERE station_id = :1 \
-                     AND date_time > :2 \
-                     ORDER BY date_time ASC",
-                     station_req,
-                     min_time
-                     )
+        history = db.GqlQuery(
+            "SELECT * FROM StationStatus \
+             WHERE station_id = :1 \
+             AND date_time > :2 \
+             ORDER BY date_time ASC",
+             station_req,
+             min_time
+             )
 
-                # prep data for insertion into html template
-                data_set = []
-                if bikes_req=="checked" and docks_req=="checked" and errors_req=="checked":
-                    for h in history:
-                        tj = makeJavaScriptTimeForCharts(h)
-                        data_set.append([tj, h.availableBikes, h.availableDocks, h.errors])
-                        color = ['#4ECDC4', '#FF6B6B', '#C44D58']
-                elif bikes_req=="checked" and docks_req == "checked":
-                    for h in history:
-                        tj = makeJavaScriptTimeForCharts(h)
-                        data_set.append([tj, h.availableBikes, h.availableDocks])
-                        color = ['#4ECDC4', '#FF6B6B']
-                elif bikes_req=="checked" and errors_req=="checked":
-                    for h in history:
-                        tj = makeJavaScriptTimeForCharts(h)
-                        data_set.append([tj, h.availableBikes, h.errors])
-                        color = ['#4ECDC4', '#C44D58']
-                elif docks_req=="checked" and errors_req=="checked":
-                    for h in history:
-                        tj = makeJavaScriptTimeForCharts(h)
-                        data_set.append([tj, h.availableDocks, h.errors])
-                        color = ['#FF6B6B', '#C44D58']
-                elif bikes_req == "checked":
-                    for h in history:
-                        tj = makeJavaScriptTimeForCharts(h)
-                        data_set.append([tj, h.availableBikes])
-                        color = ['#4ECDC4']
-                elif docks_req == "checked":
-                    for h in history:
-                        tj = makeJavaScriptTimeForCharts(h)
-                        data_set.append([tj, h.availableDocks])
-                        color = ['#FF6B6B']
-                elif errors_req=="checked":
-                    for h in history:
-                        tj = makeJavaScriptTimeForCharts(h)
-                        data_set.append([tj, h.errors])
-                        color = ['#C44D58']
+        # prep data for insertion into html template
+        data_set = []
+        if bikes_req=="checked" and docks_req=="checked" and errors_req=="checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.availableBikes, h.availableDocks, h.errors])
+                color = ['#4ECDC4', '#FF6B6B', '#C44D58']
+        elif bikes_req=="checked" and docks_req == "checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.availableBikes, h.availableDocks])
+                color = ['#4ECDC4', '#FF6B6B']
+        elif bikes_req=="checked" and errors_req=="checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.availableBikes, h.errors])
+                color = ['#4ECDC4', '#C44D58']
+        elif docks_req=="checked" and errors_req=="checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.availableDocks, h.errors])
+                color = ['#FF6B6B', '#C44D58']
+        elif bikes_req == "checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.availableBikes])
+                color = ['#4ECDC4']
+        elif docks_req == "checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.availableDocks])
+                color = ['#FF6B6B']
+        elif errors_req=="checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.errors])
+                color = ['#C44D58']
 
-                # find the name of the station for the provided ID
-                n = StationInfo.all().filter('station_id', int(station_req)).get()
-                name = n.name
-                logging.info(
-                    '%s, %s, bikes: %s, docks: %s, errors: %s',
-                    name,
-                    time_req,
-                    bikes_req,
-                    docks_req,
-                    errors_req
-                    )
-                self.render(
-                        'history.html',
-                        bikes_req=bikes_req,
-                        data_set=data_set,
-                        docks_req=docks_req, 
-                        errors_req=errors_req,
-                        name=name,
-                        station_req=station_req,
-                        stations=stations,
-                        time_req=time_req,
-                        timespans=timespans,
-                        color=color
-                        )
+        # find the name of the station for the provided ID
+        n = StationInfo.all().filter('station_id', int(station_req)).get()
+        name = n.name
+        logging.debug(
+            '%s, %s, bikes: %s, docks: %s, errors: %s',
+            name,
+            time_req,
+            bikes_req,
+            docks_req,
+            errors_req
+            )
+        self.render(
+                'history.html',
+                bikes_req=bikes_req,
+                data_set=data_set,
+                docks_req=docks_req, 
+                errors_req=errors_req,
+                name=name,
+                station_req=station_req,
+                stations=stations,
+                time_req=time_req,
+                timespans=timespans,
+                color=color
+                )
 
-	def get(self):
-		self.render_show_history()
+    def get(self):
+        self.render_show_history()
 
-	def post(self):
-                station_req = int(self.request.get('station_req'))
-                time_req = int(self.request.get('time_req'))
-                bikes_req = self.request.get('bikes_req')
-                docks_req = self.request.get('docks_req')
-                errors_req = self.request.get('errors_req')
-                self.render_show_history(
-                        station_req=station_req,
-                        time_req=time_req,
-                        bikes_req=bikes_req,
-                        docks_req=docks_req,
-                        errors_req=errors_req
-                        )
-
+    def post(self):
+        station_req = int(self.request.get('station_req'))
+        time_req = int(self.request.get('time_req'))
+        bikes_req = self.request.get('bikes_req')
+        docks_req = self.request.get('docks_req')
+        errors_req = self.request.get('errors_req')
+        self.render_show_history(
+            station_req=station_req,
+            time_req=time_req,
+            bikes_req=bikes_req,
+            docks_req=docks_req,
+            errors_req=errors_req
+            )
 
 class StationErrorChecker(MainPage):
         def render_error_checker(self):
@@ -186,7 +185,7 @@ class StationErrorChecker(MainPage):
             q = StationStatus.all().order('-date_time').get()
             last = q.date_time
             last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
-            last_update_msg = 'Last update: '+last_update+'.'
+            last_update_msg = 'Last update: '+last_update+' UTC.'
 
             stations = db.GqlQuery(
                 "SELECT station_id, errors \
@@ -215,20 +214,114 @@ class StationErrorChecker(MainPage):
 		self.render_error_checker()
 
 class TotalBikesAndDocks(MainPage):
-    def render_total_bikes(self):
-        totals = []
+    def render_show_totals(
+            self,
+            time_req="",
+            bikes_req="",
+            docks_req="",
+            errors_req=""
+            ):
+        # options for time range dropdown menu, with name and value in 
+        # seconds (UNIX time for python)
+        timespans = [
+                ['past 24 hours', 86400],
+                ['past 48 hours', 172800],
+                ['past 72 hours', 259000],
+                ['past 7 days', 604800],
+                ['past 30 days', 2592000]
+                ]
+
+        # set defaults
+        if time_req == "":
+            time_req = timespans[0][1]
+        if bikes_req=="" and docks_req=="" and errors_req=="":
+            bikes_req = "checked"
+
+        min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
+        min_time = min_time.replace(microsecond=0)
+        
+        # filtered for one station, using the provided ID,
+        # filtered for a given time range, using min_time
+        # provide all the status info sorted from old to new
+
         history = db.GqlQuery(
             "SELECT * FROM Totals \
-             ORDER BY date_time ASC"
+             WHERE date_time > :1 \
+             ORDER BY date_time ASC",
+             min_time
              )
 
-    	for h in history:
-            java_time = makeJavaScriptTimeForCharts(h)
-            totals.append([java_time, h.bikes, h.docks, h.errors])
-        self.render('totals.html', totals=totals)
+        # prep data for insertion into html template
+        data_set = []
+        if bikes_req=="checked" and docks_req=="checked" and errors_req=="checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.bikes, h.docks, h.errors])
+                color = ['#4ECDC4', '#FF6B6B', '#C44D58']
+        elif bikes_req=="checked" and docks_req == "checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.bikes, h.docks])
+                color = ['#4ECDC4', '#FF6B6B']
+        elif bikes_req=="checked" and errors_req=="checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.bikes, h.errors])
+                color = ['#4ECDC4', '#C44D58']
+        elif docks_req=="checked" and errors_req=="checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.docks, h.errors])
+                color = ['#FF6B6B', '#C44D58']
+        elif bikes_req == "checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.bikes])
+                color = ['#4ECDC4']
+        elif docks_req == "checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.docks])
+                color = ['#FF6B6B']
+        elif errors_req=="checked":
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                data_set.append([tj, h.errors])
+                color = ['#C44D58']
+
+        logging.debug(
+            'Totals: timespan: %s, bikes: %s, docks: %s, errors: %s',
+            time_req,
+            bikes_req,
+            docks_req,
+            errors_req
+            )
+
+        self.render(
+                'totals.html',
+                bikes_req=bikes_req,
+                data_set=data_set,
+                docks_req=docks_req, 
+                errors_req=errors_req,
+                time_req=time_req,
+                timespans=timespans,
+                color=color
+                )
 
     def get(self):
-        self.render_total_bikes()
+        self.render_show_totals()
+
+    def post(self):
+        time_req = int(self.request.get('time_req'))
+        bikes_req = self.request.get('bikes_req')
+        docks_req = self.request.get('docks_req')
+        errors_req = self.request.get('errors_req')
+        self.render_show_totals(
+            time_req=time_req,
+            bikes_req=bikes_req,
+            docks_req=docks_req,
+            errors_req=errors_req
+            )
 
 
 ########## This is where the utils go ##########

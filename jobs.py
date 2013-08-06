@@ -36,15 +36,26 @@ class UpdateAll(webapp2.RequestHandler):
 	def update_all_data(self):
                 data = self.getData()
                 station_list = data['stationBeanList']
-                for i in range(len(station_list)):
-                        #update StationInfo
+
+                #update StationInfo
+                def enterStation(i):
                         station_id = station_list[i]['id']
                         name = station_list[i]['stationName']
                         coordinates = str(station_list[i]['latitude'])+', '+str(station_list[i]['longitude'])
                         stAddress1 = station_list[i]['stAddress1']
                         stAddress2 = station_list[i]['stAddress2']
-			r = StationInfo(key_name = str(station_id), station_id = station_id, name = name, coordinates = coordinates, stAddress1 = stAddress1, stAddress2 = stAddress2)
-			r_key = r.put()
+                        r = StationInfo(key_name = str(station_id), station_id = station_id, name = name, coordinates = coordinates, stAddress1 = stAddress1, stAddress2 = stAddress2)
+                        r_key = r.put()
+
+                for i in range(len(station_list)):
+                        #check if entry exists
+                        station_id = station_list[i]['id']
+                        exists = StationInfo.all().filter('station_id = ', station_id).get()
+                        if exists == None:
+                                logging.debug('Inserting new station %d', station_id)
+                                enterStation(i)
+                        else:
+                                enterStation(i)
 			
 			#update StatusInfo
                         statusKey = station_list[i]['statusKey']

@@ -18,13 +18,14 @@ builtins:
 handlers:
 - url: /stylesheets
   static_dir: stylesheets
-- url: /.*
-  script: bikeshareapp.app
 - url: /updatestatus
   script: bikeshareapp.app
   login: admin
 - url: /updateall
   script: bikeshareapp.app
   login: admin
+- url: /favicon\.ico
+  static_files: static/images/favicon.ico
+  upload: static/images/favicon\.ico
 - url: /.*
   script: bikeshareapp.app
