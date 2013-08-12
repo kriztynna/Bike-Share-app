@@ -45,10 +45,16 @@ class Handler(webapp2.RequestHandler):
 		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')'''
 
 class MainPage(Handler):
-	def render_front(self):
-                self.render('front.html')
-	def get(self):
-		self.render_front()
+    def render_front(self):
+            self.render('front.html')
+    def get(self):
+            self.render_front()
+
+class AboutPage(Handler):
+    def render_about(self):
+            self.render('about.html')
+    def get(self):
+            self.render_about()
 
 class ShowStationHistory(MainPage):
     def render_show_history(
@@ -378,6 +384,7 @@ class ClearBadTimesQ(webapp2.RequestHandler):
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
+                               ('/about', AboutPage),
                                ('/updatestatus',UpdateStatus),
                                ('/updateall',UpdateAll),
                                ('/errors',StationErrorChecker),

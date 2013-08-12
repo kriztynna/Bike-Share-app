@@ -1,13 +1,117 @@
 {% extends "base.html" %}
     {% block head %}
-        <title>bici vizi</title>
-	<!-- commenting out the CSS for now
-        <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-        remember to add it back later-->
+        <title>busybici</title>
+
+    <style>
+    /* CUSTOMIZE THE CAROUSEL
+        -------------------------------------------------- */
+
+        /* Carousel base class */
+        .carousel {
+          margin-bottom: 60px;
+        }
+
+        .carousel .container {
+          position: relative;
+          z-index: 9;
+        }
+
+        .carousel-control {
+          height: 80px;
+          margin-top: 10px;
+          font-size: 120px;
+          text-shadow: 0 1px 1px rgba(0,0,0,.4);
+          background-color: transparent;
+          border: 0;
+          z-index: 10;
+        }
+
+        .carousel .item {
+          height: 500px;
+        }
+        .carousel img {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 500px;
+          width: auto;
+        }
+
+        .carousel-caption {
+          background-color: rgba(0,0,0,0.6);
+          position: static;
+          min-width: 100%;
+          max-width: 550px;
+          padding: 10px 50px;
+          margin-top: 175px;
+        }
+        .carousel-caption h1,
+        .carousel-caption .lead {
+          margin: 0;
+          margin-right: 90px;
+          line-height: 1.25;
+          color: #fff;
+          text-shadow: 0 1px 1px rgba(0,0,0,.4);
+        }
+        .carousel-caption .btn {
+          margin-top: 10px;
+        }
+        a:link {
+          color: #fff;
+        }
+        a:visited {
+          color: #fff;
+        }
+        a:hover {
+          color: #fff;
+        }
+        a:active {
+          color: #fff;
+        }
+
+    </style>
+
     {% endblock%}
 
     {% block body %}
-        <h1>bici vizi</h1>
+
+        <h1>busybici</h1>
         <p>welcome! click around to see nyc bike share data in pretty charts</p>
+
+         <!-- Carousel
+            ================================================== -->
+            <div id="myCarousel" class="carousel slide">
+              <div class="carousel-inner">
+                <div class="item active">
+                  <img src="static/images/history.png" alt="">
+                  <div class="container">
+                    <div class="carousel-caption">
+                      <h1><a class="link" href="/history">Historical station data</a></h1>
+                      <p class="lead">Browse historical data for any station. View available bikes, available docks, and out of order stuff, separately or combined. Watch how they've changed over different time spans.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="item">
+                  <img src="static/images/errors.png" alt="">
+                  <div class="container">
+                    <div class="carousel-caption">
+                      <h1><a href="/errors">Screen for system stress</a></h1>
+                      <p class="lead">When the data don't add up, there are bikes and docks out of order. busybici shows you which stations have the largest number of bad bikes, docks, and errors at the moment.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="item">
+                  <img src="static/images/totals.png" alt="">
+                  <div class="container">
+                    <div class="carousel-caption">
+                      <h1><a href="/totals">Watch bike share usage in aggregate</a></h1>
+                      <p class="lead">busybici adds up the data from each station to show you in the state of the overall bike share system. Track the availability of bikes, docks, and the incidence of issues through time.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+              <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
+            </div><!-- /.carousel -->
     {% endblock %}
 </html>

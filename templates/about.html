@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+    {% block head %}
+        <title>busybici</title>
+    {% endblock%}
+
+    {% block body %}
+
+        <h1>about</h1>
+          <p>
+          busybici is a web app tracking New York City's bike share program. It regularly scans Citi Bike's published data, stores it, crunches it, and displays it in charts to users who are curious about the underlying trends.
+          </p>
+
+          <h2>about the data</h2>
+            <p>
+            The data used by busybici is available to the public, published by Citi Bike at <a href="http://www.citibikenyc.com/stations/json">http://www.citibikenyc.com/stations/json</a>. This data set provides a profile of each station: name, address, total docks, and other tidbits. It is frequently updated with status information: available bikes, available docks, and whether a station is in service.
+            </p>
+            <p>
+            Citi Bike also displays daily ridership stats on <a href="http://www.datawrapper.de/something">http://www.datawrapper.de/something</a> (raw data available <a href ="http://www.datawrapper.de">here</a>). busybici does not collect or use this data set at the moment, but stay tuned!
+            </p>
+
+
+    {% endblock %}
+</html>
