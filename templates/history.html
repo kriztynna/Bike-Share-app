@@ -5,8 +5,8 @@
     {% block body %}
         <h1>historical station data</h1>
             <p>busybici has been collecting data on NYC bike share since late June 2013. Use this page to see how each station's availability of bikes and docks has trended over time.</p>
-            <form action="/history" method="post">
-                <select name="station_req" onchange="this.form.submit()">
+            <form action="/history">
+                <select id="station_dropdown" name="station_req" onchange="updateChart()">
                     {% for s in stations %}
                         {% set sel="" %}
                         {% if s.station_id == station_req %}
@@ -15,7 +15,7 @@
                         <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
                     {% endfor %}
                 </select>
-                <select name="time_req"  onchange="this.form.submit()">
+                <select id="time_dropdown" name="time_req"  onchange="updateChart()">
                     {% for t in timespans %}
                         {% set sel="" %}
                         {% if t[1] == time_req %}
@@ -25,72 +25,88 @@
                     {% endfor %}
                 </select>
                 <label class="checkbox">
-                    <input type="checkbox" name="bikes_req" value="checked" {{bikes_req}}>
+                    <input id="bikes_checkbox" type="checkbox" name="bikes_req" value="checked" {{bikes_req}} onchange="updateChart()">
                     Available bikes
                 </label>
                 <label class="checkbox" display:inline>
-                    <input type="checkbox" name="docks_req" value="checked" {{docks_req}}>
+                    <input id="docks_checkbox" type="checkbox" name="docks_req" value="checked" {{docks_req}} onchange="updateChart()">
                     Available docks
                 </label>
                 <label class="checkbox" display:inline>
-                    <input type="checkbox" name="errors_req" value="checked" {{errors_req}}>
+                    <input id="errors_checkbox" type="checkbox" name="errors_req" value="checked" {{errors_req}} onchange="updateChart()">
                     Station errors
                 </label>
-                <input type="submit" value="Submit">
             </form>
 	    <hr>
 	    <div id="chart_div"></div>
 
         <!-- JavaScript -->
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>      
         <script type="text/javascript">
-            google.load('visualization', '1.0', {'packages':['corechart']});
-            google.setOnLoadCallback(drawChart);
-            function drawChart() {
-                var data = new google.visualization.DataTable();
-                    data.addColumn('datetime', 'Time');
-                    {% set single=0 %}
-                    {% if bikes_req == "checked" %}
-                        data.addColumn('number', 'Available bikes');
-                        {% set single = single + 1 %}
-                    {% endif %}
-                    {% if docks_req == "checked" %}
-                        data.addColumn('number', 'Available docks');
-                        {% set single = single + 1 %}
-                    {% endif %}
-                    {% if errors_req == "checked" %}
-                        data.addColumn('number', 'Station errors');
-                        {% set single = single + 1 %}
-                    {% endif %}
-                    {% if single > 1 %}
-                        {% for d in data_set %}
-                            data.addRows([[ {{d[0]}}, {{d[1]}}, {{d[2]}}, {{d[3]}} ]]);
-                        {% endfor %}
-                    {% elif single == 1 %}
-                        {% for d in data_set %}
-                            data.addRows([[ {{d[0]}}, {{d[1]}} ]]);
-                        {% endfor %}
-                    {% endif %}
+        google.load('visualization', '1.0', {'packages':['corechart']});
+            function makeChart(){
+                    request = new XMLHttpRequest();
+                    request.onreadystatechange = function() {
+                        if (request.readyState == 4 && request.status == 200) {
+                            var output = request.responseText;
+                            eval(output);
+                        }
+                    }
+                    var req = 'historychart?station_req='+{{station_req}}+'&time_req='+{{time_req}}+'&bikes_req='+'{{bikes_req}}'+'&docks_req='+'{{docks_req}}'+'&errors_req='+'{{errors_req}}';
+                    var encoded_req = encodeURI(req);
+                    request.open("GET",encoded_req,true);
+                    request.send();
+                }
+            makeChart();
 
-                var options = {
-                    title:'    {{name|safe}}',
-                    colors: {{color|safe}},
-                    backgroundColor:{stroke:"#FFFFFF"},
-                    height:500,
-                    chartArea:{left:35,top:50,width:"80%",height:"80%"},
-                    fontSize:14,
-                    fontName:"Arial",
-                    hAxis:{baselineColor:"#FFFFFF",gridlines:{color:"#FFFFFF"}},
-                    vAxis:{baselineColor:"#556270",gridlines:{color:"#556270"},format:'#'},
-                    lineWidth:3,
-                    legend: {position: 'top'},
-                    isStacked:true,
-                    };
-                // color palette: "cheer up emo kid" by electrikmonk at ColourLovers
-                // available at http://www.colourlovers.com/palette/1930/cheer_up_emo_kid
+            function updateChart(){
+                var station_dropdown = document.getElementById('station_dropdown');
+                var station_req = station_dropdown.options[station_dropdown.selectedIndex].value;
+                var time_dropdown = document.getElementById('time_dropdown');
+                var time_req = time_dropdown.options[time_dropdown.selectedIndex].value;
                 
-                var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-                chart.draw(data, options);
+                var bikes_checkbox = document.getElementById('bikes_checkbox');
+                var bikes_req
+                if (bikes_checkbox.checked==true){
+                    bikes_req = 'checked';
+                }
+                else {
+                    bikes_req=''
+                }
+                
+                var docks_checkbox = document.getElementById('docks_checkbox');
+                var docks_req
+                if (docks_checkbox.checked==true){
+                    docks_req = 'checked';
+                }
+                else {
+                    docks_req=''
+                }
+                
+                var errors_checkbox = document.getElementById('errors_checkbox');
+                var errors_req
+                if (errors_checkbox.checked==true){
+                    errors_req = 'checked';
+                }
+                else {
+                    errors_req=''
+                }
+
+                request = new XMLHttpRequest();
+                request.onreadystatechange = function() {
+                    if (request.readyState == 4 && request.status == 200) {
+                        var output = request.responseText;
+                        eval(output);
+                    }
+                }
+                var req = 'historychart?station_req='+station_req+'&time_req='+time_req+'&bikes_req='+bikes_req+'&docks_req='+docks_req+'&errors_req='+errors_req;
+                var encoded_req = encodeURI(req);
+                request.open("GET",encoded_req,true);
+                request.send();
             }
+            updateChart();
+
+
         </script>
+
     {% endblock %}
