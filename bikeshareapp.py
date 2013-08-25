@@ -58,7 +58,71 @@ class AboutPage(Handler):
 
 class ShowStationHistory(MainPage):
     def render_show_history(
-            self, station_req="",
+            self, 
+            station_req="",
+            time_req="",
+            bikes_req="",
+            docks_req="",
+            errors_req=""
+            ):
+
+        # options for time range dropdown menu, with name and value in 
+        # seconds (UNIX time for python)
+        timespans = [
+                ['past 24 hours', 86400],
+                ['past 48 hours', 172800],
+                ['past 72 hours', 259000],
+                ['past 7 days', 604800],
+                ['past 30 days', 2592000]
+                ]
+
+        # Options for the dropdown menu of bike stations. Pulls up 
+        # every known station_id, and the name. Note: The projection 
+        # seems to only work with at least two fields projected.
+        stations = db.GqlQuery("SELECT station_id, name \
+                FROM StationInfo \
+                ORDER BY station_id ASC")
+
+        # set defaults
+        if station_req == "":
+            station_req = 357
+        if time_req == "":
+            time_req = timespans[0][1]
+        if bikes_req=="" and docks_req=="" and errors_req=="":
+            bikes_req = "checked"
+
+        # find the name of the station for the provided ID
+        n = StationInfo.all().filter('station_id', int(station_req)).get()
+        name = n.name
+
+        # and print it to the logs
+        logging.debug(
+            '%s, %s, bikes: %s, docks: %s, errors: %s',
+            name,
+            time_req,
+            bikes_req,
+            docks_req,
+            errors_req
+            )
+
+        self.render(
+                'history.html',
+                bikes_req=bikes_req,
+                docks_req=docks_req, 
+                errors_req=errors_req,
+                station_req=station_req,
+                stations=stations,
+                time_req=time_req,
+                timespans=timespans
+                )
+
+    def get(self):
+        self.render_show_history()
+
+class HistoryChartHandler(ShowStationHistory):
+    def render_history_chart(
+            self, 
+            station_req="",
             time_req="",
             bikes_req="",
             docks_req="",
@@ -77,9 +141,6 @@ class ShowStationHistory(MainPage):
         # Options for the dropdown menu of bike stations. Pulls up 
         # every known station_id, and the name. Note: The projection 
         # seems to only work with at least two fields projected.
-        stations = db.GqlQuery("SELECT station_id, name \
-                FROM StationInfo \
-                ORDER BY station_id ASC")
 
         # set defaults
         if station_req == "":
@@ -146,38 +207,26 @@ class ShowStationHistory(MainPage):
         # find the name of the station for the provided ID
         n = StationInfo.all().filter('station_id', int(station_req)).get()
         name = n.name
-        logging.debug(
-            '%s, %s, bikes: %s, docks: %s, errors: %s',
-            name,
-            time_req,
-            bikes_req,
-            docks_req,
-            errors_req
-            )
+
         self.render(
-                'history.html',
+                'historychart.js',
                 bikes_req=bikes_req,
                 data_set=data_set,
                 docks_req=docks_req, 
                 errors_req=errors_req,
                 name=name,
                 station_req=station_req,
-                stations=stations,
                 time_req=time_req,
-                timespans=timespans,
                 color=color
                 )
 
     def get(self):
-        self.render_show_history()
-
-    def post(self):
         station_req = int(self.request.get('station_req'))
         time_req = int(self.request.get('time_req'))
         bikes_req = self.request.get('bikes_req')
         docks_req = self.request.get('docks_req')
         errors_req = self.request.get('errors_req')
-        self.render_show_history(
+        self.render_history_chart(
             station_req=station_req,
             time_req=time_req,
             bikes_req=bikes_req,
@@ -239,7 +288,7 @@ class TotalBikesAndDocks(MainPage):
 
         # set defaults
         if time_req == "":
-            time_req = timespans[0][1]
+            time_req = timespans[1][1]
         if bikes_req=="" and docks_req=="" and errors_req=="":
             bikes_req = "checked"
 
@@ -381,143 +430,6 @@ class ClearBadTimesQ(webapp2.RequestHandler):
     def get(self):
         deferred.defer(ClearBadTimes)
         self.response.out.write('Successfully initiated ClearBadTimes.')
-
-class HistoryChartHandler(MainPage):
-    '''def render_history_chart(
-        self,
-        bikes_req=""
-        ):
-        self.render(
-            'historychart.js',
-            bikes_req=bikes_req
-            )
-'''
-
-    def render_history_chart(
-            self, station_req="",
-            time_req="",
-            bikes_req="",
-            docks_req="",
-            errors_req=""
-            ):
-        # options for time range dropdown menu, with name and value in 
-        # seconds (UNIX time for python)
-        timespans = [
-                ['past 24 hours', 86400],
-                ['past 48 hours', 172800],
-                ['past 72 hours', 259000],
-                ['past 7 days', 604800],
-                ['past 30 days', 2592000]
-                ]
-
-        # Options for the dropdown menu of bike stations. Pulls up 
-        # every known station_id, and the name. Note: The projection 
-        # seems to only work with at least two fields projected.
-        stations = db.GqlQuery("SELECT station_id, name \
-                FROM StationInfo \
-                ORDER BY station_id ASC")
-
-        # set defaults
-        if station_req == "":
-            station_req = 357
-        if time_req == "":
-            time_req = timespans[0][1]
-        if bikes_req=="" and docks_req=="" and errors_req=="":
-            bikes_req = "checked"
-
-        min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
-        min_time = min_time.replace(microsecond=0)
-        
-        # filtered for one station, using the provided ID,
-        # filtered for a given time range, using min_time
-        # provide all the status info sorted from old to new
-
-        history = db.GqlQuery(
-            "SELECT * FROM StationStatus \
-             WHERE station_id = :1 \
-             AND date_time > :2 \
-             ORDER BY date_time ASC",
-             station_req,
-             min_time
-             )
-
-        # prep data for insertion into html template
-        data_set = []
-        if bikes_req=="checked" and docks_req=="checked" and errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableBikes, h.availableDocks, h.errors])
-                color = ['#4ECDC4', '#FF6B6B', '#C44D58']
-        elif bikes_req=="checked" and docks_req == "checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableBikes, h.availableDocks])
-                color = ['#4ECDC4', '#FF6B6B']
-        elif bikes_req=="checked" and errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableBikes, h.errors])
-                color = ['#4ECDC4', '#C44D58']
-        elif docks_req=="checked" and errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableDocks, h.errors])
-                color = ['#FF6B6B', '#C44D58']
-        elif bikes_req == "checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableBikes])
-                color = ['#4ECDC4']
-        elif docks_req == "checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableDocks])
-                color = ['#FF6B6B']
-        elif errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.errors])
-                color = ['#C44D58']
-
-        # find the name of the station for the provided ID
-        n = StationInfo.all().filter('station_id', int(station_req)).get()
-        name = n.name
-        logging.debug(
-            '%s, %s, bikes: %s, docks: %s, errors: %s',
-            name,
-            time_req,
-            bikes_req,
-            docks_req,
-            errors_req
-            )
-        self.render(
-                'historychart.js',
-                bikes_req=bikes_req,
-                data_set=data_set,
-                docks_req=docks_req, 
-                errors_req=errors_req,
-                name=name,
-                station_req=station_req,
-                stations=stations,
-                time_req=time_req,
-                timespans=timespans,
-                color=color
-                )
-
-    def get(self):
-        station_req = int(self.request.get('station_req'))
-        time_req = int(self.request.get('time_req'))
-        bikes_req = self.request.get('bikes_req')
-        docks_req = self.request.get('docks_req')
-        errors_req = self.request.get('errors_req')
-        self.render_history_chart(
-            station_req=station_req,
-            time_req=time_req,
-            bikes_req=bikes_req,
-            docks_req=docks_req,
-            errors_req=errors_req
-            )
-
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/about', AboutPage),
