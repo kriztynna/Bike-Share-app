@@ -119,115 +119,6 @@ class ShowStationHistory(MainPage):
     def get(self):
         self.render_show_history()
 
-class HistoryChartHandler(ShowStationHistory):
-    def render_history_chart(
-            self, 
-            station_req="",
-            time_req="",
-            bikes_req="",
-            docks_req="",
-            errors_req=""
-            ):
-        # options for time range dropdown menu, with name and value in 
-        # seconds (UNIX time for python)
-        timespans = [
-                ['past 24 hours', 86400],
-                ['past 48 hours', 172800],
-                ['past 72 hours', 259000],
-                ['past 7 days', 604800],
-                ['past 30 days', 2592000]
-                ]
-
-        # set defaults
-        if station_req == "":
-            station_req = 357
-        if time_req == "":
-            time_req = timespans[0][1]
-        if bikes_req=="" and docks_req=="" and errors_req=="":
-            bikes_req = "checked"
-
-        min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
-        min_time = min_time.replace(microsecond=0)
-        
-        # filtered for one station, using the provided ID,
-        # filtered for a given time range, using min_time
-        # provide all the status info sorted from old to new
-        history = db.GqlQuery(
-            "SELECT * FROM StationStatus \
-             WHERE station_id = :1 \
-             AND date_time > :2 \
-             ORDER BY date_time ASC",
-             station_req,
-             min_time
-             )
-
-        # prep data for insertion into html template
-        data_set = []
-        if bikes_req=="checked" and docks_req=="checked" and errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableBikes, h.availableDocks, h.errors])
-                color = ['#4ECDC4', '#FF6B6B', '#C44D58']
-        elif bikes_req=="checked" and docks_req == "checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableBikes, h.availableDocks])
-                color = ['#4ECDC4', '#FF6B6B']
-        elif bikes_req=="checked" and errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableBikes, h.errors])
-                color = ['#4ECDC4', '#C44D58']
-        elif docks_req=="checked" and errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableDocks, h.errors])
-                color = ['#FF6B6B', '#C44D58']
-        elif bikes_req == "checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableBikes])
-                color = ['#4ECDC4']
-        elif docks_req == "checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.availableDocks])
-                color = ['#FF6B6B']
-        elif errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.errors])
-                color = ['#C44D58']
-
-        # find the name of the station for the provided ID
-        n = StationInfo.all().filter('station_id', int(station_req)).get()
-        name = n.name
-
-        self.render(
-                'historychart.js',
-                bikes_req=bikes_req,
-                data_set=data_set,
-                docks_req=docks_req, 
-                errors_req=errors_req,
-                name=name,
-                station_req=station_req,
-                time_req=time_req,
-                color=color
-                )
-
-    def get(self):
-        station_req = int(self.request.get('station_req'))
-        time_req = int(self.request.get('time_req'))
-        bikes_req = self.request.get('bikes_req')
-        docks_req = self.request.get('docks_req')
-        errors_req = self.request.get('errors_req')
-        self.render_history_chart(
-            station_req=station_req,
-            time_req=time_req,
-            bikes_req=bikes_req,
-            docks_req=docks_req,
-            errors_req=errors_req
-            )
 
 class HistoryChartJSONHandler(ShowStationHistory):
     def render_history_chart_json(
@@ -457,61 +348,9 @@ class TotalBikesAndDocks(MainPage):
 
         # set defaults
         if time_req == "":
-            time_req = timespans[1][1]
+            time_req = timespans[0][1]
         if bikes_req=="" and docks_req=="" and errors_req=="":
             bikes_req = "checked"
-
-        min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
-        min_time = min_time.replace(microsecond=0)
-        
-        # filtered for one station, using the provided ID,
-        # filtered for a given time range, using min_time
-        # provide all the status info sorted from old to new
-
-        history = db.GqlQuery(
-            "SELECT * FROM Totals \
-             WHERE date_time > :1 \
-             ORDER BY date_time ASC",
-             min_time
-             )
-
-        # prep data for insertion into html template
-        data_set = []
-        if bikes_req=="checked" and docks_req=="checked" and errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.bikes, h.docks, h.errors])
-                color = ['#4ECDC4', '#FF6B6B', '#C44D58']
-        elif bikes_req=="checked" and docks_req == "checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.bikes, h.docks])
-                color = ['#4ECDC4', '#FF6B6B']
-        elif bikes_req=="checked" and errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.bikes, h.errors])
-                color = ['#4ECDC4', '#C44D58']
-        elif docks_req=="checked" and errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.docks, h.errors])
-                color = ['#FF6B6B', '#C44D58']
-        elif bikes_req == "checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.bikes])
-                color = ['#4ECDC4']
-        elif docks_req == "checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.docks])
-                color = ['#FF6B6B']
-        elif errors_req=="checked":
-            for h in history:
-                tj = makeJavaScriptTimeForCharts(h)
-                data_set.append([tj, h.errors])
-                color = ['#C44D58']
 
         logging.debug(
             'Totals: timespan: %s, bikes: %s, docks: %s, errors: %s',
@@ -524,12 +363,10 @@ class TotalBikesAndDocks(MainPage):
         self.render(
                 'totals.html',
                 bikes_req=bikes_req,
-                data_set=data_set,
                 docks_req=docks_req, 
                 errors_req=errors_req,
                 time_req=time_req,
-                timespans=timespans,
-                color=color
+                timespans=timespans
                 )
 
     def get(self):
@@ -541,6 +378,165 @@ class TotalBikesAndDocks(MainPage):
         docks_req = self.request.get('docks_req')
         errors_req = self.request.get('errors_req')
         self.render_show_totals(
+            time_req=time_req,
+            bikes_req=bikes_req,
+            docks_req=docks_req,
+            errors_req=errors_req
+            )
+
+class TotalChartJSONHandler(ShowStationHistory):
+    def render_totals_chart_json(
+            self, 
+            time_req="",
+            bikes_req="",
+            docks_req="",
+            errors_req=""
+            ):
+        # options for time range dropdown menu, with name and value in 
+        # seconds (UNIX time for python)
+        timespans = [
+                ['past 24 hours', 86400],
+                ['past 48 hours', 172800],
+                ['past 72 hours', 259000],
+                ['past 7 days', 604800],
+                ['past 30 days', 2592000]
+                ]
+
+        # set defaults
+        if time_req == "":
+            time_req = timespans[0][1]
+        if bikes_req=="" and docks_req=="" and errors_req=="":
+            bikes_req = "checked"
+
+        min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
+        min_time = min_time.replace(microsecond=0)
+        
+        history = db.GqlQuery(
+            "SELECT * FROM Totals \
+             WHERE date_time > :1 \
+             ORDER BY date_time ASC",
+             min_time
+             )
+
+        # prep options for insertion
+        options = dict(height=500, fontSize=14, fontName='Arial', lineWidth=3, isStacked='true')
+        options.update(backgroundColor=dict(stroke="#FFFFFF"))
+        options.update(legend=dict(position="top"))
+        options.update(chartArea=dict(left=50, top=50, width="80%", height="80%"))
+        options.update(hAxis=dict(baselineColor="#FFFFFF", gridlines=dict(color="#FFFFFF")))
+        options.update(vAxis=dict(baselineColor="#556270", gridlines=dict(color="#556270", format="#")))
+        options.update()
+        
+        # prep data structure
+        cols = []
+        rows = []
+        time_col = dict(id='Time', type='datetime')
+        cols.append(time_col)
+
+        # populate data rows and columns
+        if bikes_req=="checked" and docks_req=="checked" and errors_req=="checked":
+            cols.append(dict(id='Total bikes', type='number'))
+            cols.append(dict(id='Total docks', type='number'))
+            cols.append(dict(id='Total errors', type='number'))
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                row = []
+                row.append(dict(v=tj))
+                row.append(dict(v=h.bikes))
+                row.append(dict(v=h.docks))
+                row.append(dict(v=h.errors))
+                c = dict(c=row)
+                rows.append(c)
+                options.update(colors=['#4ECDC4', '#FF6B6B', '#C44D58'])
+        
+        elif bikes_req=="checked" and docks_req == "checked":
+            cols.append(dict(id='Total bikes', type='number'))
+            cols.append(dict(id='Total docks', type='number'))
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                row = []
+                row.append(dict(v=tj))
+                row.append(dict(v=h.bikes))
+                row.append(dict(v=h.docks))
+                c = dict(c=row)
+                rows.append(c)
+                options.update(colors=['#4ECDC4', '#FF6B6B'])
+        
+        elif bikes_req=="checked" and errors_req=="checked":
+            cols.append(dict(id='Total bikes', type='number'))
+            cols.append(dict(id='Total errors', type='number'))
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                row = []
+                row.append(dict(v=tj))
+                row.append(dict(v=h.bikes))
+                row.append(dict(v=h.errors))
+                c = dict(c=row)
+                rows.append(c)
+                options.update(colors=['#4ECDC4', '#C44D58'])
+        
+        elif docks_req=="checked" and errors_req=="checked":
+            cols.append(dict(id='Total docks', type='number'))
+            cols.append(dict(id='Total errors', type='number'))
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                row = []
+                row.append(dict(v=tj))
+                row.append(dict(v=h.docks))
+                row.append(dict(v=h.errors))
+                c = dict(c=row)
+                rows.append(c)
+                options.update(colors=['#FF6B6B', '#C44D58'])
+        
+        elif bikes_req == "checked":
+            cols.append(dict(id='Total bikes', type='number'))
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                row = []
+                row.append(dict(v=tj))
+                row.append(dict(v=h.bikes))
+                c = dict(c=row)
+                rows.append(c)
+                options.update(colors=['#4ECDC4'])
+        
+        elif docks_req == "checked":
+            cols.append(dict(id='Total docks', type='number'))
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                row = []
+                row.append(dict(v=tj))
+                row.append(dict(v=h.docks))
+                c = dict(c=row)
+                rows.append(c)
+                options.update(colors=['#FF6B6B'])
+        
+        elif errors_req=="checked":
+            cols.append(dict(id='Total errors', type='number'))
+            for h in history:
+                tj = makeJavaScriptTimeForCharts(h)
+                row = []
+                row.append(dict(v=tj))
+                row.append(dict(v=h.errors))
+                c = dict(c=row)
+                rows.append(c)
+                options.update(colors=['#C44D58'])
+        
+        # prep json variables
+        chartType = 'AreaChart'
+        containerID = 'chart_div'
+        dataTable = dict(cols=cols, rows=rows)
+        # options already prepared
+
+        dict_output = dict(chartType=chartType, containerID=containerID, dataTable=dataTable, options=options)
+        json_output = json.dumps(dict_output)
+        self.response.out.write(json_output)
+
+    def get(self):
+        time_req = int(self.request.get('time_req'))
+        bikes_req = self.request.get('bikes_req')
+        docks_req = self.request.get('docks_req')
+        errors_req = self.request.get('errors_req')
+        self.render_totals_chart_json(
             time_req=time_req,
             bikes_req=bikes_req,
             docks_req=docks_req,
@@ -607,8 +603,8 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/updateall',UpdateAll),
                                ('/errors',StationErrorChecker),
                                ('/totals',TotalBikesAndDocks),
+                               ('/totalsjson',TotalChartJSONHandler),
                                ('/history',ShowStationHistory),
-                               ('/historychart',HistoryChartHandler),
                                ('/historyjson',HistoryChartJSONHandler)
                                ],
                               debug=True)

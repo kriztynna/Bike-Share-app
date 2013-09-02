@@ -15,7 +15,7 @@
                         <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
                     {% endfor %}
                 </select>
-                <select id="time_dropdown" name="time_req"  onchange="updateChart()">
+                <select id="time_dropdown" name="time_req" onchange="updateChart()">
                     {% for t in timespans %}
                         {% set sel="" %}
                         {% if t[1] == time_req %}
@@ -40,7 +40,7 @@
 	    <hr>
 	    <div id="chart_div"></div>
 
-        <!-- JavaScript -->
+        <!-- JavaScript for chart -->
         <script type="text/javascript" src="https://www.google.com/jsapi"></script>      
         <script type="text/javascript">
         google.load('visualization', '1.0', {'packages':['corechart']});
