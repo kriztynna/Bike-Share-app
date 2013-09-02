@@ -24,6 +24,9 @@ handlers:
 - url: /updateall
   script: bikeshareapp.app
   login: admin
+- url: /updatesystemstats
+  script: bikeshareapp.app
+  login: admin
 - url: /favicon\.ico
   static_files: static/images/favicon.ico
   upload: static/images/favicon\.ico

@@ -29,20 +29,7 @@ class Handler(webapp2.RequestHandler):
 		self.write(self.render_str(template, **kw))
 	def initialize(self, *a, **kw):
 		webapp2.RequestHandler.initialize(self, *a, **kw)
-	# don't need this yet: self.uid = self.read_secure_cookie('user_id')
-	# don't need this yet either: self.user = self.uid and User.by_id(int(self.uid))
-	# more things I will probably need later, but don't right now:
-	'''
-        def set_secure_cookie(self, user_id, val):
-		cookie_val = make_secure_val(val)
-		self.response.headers.add_header('Set-Cookie', '%s=%s; Path=/' % (user_id, cookie_val))
-	def read_secure_cookie(self, user_id):
-		cookie_val = self.request.cookies.get(user_id)
-		return cookie_val and check_secure_val(cookie_val)
-	def login(self, user):
-		self.set_secure_cookie('user_id', str(user.key().id()))
-	def logout(self):
-		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')'''
+
 
 class MainPage(Handler):
     def render_front(self):
@@ -292,34 +279,6 @@ class HistoryChartJSONHandler(ShowStationHistory):
             docks_req=docks_req,
             errors_req=errors_req
             )
-
-class StationErrorChecker(MainPage):
-        def render_error_checker(self):
-            # pull all updates, sorted most to least recent, and get the first result
-            q = StationStatus.query().order(-StationStatus.date_time).get()
-            last = q.date_time
-            last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
-            last_update_msg = 'Last update: '+last_update+' UTC.'
-
-            stations = StationStatus.query().filter(StationStatus.date_time==last).order(StationStatus.station_id)
-
-            data_set = []
-            for station in stations:
-                name_lookup = StationInfo.query().filter(StationInfo.station_id==station.station_id).get()
-                if name_lookup == None:
-                    logging.debug("We have a station_id without info: %d", station.station_id)
-                    continue
-                else:
-                    station_name = name_lookup.name
-                    ooo_docks = station.errors
-                    java_name = '"'+station_name+'"'
-                    data_set.append([java_name, ooo_docks])
-            sorted_set = sorted(data_set, key=lambda arg: arg[1], reverse=True)
-            sorted_set = sorted_set[:10]
-            self.render('errors.html', data_set=sorted_set, last_update_msg=last_update_msg)
-
-        def get(self):
-		self.render_error_checker()
 
 class TotalBikesAndDocks(MainPage):
     def render_show_totals(
@@ -593,10 +552,10 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/about', AboutPage),
                                ('/updatestatus',UpdateStatus),
                                ('/updateall',UpdateAll),
-                               ('/errors',StationErrorChecker),
                                ('/totals',TotalBikesAndDocks),
                                ('/totalsjson',TotalChartJSONHandler),
                                ('/history',ShowStationHistory),
-                               ('/historyjson',HistoryChartJSONHandler)
+                               ('/historyjson',HistoryChartJSONHandler),
+                               ('/updatesystemstats',UpdateSystemStats)
                                ],
                               debug=True)

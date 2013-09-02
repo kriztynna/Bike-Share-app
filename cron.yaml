@@ -5,5 +5,9 @@ cron:
   timezone: America/New_York
 - description: update bike share data
   url: /updateall
-  schedule: every wednesday 03:00
+  schedule: every tuesday 03:15
+  timezone: America/New_York
+- description: check for new system stats
+  url: /updatesystemstats
+  schedule: every wednesday 03:15
   timezone: America/New_York

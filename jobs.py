@@ -1,7 +1,9 @@
 from models import *
+import csv
 import datetime
 import json
 import logging
+import StringIO
 import traceback
 import time
 import urllib2
@@ -15,7 +17,7 @@ from google.appengine.ext import deferred
 ########## This is where the cron jobs go ##########
 
 class UpdateAll(webapp2.RequestHandler):
-	def getData(self, i=1):
+    	def getData(self, i=1):
                 try:
                         bikeShareJSON = urllib2.Request('http://www.citibikenyc.com/stations/json')
                         response = urllib2.urlopen(bikeShareJSON)
@@ -26,6 +28,7 @@ class UpdateAll(webapp2.RequestHandler):
                         print traceback.format_exc()
                         time.sleep(60*i)
                         self.getData(i+0.25)
+
         def get_et(self, data):
                 execution_time = data['executionTime']
                 et = datetime.datetime.strptime(execution_time, '%Y-%m-%d %I:%M:%S %p')
@@ -35,7 +38,8 @@ class UpdateAll(webapp2.RequestHandler):
                 et_UTC = et.astimezone(pytz.UTC)
                 et_UTC = et_UTC.replace(tzinfo=None)
                 return et, et_UNIX, et_UTC
-	def update_all_data(self):
+
+        def update_all_data(self):
                 data = self.getData()
                 station_list = data['stationBeanList']
 
@@ -48,13 +52,13 @@ class UpdateAll(webapp2.RequestHandler):
                         stAddress1 = station_list[i]['stAddress1']
                         stAddress2 = station_list[i]['stAddress2']
                         r = StationInfo(
-                                id=str(station_id), 
-                                station_id = station_id, 
-                                name = name, 
-                                coordinates = coordinates, 
-                                stAddress1 = stAddress1, 
-                                stAddress2 = stAddress2
-                                )
+                            id=str(station_id), 
+                            station_id = station_id, 
+                            name = name, 
+                            coordinates = coordinates, 
+                            stAddress1 = stAddress1, 
+                            stAddress2 = stAddress2
+                            )
                         r_key = r.put()
 
                 for i in range(len(station_list)):
@@ -66,8 +70,8 @@ class UpdateAll(webapp2.RequestHandler):
                                 enterStation(i)
                         else:
                                 enterStation(i)
-			
-			#update StatusInfo
+                        
+                        #update StatusInfo
                         statusKey = station_list[i]['statusKey']
                         if statusKey == 1:
                                 continue
@@ -77,285 +81,126 @@ class UpdateAll(webapp2.RequestHandler):
                                 statusValue = station_list[i]['statusValue']
                                 print 'Found a new status: statusKey = '+str(statusKey)+' and statusValue = '+statusValue+'.'
                                 print 'I added this new status to the database BUT *you need to manually update* this code to prevent unnecessary rewrites.'
-                                r = StatusInfo(
-                                        id=statusValue, 
-                                        statusKey = statusKey, 
-                                        statusValue = statusValue
-                                        )
-                                r_key = r.put()
-	def get(self):
-		self.update_all_data()
+                        
+                        r = StatusInfo(
+                            id=statusValue, 
+                            statusKey = statusKey, 
+                            statusValue = statusValue
+                            )
+
+                        r_key = r.put()
+
+        def get(self):
+                self.update_all_data()
 
 class UpdateStatus(UpdateAll):
-	def update_station_status(self):
-                data = self.getData()
-                et, et_UNIX, et_UTC = self.get_et(data)
-                station_list = data['stationBeanList']
-                all_bikes = 0
-                all_docks = 0
-                all_errors = 0
-                to_put_status = []
-                for i in range(len(station_list)):
-                        #update StationStatus
-			station_id = station_list[i]['id']
-			availableDocks = station_list[i]['availableDocks']
-                        totalDocks = station_list[i]['totalDocks']
-                        statusKey = station_list[i]['statusKey']
-                        availableBikes = station_list[i]['availableBikes']
-                        made_key = str(station_id)+'_'+str(et_UNIX)
-                        errors = totalDocks - (availableBikes + availableDocks)
-			r = StationStatus(
-                                id=made_key,
-                                date_time = et_UTC, 
-                                station_id = station_id,
-                                availableDocks = availableDocks,
-                                totalDocks = totalDocks,
-                                statusKey = statusKey,
-                                availableBikes = availableBikes,
-                                errors = errors
-                                )
+    def update_station_status(self):
+        data = self.getData()
+        et, et_UNIX, et_UTC = self.get_et(data)
+        station_list = data['stationBeanList']
+        all_bikes = 0
+        all_docks = 0
+        all_errors = 0
+        to_put_status = []
+        for i in range(len(station_list)):
+            #update StationStatus
+            station_id = station_list[i]['id']
+            availableDocks = station_list[i]['availableDocks']
+            totalDocks = station_list[i]['totalDocks']
+            statusKey = station_list[i]['statusKey']
+            availableBikes = station_list[i]['availableBikes']
+            made_key = str(station_id)+'_'+str(et_UNIX)
+            errors = totalDocks - (availableBikes + availableDocks)
 
-                        to_put_status.append(r)
-                        all_bikes += availableBikes
-                        all_docks += availableDocks
-                        all_errors += errors
-                t = Totals(
-                        id=str(et_UNIX),
-                        date_time = et_UTC,
-                        bikes = all_bikes,
-                        docks = all_docks,
-                        errors = all_errors
-                        )
+            r = StationStatus(
+                id=made_key, 
+                date_time = et_UTC, 
+                station_id = station_id, 
+                availableDocks = availableDocks, 
+                totalDocks = totalDocks, 
+                statusKey = statusKey, 
+                availableBikes = availableBikes, 
+                errors = errors
+                )
 
-                t.put()
-                ndb.put_multi(to_put_status)
+            to_put_status.append(r)
+            all_bikes += availableBikes
+            all_docks += availableDocks
+            all_errors += errors
 
-	def get(self):
-		self.update_station_status()
+        t = Totals(
+            id=str(et_UNIX), 
+            date_time = et_UTC, 
+            bikes = all_bikes, 
+            docks = all_docks, 
+            errors = all_errors
+            )
 
-########## This is where the task queue things go ##########
-def FixTimes(cursor=None, cum_updated=0):
-        # 5 hours time offset
-        offset = datetime.timedelta(seconds=3600)
-        limit = 10000
-        if cursor == None:
-                cursor = 0
-        counter = 0
-        counter_updated = 0
+        t.put()
+        ndb.put_multi(to_put_status)
 
+    def get(self):
+        self.update_station_status()
 
-        prep = "SELECT * FROM StationStatus WHERE date_time <= DATETIME('2013-07-30 02:59:01') ORDER BY date_time ASC LIMIT "+str(cursor)+", "+str(limit)
-        logging.debug(prep)
+class UpdateSystemStats(webapp2.RequestHandler):
+    def getStats(self):
+        systemstats = urllib2.Request('http://cf.datawrapper.de/CSXes/data')
+        # possible alternative: 
+        # systemstats = urllib2.Request('http://s3.datawrapper.de/CSXes/data')
+        response = urllib2.urlopen(systemstats).read()
+        raw_data = StringIO.StringIO(response)
+        csv_data = csv.reader(raw_data)
+        csv_data.next()
 
-        the_times = ndb.gql(prep)
-        for e in the_times:
-                if e.tzFixed != True:
-                        old_time = e.date_time
-                        new_time = old_time - offset
-                        new_time_UNIX = new_time.strftime('%s')
-                        e.date_time = new_time
-                        e.tzFixed = True
-                        e_key = e.put()
-                        counter+=1
-                        counter_updated+=1
-                else:
-                        counter+=1
-                        continue
-        cursor += counter
-        cum_updated += counter_updated
-        if counter > 0:
-                logging.debug(
-                        'Cycled through %d entities and updated %d of them. \
-                        Cumulative total entities reviewed: %d, updated: %d', 
-                        counter, 
-                        counter_updated, 
-                        cursor,
-                        cum_updated
-                        )
-                deferred.defer(FixTimes, cursor=cursor, cum_updated=cum_updated)
-        else:
-                logging.debug(
-                        "All done. Reviewed %d entities \
-                        and updated %d of them in total!", 
-                        cursor, 
-                        cum_updated
-                        )
-
-def RemoveTzFixed(cursor=0, cum_deleted=0, cum_skipped=0):
-        limit = 5000
-        counter = 0
-        deleted = 0
-        skipped = 0
         to_put = []
+        for row in csv_data:
+            date = datetime.datetime.strptime(row[0], '%m/%d/%Y')
+            min_date = datetime.datetime.strptime('2013-05-27', '%Y-%m-%d')
+            if date < min_date:
+                continue
+            else:
+                made_key = datetime.datetime.strftime(date, '%Y/%m/%d')
+                exists = SystemStats.query(SystemStats.date == date).get()
+                if exists == None:
+                    trips = int(row[1])
+                    cum_trips = int(row[2])
 
-        prep = "SELECT * FROM StationStatus \
-                WHERE date_time <= DATETIME('2013-07-30 11:59:01') \
-                ORDER BY date_time \
-                ASC LIMIT "+str(cursor)+", "+str(limit)
+                    if row[3] == '':
+                        miles = 0
+                    else:
+                        miles = int(row[3])
 
-        logging.debug(prep)
+                    cum_miles = int(row[4])
 
-        the_list = ndb.gql(prep)
-        
-        for e in the_list:
-                if hasattr(e,'tzFixed'):
-                        delattr(e,'tzFixed')
-                        to_put.append(e)
-                        counter+=1
-                        deleted+=1
-                else:
-                        counter+=1
-                        skipped+=1
-                        continue
+                    try:
+                        members = int(row[5])
+                    except:
+                        members = 0
 
-        cursor += counter
-        cum_deleted+=deleted
-        cum_skipped+=skipped
-
-        if counter > 0:
-                ndb.put_multi(to_put)
-                logging.debug(
-                        'Cycled through %d entities this round. Deleted %d, skipped %d. \
-                        Totals: reviewed: %d, deleted: %d, skipped: %d.', 
-                        counter, 
-                        deleted,
-                        skipped,
-                        cursor,
-                        cum_deleted,
-                        cum_skipped
-                        )
-                deferred.defer(
-                        RemoveTzFixed, 
-                        cursor=cursor, 
-                        cum_deleted=cum_deleted, 
-                        cum_skipped=cum_skipped
-                        )
-        else:
-                logging.debug(
-                        "All done. Totals: reviewed: %d, deleted: %d, skipped: %d.", 
-                        cursor,
-                        cum_deleted,
-                        cum_skipped
-                        )
-
-def BackfillErrorsData(cursor=0):
-        # Through experience making the previous two task queue functions, 
-        # I think the optimal batch size is between 500 and 1000
-        # 500 is too small, but with 1000, sometimes the operation times out.
-        # even with a batch size of 750, sometimes it times out.
-        limit = 750
-        counter = 0
-
-        prep = "SELECT * FROM StationStatus \
-                        WHERE date_time < DATETIME('2013-07-28 22:59:01') \
-                        ORDER BY date_time \
-                        ASC LIMIT "+str(cursor)+", "+str(limit)
-        
-        logging.debug(prep)
-
-        the_list = ndb.gql(prep)
-        for e in the_list:
-                errors = e.totalDocks - (e.availableBikes + e.availableDocks)
-                e.errors = errors
-                e_key = e.put()
-                counter+=1
-
-        cursor += counter
-
-        if counter > 0:
-                logging.debug(
-                        'Filled in errors attribute for %d entities. Cumulative total: %d', 
-                        counter, 
-                        cursor
-                        )
-                deferred.defer(BackfillErrorsData, cursor=cursor)
-        else:
-                logging.debug("All done. Filled in errors attribute for %d entities in total.", cursor)
-
-def BackfillTotalsData(cursor=0,counter=0):
-
-        prep = "SELECT * FROM StationStatus \
-                WHERE station_id = 116 \
-                ORDER BY date_time ASC"
-
-        logging.debug(prep)
-        query = ndb.gql(prep)
-
-        the_times = []
-        for q in query:
-                if q == None:
-                        logging.debug('We got a q that was null.')
-                        continue
-                elif hasattr(q,'date_time'):
-                        if q.date_time in the_times:
-                                logging.debug('We somehow ran into a time we already had.')
-                                continue
-                        else:
-                                the_totals = Totals.query(Totals.date_time == q.date_time).get()
-                                if the_totals == None: #means there isn't already an entry for this time
-                                        the_times.append(q.date_time)
-                                        t = q.date_time
-                                        t_UNIX=t.strftime('%s')+'000'
-                                        logging.debug('We appended a date_time, %s',t_UNIX)
-                                        counter+=1
-                                else:
-                                        continue
-                else:
-                        logging.debug("We ran into a q that didn't have a date_time property. Odd.")
-                        continue
-        cursor+=counter
-        
-        to_put = []
-        for t in the_times:
-                bikes=0
-                docks=0
-                errors=0
-                statuses = ndb.gql(
-                        "SELECT * FROM StationStatus \
-                        WHERE date_time = :1",
-                        t
-                        )
-                for s in statuses:
-                        bikes+=s.availableBikes
-                        docks+=s.availableDocks
-                        errors+=s.errors
-
-                t_UNIX = int(time.mktime(t.timetuple()))
-                total = Totals(
-                        date_time = t,
-                        key_name = str(t_UNIX),
-                        bikes = bikes,
-                        docks = docks,
-                        errors = errors
-                        )
-                to_put.append(total)
-                counter+=1
+                    signups = int(row[6])
+                    day_passes = int(row[7])
+                    week_passes = int(row[8])
                 
-        if counter > 0:
-                ndb.put_multi(to_put)
-                logging.debug('Another round done. Counter: %d entries, cursor: %d.', counter, cursor)
-                deferred.defer(BackfillTotalsData, cursor=cursor)
-        else:
-                logging.debug('All done. Cursor: %d.', cursor)
+                    stat = SystemStats(
+                        id=made_key,
+                        date = date,
+                        trips = trips,
+                        miles = miles,
+                        cum_trips = cum_trips,
+                        cum_miles = cum_miles,
+                        members = members,
+                        signups = signups,
+                        day_passes = day_passes,
+                        week_passes = week_passes
+                        )
 
-def ClearBadTimes(cursor=0):
-        bad_times = [
-        '2013-07-25 01:58:01'
-        ]
+                    to_put.append(stat)
+                    logging.debug('New data added.')
+                    
+                else:
+                    continue
+        
+        ndb.put_multi(to_put)
 
-        for t in bad_times:
-                prep = "SELECT * FROM StationStatus \
-                        WHERE date_time = DATETIME("+"'"+t+"')"
-                logging.debug(prep)
-                statuses = ndb.gql(prep)
-                for s in statuses:
-                        s.key.delete()
-
-        for t in bad_times:
-                prep2 = "SELECT * FROM Totals \
-                        WHERE date_time = DATETIME("+"'"+t+"')"
-                logging.debug(prep)
-                statuses = ndb.gql(prep2)
-                for s in statuses:
-                        s.key.delete()
-
+    def get(self):
+        self.getStats()
