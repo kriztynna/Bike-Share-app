@@ -1,4 +1,4 @@
-from dbmodels import *
+from models import *
 from jobs import *
 
 import datetime
@@ -11,7 +11,7 @@ import traceback
 import urllib2
 import webapp2
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 from google.appengine.ext import deferred
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -79,7 +79,7 @@ class ShowStationHistory(MainPage):
         # Options for the dropdown menu of bike stations. Pulls up 
         # every known station_id, and the name. Note: The projection 
         # seems to only work with at least two fields projected.
-        stations = db.GqlQuery("SELECT station_id, name \
+        stations = ndb.gql("SELECT station_id, name \
                 FROM StationInfo \
                 ORDER BY station_id ASC")
 
@@ -92,7 +92,7 @@ class ShowStationHistory(MainPage):
             bikes_req = "checked"
 
         # find the name of the station for the provided ID
-        n = StationInfo.all().filter('station_id', int(station_req)).get()
+        n = StationInfo.query(StationInfo.station_id == int(station_req)).get()
         name = n.name
 
         # and print it to the logs
@@ -118,7 +118,6 @@ class ShowStationHistory(MainPage):
 
     def get(self):
         self.render_show_history()
-
 
 class HistoryChartJSONHandler(ShowStationHistory):
     def render_history_chart_json(
@@ -153,7 +152,7 @@ class HistoryChartJSONHandler(ShowStationHistory):
         # filtered for one station, using the provided ID,
         # filtered for a given time range, using min_time
         # provide all the status info sorted from old to new
-        history = db.GqlQuery(
+        history = ndb.gql(
             "SELECT * FROM StationStatus \
              WHERE station_id = :1 \
              AND date_time > :2 \
@@ -266,7 +265,7 @@ class HistoryChartJSONHandler(ShowStationHistory):
                 options.update(colors=['#C44D58'])
 
         # find the name of the station for the provided ID
-        n = StationInfo.all().filter('station_id', int(station_req)).get()
+        n = StationInfo.query(StationInfo.station_id == int(station_req)).get()
         name = n.name
         options.update(title=name)
         
@@ -296,23 +295,17 @@ class HistoryChartJSONHandler(ShowStationHistory):
 
 class StationErrorChecker(MainPage):
         def render_error_checker(self):
-            # pull all updates, sorted most to least recent, and get the first result    
-            q = StationStatus.all().order('-date_time').get()
+            # pull all updates, sorted most to least recent, and get the first result
+            q = StationStatus.query().order(-StationStatus.date_time).get()
             last = q.date_time
             last_update = last.strftime('%I:%M:%S %p on %A, %B %d, %Y')
             last_update_msg = 'Last update: '+last_update+' UTC.'
 
-            stations = db.GqlQuery(
-                "SELECT station_id, errors \
-                 FROM StationStatus \
-                 WHERE date_time = :1 \
-                 ORDER BY station_id ASC",
-                 last
-                 )
+            stations = StationStatus.query().filter(StationStatus.date_time==last).order(StationStatus.station_id)
 
             data_set = []
             for station in stations:
-                name_lookup = StationInfo.all().filter('station_id =',station.station_id).get()
+                name_lookup = StationInfo.query().filter(StationInfo.station_id==station.station_id).get()
                 if name_lookup == None:
                     logging.debug("We have a station_id without info: %d", station.station_id)
                     continue
@@ -411,7 +404,7 @@ class TotalChartJSONHandler(ShowStationHistory):
         min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
         min_time = min_time.replace(microsecond=0)
         
-        history = db.GqlQuery(
+        history = ndb.gql(
             "SELECT * FROM Totals \
              WHERE date_time > :1 \
              ORDER BY date_time ASC",
@@ -545,12 +538,11 @@ class TotalChartJSONHandler(ShowStationHistory):
 
 
 ########## This is where the utils go ##########
-def makeJavaScriptTimeForCharts(db_entry):
-        t=db_entry.date_time #extract date_time from a data store object
+def makeJavaScriptTimeForCharts(entity):
+        t=entity.date_time #extract date_time from a data store object
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return int(t_UNIX)
-        # return 'new Date(' + t_UNIX + ')' #return JavaScript to add dates and times to charts
-
+        
 ########## This is where the task queue handlers go ##########
 
 class FixTimesQ(webapp2.RequestHandler):
