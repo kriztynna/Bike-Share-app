@@ -495,58 +495,11 @@ class TotalChartJSONHandler(ShowStationHistory):
             errors_req=errors_req
             )
 
-
 ########## This is where the utils go ##########
 def makeJavaScriptTimeForCharts(entity):
         t=entity.date_time #extract date_time from a data store object
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return int(t_UNIX)
-        
-########## This is where the task queue handlers go ##########
-
-class FixTimesQ(webapp2.RequestHandler):
-    # No longer in use. Removed from webapp2 to prevent it from being 
-    # run again by accident. Can re-enable this handler simply by adding
-    # ('/fixtimes',FixTimesQ) or similar to "app" at the bottom of this script.
-    def get(self):
-        deferred.defer(FixTimes)
-        self.response.out.write('Successfully initiated FixTimes.')
-
-class RemoveTzFixedQ(webapp2.RequestHandler):
-    # No longer in use. Removed from webapp2 to prevent it from being 
-    # run again by accident. Can re-enable this handler simply by adding
-    # ('/removetzfixed',RemoveTzFixedQ) or similar to "app" at the bottom 
-    # of this script.
-    def get(self):
-        deferred.defer(RemoveTzFixed)
-        self.response.out.write('Successfully initiated RemoveTzFixed.')
-
-class BackfillErrorsDataQ(webapp2.RequestHandler):
-    # No longer in use. Removed from webapp2 to prevent it from being 
-    # run again by accident. Can re-enable this handler simply by adding
-    # ('/backfillerrorsdata',BackfillErrorsDataQ) or similar to "app" at the 
-    # bottom of this script.
-    def get(self):
-        deferred.defer(BackfillErrorsData)
-        self.response.out.write('Successfully initiated BackfillErrorsData.')
-
-class BackfillTotalsDataQ(webapp2.RequestHandler):
-    # No longer in use. Removed from webapp2 to prevent it from being 
-    # run again by accident. Can re-enable this handler simply by adding
-    # ('/backfilltotalsdata',BackfillErrorsDataQ) or similar to "app" at the 
-    # bottom of this script.
-    def get(self):
-        deferred.defer(BackfillTotalsData)
-        self.response.out.write('Successfully initiated BackfillTotalsData.')
-
-class ClearBadTimesQ(webapp2.RequestHandler):
-    # No longer in use. Removed from webapp2 to prevent it from being 
-    # run again by accident. Can re-enable this handler simply by adding
-    # ('/clearbadtimes',ClearBadTimesQ) or similar to "app" at the 
-    # bottom of this script.
-    def get(self):
-        deferred.defer(ClearBadTimes)
-        self.response.out.write('Successfully initiated ClearBadTimes.')
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/about', AboutPage),
