@@ -36,11 +36,12 @@ class Totals(ndb.Model):
 class SystemStats(ndb.Model):
     date = ndb.DateProperty(required=True)
     trips = ndb.IntegerProperty(required=True) #5pm to #5pm
-    miles = ndb.IntegerProperty(required=False) #5pm to 5pm
+    miles = ndb.IntegerProperty(required=True) #5pm to 5pm
+    miles_per_trip = ndb.FloatProperty(required=True)
     cum_trips = ndb.IntegerProperty(required=True) #since launch
     cum_miles = ndb.IntegerProperty(required=True) #since launch
     signups = ndb.IntegerProperty(required=True) #annual pass
     members = ndb.IntegerProperty(required=True) #annual pass
-    day_passes = ndb.IntegerProperty(required=True) #5pm to 5pm
-    week_passes = ndb.IntegerProperty(required=True) #5pm to 5pm
+    day_passes = ndb.IntegerProperty(required=False) #5pm to 5pm
+    week_passes = ndb.IntegerProperty(required=False) #5pm to 5pm
 

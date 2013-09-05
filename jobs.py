@@ -204,3 +204,20 @@ class UpdateSystemStats(webapp2.RequestHandler):
 
     def get(self):
         self.getStats()
+
+#### Task Queue ####
+def MakeMilesPerTrip():
+    #to_put = []
+    print 'starting'
+    query = SystemStats.query().order(-SystemStats.date)
+    for q in query:
+        print q.date
+        q.miles_per_trip = float(q.miles)/float(q.trips)
+        q.put()
+        #to_put.append(q)
+    #ndb.put_multi(to_put)
+
+
+
+
+

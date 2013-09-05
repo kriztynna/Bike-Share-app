@@ -2,7 +2,9 @@
     {% block head %}
         <title>busybici: history</title>
     {% endblock %}
+
     {% block body %}
+        <br>
         <h1>historical station data</h1>
             <p>busybici has been collecting data on NYC bike share since late June 2013. Use this page to see how each station's availability of bikes and docks has trended over time.</p>
             <form action="/history">
@@ -35,6 +37,9 @@
                 <label class="checkbox" display:inline>
                     <input id="errors_checkbox" type="checkbox" name="errors_req" value="checked" {{errors_req}} onchange="updateChart()">
                     Station errors
+                </label>
+                <label class="error" display:inline>
+                    {{error_msg}}
                 </label>
             </form>
 	    <hr>

@@ -4,6 +4,7 @@ from jobs import *
 import datetime
 import jinja2
 import json
+import locale
 import os
 import pytz
 import time
@@ -29,7 +30,6 @@ class Handler(webapp2.RequestHandler):
 		self.write(self.render_str(template, **kw))
 	def initialize(self, *a, **kw):
 		webapp2.RequestHandler.initialize(self, *a, **kw)
-
 
 class MainPage(Handler):
     def render_front(self):
@@ -115,23 +115,6 @@ class HistoryChartJSONHandler(ShowStationHistory):
             docks_req="",
             errors_req=""
             ):
-        # options for time range dropdown menu, with name and value in 
-        # seconds (UNIX time for python)
-        timespans = [
-                ['past 24 hours', 86400],
-                ['past 48 hours', 172800],
-                ['past 72 hours', 259000],
-                ['past 7 days', 604800],
-                ['past 30 days', 2592000]
-                ]
-
-        # set defaults
-        if station_req == "":
-            station_req = 357
-        if time_req == "":
-            time_req = timespans[0][1]
-        if bikes_req=="" and docks_req=="" and errors_req=="":
-            bikes_req = "checked"
 
         min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
         min_time = min_time.replace(microsecond=0)
@@ -251,6 +234,17 @@ class HistoryChartJSONHandler(ShowStationHistory):
                 rows.append(c)
                 options.update(colors=['#C44D58'])
 
+        else:
+            cols.append(dict(id='',type='number'))
+            for h in history:
+                tj=makeJavaScriptTimeForCharts(h)
+                row=[]
+                row.append(dict(v=tj))
+                row.append(dict(v=0))
+                c = dict(c=row)
+                rows.append(c)
+                options.update(colors=['#FFFFFF'])
+
         # find the name of the station for the provided ID
         n = StationInfo.query(StationInfo.station_id == int(station_req)).get()
         name = n.name
@@ -344,21 +338,6 @@ class TotalChartJSONHandler(ShowStationHistory):
             docks_req="",
             errors_req=""
             ):
-        # options for time range dropdown menu, with name and value in 
-        # seconds (UNIX time for python)
-        timespans = [
-                ['past 24 hours', 86400],
-                ['past 48 hours', 172800],
-                ['past 72 hours', 259000],
-                ['past 7 days', 604800],
-                ['past 30 days', 2592000]
-                ]
-
-        # set defaults
-        if time_req == "":
-            time_req = timespans[0][1]
-        if bikes_req=="" and docks_req=="" and errors_req=="":
-            bikes_req = "checked"
 
         min_time = datetime.datetime.now() - datetime.timedelta(seconds=time_req)
         min_time = min_time.replace(microsecond=0)
@@ -472,6 +451,17 @@ class TotalChartJSONHandler(ShowStationHistory):
                 c = dict(c=row)
                 rows.append(c)
                 options.update(colors=['#C44D58'])
+
+        else:
+            cols.append(dict(id='',type='number'))
+            for h in history:
+                tj=makeJavaScriptTimeForCharts(h)
+                row=[]
+                row.append(dict(v=tj))
+                row.append(dict(v=0))
+                c = dict(c=row)
+                rows.append(c)
+                options.update(colors=['#FFFFFF'])
         
         # prep json variables
         chartType = 'AreaChart'
@@ -495,11 +485,112 @@ class TotalChartJSONHandler(ShowStationHistory):
             errors_req=errors_req
             )
 
+class SuperlativesPage(Handler):
+    def render_superlatives(self):
+        query = SystemStats.query()
+        most_trips = query.order(-SystemStats.trips).get()
+        most_trips_date = most_trips.date.strftime('%A, %B %d, %Y')
+        most_trips_amt = '{:,}'.format(most_trips.trips)
+
+        least_trips = query.order(SystemStats.trips).get()
+        least_trips_date = least_trips.date.strftime('%A, %B %d, %Y')
+        least_trips_amt = '{:,}'.format(least_trips.trips)
+
+        most_miles = query.order(-SystemStats.miles).get()
+        most_miles_date = most_miles.date.strftime('%A, %B %d, %Y')
+        most_miles_amt = '{:,}'.format(most_miles.miles)
+
+        least_miles = query.order(SystemStats.miles).get()
+        least_miles_date = least_miles.date.strftime('%A, %B %d, %Y')
+        least_miles_amt = '{:,}'.format(least_miles.miles)
+
+        longest_trips = query.order(-SystemStats.miles_per_trip).get()
+        longest_trips_date = longest_trips.date.strftime('%A, %B %d, %Y')
+        longest_trips_amt = '{:,}'.format(longest_trips.miles_per_trip)
+
+        shortest_trips = query.order(SystemStats.miles_per_trip).get()
+        shortest_trips_date = shortest_trips.date.strftime('%A, %B %d, %Y')
+        shortest_trips_amt = '{:,}'.format(shortest_trips.miles_per_trip)
+
+        most_day_passes = query.order(-SystemStats.day_passes).get()
+        most_day_passes_date = most_day_passes.date.strftime('%A, %B %d, %Y')
+        most_day_passes_amt = '{:,}'.format(most_day_passes.day_passes)
+
+        min_time = datetime.datetime.strptime('2013-06-01','%Y-%m-%d')
+        least_day_passes = query.filter(SystemStats.date>=min_time).order(SystemStats.date, SystemStats.day_passes).get()
+        least_day_passes_date = least_day_passes.date.strftime('%A, %B %d, %Y')
+        least_day_passes_amt = '{:,}'.format(least_day_passes.day_passes)
+
+        most_week_passes = query.order(-SystemStats.week_passes).get()
+        most_week_passes_date = most_week_passes.date.strftime('%A, %B %d, %Y')
+        most_week_passes_amt = '{:,}'.format(most_week_passes.week_passes)
+
+        min_time = datetime.datetime.strptime('2013-06-02','%Y-%m-%d')
+        least_week_passes = query.filter(SystemStats.date>=min_time).order(SystemStats.date, SystemStats.week_passes).get()
+        least_week_passes_date = least_week_passes.date.strftime('%A, %B %d, %Y')
+        least_week_passes_amt = '{:,}'.format(least_week_passes.week_passes)
+
+        most_member_signups = query.order(-SystemStats.signups).get()
+        most_member_signups_date = most_member_signups.date.strftime('%A, %B %d, %Y')
+        most_member_signups_amt = '{:,}'.format(most_member_signups.signups)
+
+        least_member_signups = query.order(SystemStats.signups).get()
+        least_member_signups_date = least_member_signups.date.strftime('%A, %B %d, %Y')
+        least_member_signups_amt = '{:,}'.format(least_member_signups.signups)
+
+        latest_entry = query.order(-SystemStats.date).get()
+        last_update = latest_entry.date.strftime('%A, %B %d, %Y')
+        members = '{:,}'.format(latest_entry.members)
+        cum_trips = '{:,}'.format(latest_entry.cum_trips)
+        cum_miles = '{:,}'.format(latest_entry.cum_miles)
+
+
+        self.render(
+            'superlatives.html',
+            most_trips_date=most_trips_date,
+            most_trips_amt=most_trips_amt,
+            least_trips_date=least_trips_date,
+            least_trips_amt=least_trips_amt,
+            longest_trips_date=longest_trips_date,
+            longest_trips_amt=longest_trips_amt,
+            shortest_trips_date=shortest_trips_date,
+            shortest_trips_amt=shortest_trips_amt,
+            most_miles_date=most_miles_date,
+            most_miles_amt=most_miles_amt,
+            least_miles_date=least_miles_date,
+            least_miles_amt=least_miles_amt,
+            most_day_passes_date=most_day_passes_date,
+            most_day_passes_amt=most_day_passes_amt,
+            least_day_passes_date=least_day_passes_date,
+            least_day_passes_amt=least_day_passes_amt,
+            most_week_passes_date=most_week_passes_date,
+            most_week_passes_amt=most_week_passes_amt,
+            least_week_passes_date=least_week_passes_date,
+            least_week_passes_amt=least_week_passes_amt,
+            most_member_signups_date=most_member_signups_date,
+            most_member_signups_amt=most_member_signups_amt,
+            least_member_signups_date=least_member_signups_date,
+            least_member_signups_amt=least_member_signups_amt,
+            last_update=last_update,
+            members=members,
+            cum_trips=cum_trips,
+            cum_miles=cum_miles
+            )
+
+    def get(self):
+            self.render_superlatives()
+
 ########## This is where the utils go ##########
 def makeJavaScriptTimeForCharts(entity):
         t=entity.date_time #extract date_time from a data store object
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return int(t_UNIX)
+
+########## Task Queue ##########
+class MakeMilesPerTripQ(webapp2.RequestHandler):
+    def get(self):
+        deferred.defer(MakeMilesPerTrip)
+        self.response.out.write('Make miles per trip successfully initiated.')
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/about', AboutPage),
@@ -509,6 +600,8 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/totalsjson',TotalChartJSONHandler),
                                ('/history',ShowStationHistory),
                                ('/historyjson',HistoryChartJSONHandler),
-                               ('/updatesystemstats',UpdateSystemStats)
+                               ('/updatesystemstats',UpdateSystemStats),
+                               ('/superlatives',SuperlativesPage),
+                               ('/makemilespertrip',MakeMilesPerTripQ)
                                ],
                               debug=True)
