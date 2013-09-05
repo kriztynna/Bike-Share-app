@@ -586,12 +586,6 @@ def makeJavaScriptTimeForCharts(entity):
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return int(t_UNIX)
 
-########## Task Queue ##########
-class MakeMilesPerTripQ(webapp2.RequestHandler):
-    def get(self):
-        deferred.defer(MakeMilesPerTrip)
-        self.response.out.write('Make miles per trip successfully initiated.')
-
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/about', AboutPage),
                                ('/updatestatus',UpdateStatus),
@@ -601,7 +595,6 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/history',ShowStationHistory),
                                ('/historyjson',HistoryChartJSONHandler),
                                ('/updatesystemstats',UpdateSystemStats),
-                               ('/superlatives',SuperlativesPage),
-                               ('/makemilespertrip',MakeMilesPerTripQ)
+                               ('/superlatives',SuperlativesPage)
                                ],
                               debug=True)
