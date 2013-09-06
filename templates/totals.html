@@ -1,9 +1,116 @@
 {% extends "base.html" %}
     {% block head %}
+    <!--CSS-->
+    <style>
+    #chart_div {
+        height: 500px;
+        }
+
+    .load_text{
+        height: 40px;
+        text-align:center;
+        }
+
+    #load_text1 {
+        color: #4ECDC4;
+        animation: fadeout 0.5s;
+        -moz-animation: fadeout 0.5s; /* Firefox */
+        -webkit-animation: fadeout 0.5s; /* Safari and Chrome */
+        -o-animation: fadeout 0.5s; /* Opera */
+        }
+
+    #load_text2 {
+        color: #FF6B6B;
+        animation: fadeout 1s;
+        -moz-animation: fadeout 1s; /* Firefox */
+        -webkit-animation: fadeout 1s; /* Safari and Chrome */
+        -o-animation: fadeout 1s; /* Opera */
+        }
+
+    #load_text3 {
+        color: #C44D58;
+        animation: fadeout 2s;
+        -moz-animation: fadeout 2s; /* Firefox */
+        -webkit-animation: fadeout 2s; /* Safari and Chrome */
+        -o-animation: fadeout 2s; /* Opera */
+        }
+
+    @keyframes fadein {
+        from {
+            opacity:0;
+        }
+        to {
+            opacity:1;
+        }
+    }
+
+        @-moz-keyframes fadein { /* Firefox */
+            from {
+                opacity:0;
+            }
+            to {
+                opacity:1;
+            }
+        }
+
+        @-webkit-keyframes fadein { /* Safari and Chrome */
+            from {
+                opacity:0;
+            }
+            to {
+                opacity:1;
+            }
+        }
+
+        @-o-keyframes fadein { /* Opera */
+            from {
+                opacity:0;
+            }
+            to {
+                opacity:1;
+            }
+        }​
+
+    @keyframes fadeout {
+        from {
+            opacity:1;
+        }
+        to {
+            opacity:0;
+        }
+    }
+
+        @-moz-keyframes fadeout { /* Firefox */
+            from {
+                opacity:1;
+            }
+            to {
+                opacity:0;
+            }
+        }
+
+        @-webkit-keyframes fadeout { /* Safari and Chrome */
+            from {
+                opacity:1;
+            }
+            to {
+                opacity:0;
+            }
+        }
+
+        @-o-keyframes fadeout { /* Opera */
+            from {
+                opacity:1;
+            }
+            to {
+                opacity: 0;
+            }
+    }​
+    </style>
+
         <title>busybici: totals</title>
     {% endblock %}
     {% block body %}
-        <br>
         <h1>total bikes and docks</h1>
             <p>This page shows total bikes available and total docks available, and how these have changed over a recent period of time. I'm still working on making this data set more useful. One of the things I'd like to be able to do is show an estimate of the total bikes in circulation over time.</p>
                 <select id="time_dropdown" name="time_req" onchange="updateChart()">
@@ -28,7 +135,11 @@
                     Station errors
                 </label>
 	    <hr>
-	    <div id="chart_div"></div>
+	    <div id="chart_div">
+            <h3 class="load_text" id="load_text1"><br><br><br>adjusting seat...</h3>
+            <h3 class="load_text" id="load_text2"><br><br><br><br>... putting on helmet</h3>
+            <h3 class="load_text" id="load_text3"><br><br><br><br><br>... and off we go!</h3>
+        </div>
 
         <!-- JavaScript for chart-->
         <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -80,6 +191,9 @@
             drawChart();
 
             function updateChart(){
+                var chart_div = document.getElementById('chart_div');
+                chart_div.innerHTML='<h3 class="load_text" id="load_text1"><br><br><br>adjusting seat...</h3><h3 class="load_text" id="load_text2"><br><br><br><br>... putting on helmet</h3><h3 class="load_text" id="load_text3"><br><br><br><br><br>... and off we go!</h3>'
+
                 var time_dropdown = document.getElementById('time_dropdown');
                 var time_req = time_dropdown.options[time_dropdown.selectedIndex].value;                
                 var bikes_checkbox = document.getElementById('bikes_checkbox');

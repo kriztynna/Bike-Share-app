@@ -8,35 +8,54 @@
     }
     .span4 {
     	text-align:center;
+    	border-style:solid;
+		border-width:5px;
+		border-radius: 15px;
+		-webkit-border-radius: 15px;
+		-moz-border-radius: 15px;
+		border-color:#fff;
     	}
 
     #blue {
     	color: #4ECDC4;
     	}
+    	#blue:hover {
+    		border-color:#4ECDC4;
+    	}
 
     #gray {
     	color:#556270;
+    	}
+    	#gray:hover {
+    		border-color:#556270;
     	}
 
     #orange {
     	color:#FF6B6B;
     	}
+    	#orange:hover {
+    		border-color:#FF6B6B;
+    	}
 
     #red {
     	color:#C44D58;
+    	}
+    	#red:hover {
+    		border-color:#C44D58;
     	}
 
     #green {
     	color:#C7F464;
     	}
+    	#green:hover {
+    		border-color:#C7F464;
+    	}
 
-    </style>style>
-
+    </style>
         <title>busybici: superlatives</title>
     {% endblock%}
 
     {% block body %}
-
         <h1>superlatives</h1>
 			<div class="span9">
 				<div class="row-fluid">
@@ -55,27 +74,27 @@
 					<div class="span4" id="blue">
 						<h2>longest trips</h2>
 						<h4>{{longest_trips_date}}</h4>
-						<h4>{{longest_trips_amt}}</h4>
+						<h4>{{longest_trips_amt}} miles per trip</h4>
 					</div><!--/span-->
 				</div><!--/row-->
 
 				<div class="row-fluid">
 					<div class="span4" id="gray">
-						<h2>least trips</h2>
-						<h4>{{least_trips_date}}</h4>
-						<h4>{{least_trips_amt}}</h4>
+						<h2>fewest trips</h2>
+						<h4>{{fewest_trips_date}}</h4>
+						<h4>{{fewest_trips_amt}}</h4>
 					</div><!--/span-->
 
 					<div class="span4" id="gray">
-						<h2>least miles</h2>
-						<h4>{{least_miles_date}}</h4>
-						<h4>{{least_miles_amt}}</h4>
+						<h2>fewest miles</h2>
+						<h4>{{fewest_miles_date}}</h4>
+						<h4>{{fewest_miles_amt}}</h4>
 					</div><!--/span-->
 
 					<div class="span4" id="gray">
 						<h2>shortest trips</h2>
 						<h4>{{shortest_trips_date}}</h4>
-						<h4>{{shortest_trips_amt}}</h4>
+						<h4>{{shortest_trips_amt}} miles per trip</h4>
 					</div><!--/span-->
 				</div><!--/row-->
 
@@ -101,39 +120,39 @@
 
 				<div class="row-fluid">
 					<div class="span4" id="red">
-						<h2>least 24-hour passes</h2>
-						<h4>{{least_day_passes_date}}</h4>
-						<h4>{{least_day_passes_amt}}</h4>
+						<h2>fewest 24-hour passes</h2>
+						<h4>{{fewest_day_passes_date}}</h4>
+						<h4>{{fewest_day_passes_amt}}</h4>
 					</div><!--/span-->
 
 					<div class="span4" id="red">
-						<h2>least 7-day passes</h2>
-						<h4>{{least_week_passes_date}}</h4>
-						<h4>{{least_week_passes_amt}}</h4>
+						<h2>fewest 7-day passes</h2>
+						<h4>{{fewest_week_passes_date}}</h4>
+						<h4>{{fewest_week_passes_amt}}</h4>
 					</div><!--/span-->
 
 					<div class="span4" id="red">
-						<h2>least member sign-ups</h2>
-						<h4>{{least_member_signups_date}}</h4>
-						<h4>{{least_member_signups_amt}}</h4>
+						<h2>fewest member sign-ups</h2>
+						<h4>{{fewest_member_signups_date}}</h4>
+						<h4>{{fewest_member_signups_amt}}</h4>
 					</div><!--/span-->
 				</div><!--/row-->
 
 				<div class="row-fluid">
 					<div class="span4" id="green">
-						<h2>Total members</h2>
+						<h2>total members</h2>
 						<h4>{{members}}</h4>
 						<h4>as of {{last_update}}</h4>
 					</div><!--/span-->
 
 					<div class="span4" id="green">
-						<h2>Total trips</h2>
+						<h2>total trips</h2>
 						<h4>{{cum_trips}}</h4>
 						<h4>as of {{last_update}}</h4>
 					</div><!--/span-->
 
 					<div class="span4" id="green">
-						<h2>Total miles</h2>
+						<h2>total miles</h2>
 						<h4>{{cum_miles}}</h4>
 						<h4>as of {{last_update}}</h4>
 					</div><!--/span-->

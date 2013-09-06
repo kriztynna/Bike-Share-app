@@ -492,51 +492,50 @@ class SuperlativesPage(Handler):
         most_trips_date = most_trips.date.strftime('%A, %B %d, %Y')
         most_trips_amt = '{:,}'.format(most_trips.trips)
 
-        least_trips = query.order(SystemStats.trips).get()
-        least_trips_date = least_trips.date.strftime('%A, %B %d, %Y')
-        least_trips_amt = '{:,}'.format(least_trips.trips)
+        fewest_trips = query.order(SystemStats.trips).get()
+        fewest_trips_date = fewest_trips.date.strftime('%A, %B %d, %Y')
+        fewest_trips_amt = '{:,}'.format(fewest_trips.trips)
 
         most_miles = query.order(-SystemStats.miles).get()
         most_miles_date = most_miles.date.strftime('%A, %B %d, %Y')
         most_miles_amt = '{:,}'.format(most_miles.miles)
 
-        least_miles = query.order(SystemStats.miles).get()
-        least_miles_date = least_miles.date.strftime('%A, %B %d, %Y')
-        least_miles_amt = '{:,}'.format(least_miles.miles)
+        fewest_miles = query.order(SystemStats.miles).get()
+        fewest_miles_date = fewest_miles.date.strftime('%A, %B %d, %Y')
+        fewest_miles_amt = '{:,}'.format(fewest_miles.miles)
 
         longest_trips = query.order(-SystemStats.miles_per_trip).get()
         longest_trips_date = longest_trips.date.strftime('%A, %B %d, %Y')
-        longest_trips_amt = '{:,}'.format(longest_trips.miles_per_trip)
+        longest_trips_amt = '{:.2f}'.format(longest_trips.miles_per_trip)
 
         shortest_trips = query.order(SystemStats.miles_per_trip).get()
         shortest_trips_date = shortest_trips.date.strftime('%A, %B %d, %Y')
-        shortest_trips_amt = '{:,}'.format(shortest_trips.miles_per_trip)
+        shortest_trips_amt = '{:.2f}'.format(shortest_trips.miles_per_trip)
 
         most_day_passes = query.order(-SystemStats.day_passes).get()
         most_day_passes_date = most_day_passes.date.strftime('%A, %B %d, %Y')
         most_day_passes_amt = '{:,}'.format(most_day_passes.day_passes)
 
-        min_time = datetime.datetime.strptime('2013-06-01','%Y-%m-%d')
-        least_day_passes = query.filter(SystemStats.date>=min_time).order(SystemStats.date, SystemStats.day_passes).get()
-        least_day_passes_date = least_day_passes.date.strftime('%A, %B %d, %Y')
-        least_day_passes_amt = '{:,}'.format(least_day_passes.day_passes)
+        min_time = datetime.datetime.strptime('2013-06-02','%Y-%m-%d')
+        fewest_day_passes = query.filter(SystemStats.date>=min_time).order(SystemStats.date, SystemStats.day_passes).get()
+        fewest_day_passes_date = fewest_day_passes.date.strftime('%A, %B %d, %Y')
+        fewest_day_passes_amt = '{:,}'.format(fewest_day_passes.day_passes)
 
         most_week_passes = query.order(-SystemStats.week_passes).get()
         most_week_passes_date = most_week_passes.date.strftime('%A, %B %d, %Y')
         most_week_passes_amt = '{:,}'.format(most_week_passes.week_passes)
 
-        min_time = datetime.datetime.strptime('2013-06-02','%Y-%m-%d')
-        least_week_passes = query.filter(SystemStats.date>=min_time).order(SystemStats.date, SystemStats.week_passes).get()
-        least_week_passes_date = least_week_passes.date.strftime('%A, %B %d, %Y')
-        least_week_passes_amt = '{:,}'.format(least_week_passes.week_passes)
+        fewest_week_passes = query.filter(SystemStats.date>=min_time).order(SystemStats.date, SystemStats.week_passes).get()
+        fewest_week_passes_date = fewest_week_passes.date.strftime('%A, %B %d, %Y')
+        fewest_week_passes_amt = '{:,}'.format(fewest_week_passes.week_passes)
 
         most_member_signups = query.order(-SystemStats.signups).get()
         most_member_signups_date = most_member_signups.date.strftime('%A, %B %d, %Y')
         most_member_signups_amt = '{:,}'.format(most_member_signups.signups)
 
-        least_member_signups = query.order(SystemStats.signups).get()
-        least_member_signups_date = least_member_signups.date.strftime('%A, %B %d, %Y')
-        least_member_signups_amt = '{:,}'.format(least_member_signups.signups)
+        fewest_member_signups = query.order(SystemStats.signups).get()
+        fewest_member_signups_date = fewest_member_signups.date.strftime('%A, %B %d, %Y')
+        fewest_member_signups_amt = '{:,}'.format(fewest_member_signups.signups)
 
         latest_entry = query.order(-SystemStats.date).get()
         last_update = latest_entry.date.strftime('%A, %B %d, %Y')
@@ -549,28 +548,28 @@ class SuperlativesPage(Handler):
             'superlatives.html',
             most_trips_date=most_trips_date,
             most_trips_amt=most_trips_amt,
-            least_trips_date=least_trips_date,
-            least_trips_amt=least_trips_amt,
+            fewest_trips_date=fewest_trips_date,
+            fewest_trips_amt=fewest_trips_amt,
             longest_trips_date=longest_trips_date,
             longest_trips_amt=longest_trips_amt,
             shortest_trips_date=shortest_trips_date,
             shortest_trips_amt=shortest_trips_amt,
             most_miles_date=most_miles_date,
             most_miles_amt=most_miles_amt,
-            least_miles_date=least_miles_date,
-            least_miles_amt=least_miles_amt,
+            fewest_miles_date=fewest_miles_date,
+            fewest_miles_amt=fewest_miles_amt,
             most_day_passes_date=most_day_passes_date,
             most_day_passes_amt=most_day_passes_amt,
-            least_day_passes_date=least_day_passes_date,
-            least_day_passes_amt=least_day_passes_amt,
+            fewest_day_passes_date=fewest_day_passes_date,
+            fewest_day_passes_amt=fewest_day_passes_amt,
             most_week_passes_date=most_week_passes_date,
             most_week_passes_amt=most_week_passes_amt,
-            least_week_passes_date=least_week_passes_date,
-            least_week_passes_amt=least_week_passes_amt,
+            fewest_week_passes_date=fewest_week_passes_date,
+            fewest_week_passes_amt=fewest_week_passes_amt,
             most_member_signups_date=most_member_signups_date,
             most_member_signups_amt=most_member_signups_amt,
-            least_member_signups_date=least_member_signups_date,
-            least_member_signups_amt=least_member_signups_amt,
+            fewest_member_signups_date=fewest_member_signups_date,
+            fewest_member_signups_amt=fewest_member_signups_amt,
             last_update=last_update,
             members=members,
             cum_trips=cum_trips,

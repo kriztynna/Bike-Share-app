@@ -180,12 +180,14 @@ class UpdateSystemStats(webapp2.RequestHandler):
                     signups = int(row[6])
                     day_passes = int(row[7])
                     week_passes = int(row[8])
+                    miles_per_trip = miles/trips
                 
                     stat = SystemStats(
                         id=made_key,
                         date = date,
                         trips = trips,
                         miles = miles,
+                        miles_per_trip = miles_per_trip,
                         cum_trips = cum_trips,
                         cum_miles = cum_miles,
                         members = members,
