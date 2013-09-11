@@ -45,3 +45,21 @@ class SystemStats(ndb.Model):
     day_passes = ndb.IntegerProperty(required=False) #5pm to 5pm
     week_passes = ndb.IntegerProperty(required=False) #5pm to 5pm
 
+class Alert(ndb.Model):
+    email = ndb.StringProperty(required=False)
+
+    phone = ndb.IntegerProperty(required=False)
+    carrier = ndb.StringProperty(required=False)
+
+    start1 = ndb.IntegerProperty(required=False)
+    start2 = ndb.IntegerProperty(required=False)
+    start3 = ndb.IntegerProperty(required=False)
+    
+    end1 = ndb.IntegerProperty(required=False)
+    end2 = ndb.IntegerProperty(required=False)
+    end3 = ndb.IntegerProperty(required=False)
+
+    time = ndb.TimeProperty(required=True)
+
+
+

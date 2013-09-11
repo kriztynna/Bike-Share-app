@@ -1,5 +1,6 @@
 from models import *
 from jobs import *
+from alerts import *
 
 import datetime
 import jinja2
@@ -579,6 +580,25 @@ class SuperlativesPage(Handler):
     def get(self):
             self.render_superlatives()
 
+########## Task Queue ##########
+class ManageAlertsListQ(webapp2.RequestHandler):
+    def get(self):
+        query = Alert.query()
+        todays_list = []
+        for x in query:
+            item = {
+            'time':x.time,
+            'email':x.email,
+            'phone':x.phone,
+            'carrier':x.carrier,
+            'start1':x.start1,
+            'end1':x.end1
+            }
+            todays_list.append(item)
+        sorted_list = sorted(todays_list, key=lambda k: k['time'])
+        deferred.defer(work_thru_todays_list, sorted_list, _queue="sendthealerts")
+        self.response.out.write('Manage alerts list successfully initiated.')
+
 ########## This is where the utils go ##########
 def makeJavaScriptTimeForCharts(entity):
         t=entity.date_time #extract date_time from a data store object
@@ -594,6 +614,8 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/history',ShowStationHistory),
                                ('/historyjson',HistoryChartJSONHandler),
                                ('/updatesystemstats',UpdateSystemStats),
-                               ('/superlatives',SuperlativesPage)
+                               ('/superlatives',SuperlativesPage),
+                               ('/createalerts',CreateAlerts),
+                               ('/sendalerts',ManageAlertsListQ)
                                ],
                               debug=True)

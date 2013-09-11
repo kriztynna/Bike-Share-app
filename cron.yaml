@@ -11,3 +11,7 @@ cron:
   url: /updatesystemstats
   schedule: every wednesday 03:15
   timezone: America/New_York
+- description: set up todays alert queue
+  url: /sendalerts
+  schedule: every day 00:00
+  timezone: America/New_York
