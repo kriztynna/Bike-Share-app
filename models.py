@@ -61,5 +61,29 @@ class Alert(ndb.Model):
 
     time = ndb.TimeProperty(required=True)
 
+    # List of integers representing day of the week.
+    # As the convention in Python, 0 is Sunday and 6 is Saturday.
+    days = ndb.IntegerProperty(repeated=True)
+
+class AlertLog(ndb.Model):
+    email = ndb.StringProperty(required=False)
+
+    phone = ndb.IntegerProperty(required=False)
+    carrier = ndb.StringProperty(required=False)
+
+    start1 = ndb.IntegerProperty(required=False)
+    start2 = ndb.IntegerProperty(required=False)
+    start3 = ndb.IntegerProperty(required=False)
+    
+    end1 = ndb.IntegerProperty(required=False)
+    end2 = ndb.IntegerProperty(required=False)
+    end3 = ndb.IntegerProperty(required=False)
+
+    time = ndb.TimeProperty(required=True)
+
+    complete = ndb.BooleanProperty(required=True, default=False)
+    sent = ndb.DateTimeProperty(required=False)
+
+
 
 

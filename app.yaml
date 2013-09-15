@@ -21,19 +21,7 @@ inbound_services:
 handlers:
 - url: /stylesheets
   static_dir: stylesheets
-- url: /updatestatus
-  script: bikeshareapp.app
-  login: admin
-- url: /updateall
-  script: bikeshareapp.app
-  login: admin
-- url: /updatesystemstats
-  script: bikeshareapp.app
-  login: admin
-- url: /sendalerts
-  script: bikeshareapp.app
-  login: admin
-- url: /createalerts
+- url: /admin/*
   script: bikeshareapp.app
   login: admin
 - url: /_ah/mail/.+

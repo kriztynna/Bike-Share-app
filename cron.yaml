@@ -1,17 +1,17 @@
 cron:
 - description: update station status
-  url: /updatestatus
+  url: /admin/updatestatus
   schedule: every 30 minutes synchronized
   timezone: America/New_York
 - description: update bike share data
-  url: /updateall
+  url: /admin/updateall
   schedule: every tuesday 03:15
   timezone: America/New_York
 - description: check for new system stats
-  url: /updatesystemstats
+  url: /admin/updatesystemstats
   schedule: every wednesday 03:15
   timezone: America/New_York
 - description: set up todays alert queue
-  url: /sendalerts
+  url: /admin/managealertslistq
   schedule: every day 00:00
   timezone: America/New_York

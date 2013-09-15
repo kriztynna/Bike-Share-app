@@ -144,7 +144,7 @@ class UpdateStatus(UpdateAll):
 
 class UpdateSystemStats(webapp2.RequestHandler):
     def getStats(self):
-        systemstats = urllib2.Request('http://cf.datawrapper.de/CSXes/data')
+        systemstats = urllib2.Request('http://cf.datawrapper.de/CSXes/2/data')
         # possible alternative: 
         # systemstats = urllib2.Request('http://s3.datawrapper.de/CSXes/data')
         response = urllib2.urlopen(systemstats).read()

@@ -15,6 +15,7 @@ import webapp2
 
 from google.appengine.ext import ndb
 from google.appengine.ext import deferred
+from google.appengine.api.taskqueue import Task
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape=True)
@@ -583,21 +584,34 @@ class SuperlativesPage(Handler):
 ########## Task Queue ##########
 class ManageAlertsListQ(webapp2.RequestHandler):
     def get(self):
-        query = Alert.query()
-        todays_list = []
-        for x in query:
-            item = {
-            'time':x.time,
-            'email':x.email,
-            'phone':x.phone,
-            'carrier':x.carrier,
-            'start1':x.start1,
-            'end1':x.end1
-            }
-            todays_list.append(item)
-        sorted_list = sorted(todays_list, key=lambda k: k['time'])
-        deferred.defer(work_thru_todays_list, sorted_list, _queue="sendthealerts")
-        self.response.out.write('Manage alerts list successfully initiated.')
+        now = datetime.datetime.now()
+        day_of_week = int(now.strftime('%w'))
+
+        query = Alert.query(Alert.days.IN([day_of_week]))
+        to_put = []
+        for q in query:
+            alert_today = AlertLog(
+                email = q.email,
+                phone = q.phone,
+                carrier = q.carrier,
+                start1 = q.start1,
+                start2 = q.start2,
+                start3 = q.start3,
+                end1 = q.end1, 
+                end2 = q.end2,
+                end3 = q.end3,
+                time = q.time
+                )
+            to_put.append(alert_today)
+        ndb.put_multi(to_put)
+        logging.debug("Prepared today's list of alerts to send.")
+        time.sleep(5) # give it 5 seconds for the new data to take
+
+        first_task = Task(payload=None, url="/admin/sendalerts")
+        first_task.add(queue_name="alertsqueue")
+
+        logging.debug('ManageAlertsListQ successfully initiated.')        
+        self.response.out.write('ManageAlertsListQ successfully initiated.')
 
 ########## This is where the utils go ##########
 def makeJavaScriptTimeForCharts(entity):
@@ -607,15 +621,16 @@ def makeJavaScriptTimeForCharts(entity):
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/about', AboutPage),
-                               ('/updatestatus',UpdateStatus),
-                               ('/updateall',UpdateAll),
+                               ('/admin/updatestatus',UpdateStatus),
+                               ('/admin/updateall',UpdateAll),
                                ('/totals',TotalBikesAndDocks),
                                ('/totalsjson',TotalChartJSONHandler),
                                ('/history',ShowStationHistory),
                                ('/historyjson',HistoryChartJSONHandler),
-                               ('/updatesystemstats',UpdateSystemStats),
+                               ('/admin/updatesystemstats',UpdateSystemStats),
                                ('/superlatives',SuperlativesPage),
-                               ('/createalerts',CreateAlerts),
-                               ('/sendalerts',ManageAlertsListQ)
+                               ('/admin/createalerts',CreateAlerts),
+                               ('/admin/managealertslistq',ManageAlertsListQ),
+                               ('/admin/sendalerts',SendAlerts)
                                ],
                               debug=True)

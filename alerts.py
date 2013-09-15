@@ -15,6 +15,7 @@ import webapp2
 from google.appengine.ext import ndb
 from google.appengine.ext import deferred
 from google.appengine.api import mail
+from google.appengine.api.taskqueue import Task
 
 def sendEmail(
     to='',
@@ -85,9 +86,9 @@ def distribute(
     end1_docks='',
     end1_time=''
     ):
-    if entity['email']!=None:
+    if entity.email!=None:
         sendEmail(
-            to=entity['email'],
+            to=entity.email,
             start1_name=start1_name,
             start1_bikes=start1_bikes,
             start1_time=start1_time,
@@ -95,8 +96,8 @@ def distribute(
             end1_docks=end1_docks,
             end1_time=end1_time
             )
-    if entity['phone']!=None:
-        to = str(entity['phone'])+carriers[entity['carrier']]
+    if entity.phone!=None:
+        to = str(entity.phone)+carriers[entity.carrier]
         sendSMS(
             to=to,
             start1_name=start1_name,
@@ -111,7 +112,7 @@ def generate_msg_info(
     entity
     ):
 
-    start1=entity['start1']
+    start1=entity.start1
     start1_status = StationStatus.query(StationStatus.station_id==start1).order(-StationStatus.date_time).get()
     start1_bikes = start1_status.availableBikes
     start1_time = start1_status.date_time
@@ -119,7 +120,7 @@ def generate_msg_info(
     start1_info = StationInfo.query(StationInfo.station_id==start1).get()
     start1_name = start1_info.name
 
-    end1=entity['end1']
+    end1=entity.end1
     end1_status = StationStatus.query(StationStatus.station_id==end1).order(-StationStatus.date_time).get()
     end1_docks = end1_status.availableDocks
     end1_time = end1_status.date_time
@@ -137,41 +138,45 @@ def generate_msg_info(
         end1_time=end1_time
         )
 
-def work_thru_todays_list(
-    todays_list=None
-    ):
-    
-    todays_list_len = len(todays_list)
+class SendAlerts(webapp2.RequestHandler):
+    def send_alerts(self, wait=0):
+        todays_alerts = AlertLog.query()
 
-    if todays_list_len==0:
-        logging.debug('Done for the day. See you tomorrow.')
-    else:
-        while len(todays_list) > 0:
-            a = todays_list[0]
-            now = makeNowTime()
-            if a['time']<=now:
-                generate_msg_info(a)
-                logging.debug(
-                    'I sent an alert that was scheduled for %s.',
-                    a['time'].strftime('%I:%M %p')
-                    )
-                todays_list.remove(a)
-            else:
-                next_time = (a['time'].hour*3600)+(a['time'].minute*60)+a['time'].second
-                now_seconds = (now.hour*3600)+(now.minute*60)+now.second
-                wait = next_time - now_seconds
-                logging.debug(
-                    'Next alert will go out in %d seconds. Going to sleep until then.',
-                    wait
-                    )
-                time.sleep(wait)
-                break
+        todays_alerts_len = todays_alerts.filter(AlertLog.complete==False).count()
 
-        deferred.defer(
-            work_thru_todays_list,
-            todays_list=todays_list,
-            _queue="sendthealerts"
-            )
+        if todays_alerts_len==0:
+            logging.debug('Done for the day. See you tomorrow.')
+        else:
+            while todays_alerts_len > 0:
+                current_alerts = todays_alerts.filter(AlertLog.complete==False).order(AlertLog.time)
+                a = current_alerts.get()
+                now = makeNowTime()
+                if a.time<=now:
+                    generate_msg_info(a)
+                    logging.debug(
+                        'I sent an alert that was scheduled for %s.',
+                        a.time.strftime('%I:%M %p')
+                        )
+                    a.complete = True
+                    a.sent = datetime.datetime.now()
+                    a.put()
+                    todays_alerts_len = todays_alerts_len - 1
+                    time.sleep(1) # give it a second for the new data to take
+
+                else:
+                    wait = makeWait(a.time)
+                    logging.debug(
+                        'Going to count down for %d seconds.',
+                        wait
+                        )
+                    break
+
+            the_only_other_task = Task(payload=None, url="/admin/sendalerts", countdown=wait)
+            the_only_other_task.add(queue_name="alertsqueue")
+
+    def post(self):
+        self.response.out.write('SendAlerts successfully initiated.')
+        self.send_alerts()
 
 class CreateAlerts(webapp2.RequestHandler):
     def create_records(self):
@@ -179,21 +184,24 @@ class CreateAlerts(webapp2.RequestHandler):
             email='cristina.colon@gmail.com', 
             start1=357, 
             end1=327,
-            time=datetime.time(20, 0, 0)
+            time=datetime.time(20, 0, 0),
+            days=[0, 1, 2, 3, 4, 5, 6] # every day of the week
             )
         alert.put()
         alert2 = Alert(
             email='cristina.colon@gmail.com',
             start1=293,
             end1=426,
-            time=datetime.time(21, 0, 0)
+            time=datetime.time(21, 0, 0),
+            days=[0, 6] # weekends
             )
         alert2.put()
         alert3 = Alert( 
             email='cristina.colon@gmail.com', 
             start1=483, 
             end1=147,
-            time=datetime.time(21, 15, 0)
+            time=datetime.time(21, 15, 0),
+            days=[1, 2, 3, 4, 5] # weekdays
             )
         alert3.put()
     def get(self):
@@ -217,15 +225,33 @@ def makeNowTime():
     utc = pytz.timezone('UTC')
     newyork = pytz.timezone('America/New_York')
 
-    # make the now, convert to new york time
+    # make the now, make it aware of its UTC time zone, and convert to NY time
     n = datetime.datetime.now()
     n = utc.localize(n)
     n = n.astimezone(newyork)
 
-    # reduce to just the time in HH:MM:SS
+    # Reduce to just the time in HH:MM:SS.
     n = n.time()
     n = n.replace(microsecond=0)
     return n
+
+def makeWait(x):
+    now = makeNowTime()
+    now_seconds = (now.hour*3600)+(now.minute*60)+now.second
+    next_time = (x.hour*3600)+(x.minute*60)+x.second
+    diff = next_time - now_seconds
+
+    # Give a few seconds of cushion. This helps make sure that tasks scheduled 
+    # on the hour and the half hour get the most up-to-date status info.
+    diff+=5
+    
+    # Disallow negative wait times.
+    if diff<=0: 
+        return 0
+    else:
+        # 1 hour max wait time
+        wait = min(diff, 3600) 
+        return wait
 
 carriers = {'AT&T': '@txt.att.net', 
 'Qwest': '@qwestmp.com', 
