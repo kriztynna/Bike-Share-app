@@ -45,6 +45,12 @@ class AboutPage(Handler):
     def get(self):
             self.render_about()
 
+class AlertsPage(Handler):
+    def render_alerts(self):
+            self.render('alerts.html')
+    def get(self):
+            self.render_alerts()
+
 class ShowStationHistory(MainPage):
     def render_show_history(
             self, 
@@ -584,8 +590,7 @@ class SuperlativesPage(Handler):
 ########## Task Queue ##########
 class ManageAlertsListQ(webapp2.RequestHandler):
     def get(self):
-        now = datetime.datetime.now()
-        day_of_week = int(now.strftime('%w'))
+        day_of_week = makeDayOfWeek()
 
         query = Alert.query(Alert.days.IN([day_of_week]))
         to_put = []
@@ -619,16 +624,30 @@ def makeJavaScriptTimeForCharts(entity):
         t_UNIX=t.strftime('%s')+'000' #convert to UNIX time in milliseconds from Python date_time obj
         return int(t_UNIX)
 
+def makeDayOfWeek():
+    # establish the time zones
+    utc = pytz.timezone('UTC')
+    newyork = pytz.timezone('America/New_York')
+
+    # make the now, make it aware of its UTC time zone, and convert to NY time
+    n = datetime.datetime.now()
+    n = utc.localize(n)
+    n = n.astimezone(newyork)
+
+    day_of_week = int(n.strftime('%w'))
+    return day_of_week
+
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/about', AboutPage),
-                               ('/admin/updatestatus',UpdateStatus),
-                               ('/admin/updateall',UpdateAll),
-                               ('/totals',TotalBikesAndDocks),
-                               ('/totalsjson',TotalChartJSONHandler),
+                               ('/alerts', AlertsPage),
                                ('/history',ShowStationHistory),
                                ('/historyjson',HistoryChartJSONHandler),
-                               ('/admin/updatesystemstats',UpdateSystemStats),
                                ('/superlatives',SuperlativesPage),
+                               ('/totals',TotalBikesAndDocks),
+                               ('/totalsjson',TotalChartJSONHandler),
+                               ('/admin/updatestatus',UpdateStatus),
+                               ('/admin/updateall',UpdateAll),
+                               ('/admin/updatesystemstats',UpdateSystemStats),
                                ('/admin/createalerts',CreateAlerts),
                                ('/admin/managealertslistq',ManageAlertsListQ),
                                ('/admin/sendalerts',SendAlerts)

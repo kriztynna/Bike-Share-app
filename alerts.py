@@ -18,28 +18,42 @@ from google.appengine.api import mail
 from google.appengine.api.taskqueue import Task
 
 def sendEmail(
-    to='',
-    start1_name='',
-    start1_bikes='',
-    start1_time='',
-    end1_name='',
-    end1_docks='',
-    end1_time=''
+    to=None,
+    start_names=None,
+    start_bikes=None,
+    start_times=None,
+    end_names=None,
+    end_docks=None,
+    end_times=None
     ):
 
-    body = '%(start1_name)s at %(start1_time)s \n\
-Bikes: %(start1_bikes)d \n\n\
-%(end1_name)s at %(end1_time)s\n\
-Docks: %(end1_docks)d \n\n\
-enjoy your journey!\n\n\
--busybici' % \
-            {'start1_time':start1_time, \
-            'start1_bikes':start1_bikes, \
-            'start1_name':start1_name, \
-            'end1_time':end1_time, \
-            'end1_docks':end1_docks, \
-            'end1_name':end1_name}
+    body_contents = []
 
+    if len(start_names)>0:
+        body_contents.append('starting stations:\n')
+
+    for key in start_names:
+        start_text = '%(start_name)s at %(start_time)s \n\
+Bikes: %(start_bikes)d \n' % \
+            {'start_time':start_times[key], \
+            'start_bikes':start_bikes[key], \
+            'start_name':start_names[key]}
+        body_contents.append(start_text)
+
+    if len(end_names)>0:
+        body_contents.append('\nending stations:\n')
+
+    for key in end_names:
+        end_text = '%(end_name)s at %(end_time)s \n\
+Docks: %(end_docks)d \n' % \
+            {'end_time':end_times[key], \
+            'end_docks':end_docks[key], \
+            'end_name':end_names[key]}
+        body_contents.append(end_text)
+
+    body_contents.append('\nenjoy your journey!\n-busybici')
+
+    body = ''.join(body_contents)
     message = mail.EmailMessage(
         sender='busybici <busybici@bikeshareapp.appspotmail.com>',
         subject='busybici update',
@@ -50,24 +64,41 @@ enjoy your journey!\n\n\
 
 def sendSMS(
     to='',
-    start1_name='',
-    start1_bikes='',
-    start1_time='',
-    end1_name='',
-    end1_docks='',
-    end1_time=''
+    start_names='',
+    start_bikes='',
+    start_times='',
+    end_names='',
+    end_docks='',
+    end_times=''
     ):
 
-    body = '%(start1_name)s %(start1_time)s \n\
-Bikes: %(start1_bikes)d \n\
-%(end1_name)s %(end1_time)s\n\
-Docks: %(end1_docks)d' % \
-            {'start1_time':start1_time, \
-            'start1_bikes':start1_bikes, \
-            'start1_name':start1_name, \
-            'end1_time':end1_time, \
-            'end1_docks':end1_docks, \
-            'end1_name':end1_name}
+    body_contents = []
+
+    if len(start_names)>0:
+        body_contents.append('starting stations:\n')
+
+    for key in start_names:
+        start_text = '%(start_name)s at %(start_time)s \n\
+Bikes: %(start_bikes)d\n' % \
+            {'start_time':start_times[key], \
+            'start_bikes':start_bikes[key], \
+            'start_name':start_names[key]}
+        body_contents.append(start_text)
+
+    if len(end_names)>0:
+        body_contents.append('\nending stations:\n')
+
+    for key in end_names:
+        end_text = '%(end_name)s at %(end_time)s \n\
+Docks: %(end_docks)d\n' % \
+            {'end_time':end_times[key], \
+            'end_docks':end_docks[key], \
+            'end_name':end_names[key]}
+        body_contents.append(end_text)
+
+    body_contents.append('\n-busybici')
+
+    body = ''.join(body_contents)
 
     message = mail.EmailMessage(
         sender='busybici <busybici@bikeshareapp.appspotmail.com>',
@@ -78,64 +109,111 @@ Docks: %(end1_docks)d' % \
     message.send()
 
 def distribute(
-    entity='',
-    start1_name='',
-    start1_bikes='',
-    start1_time='',
-    end1_name='',
-    end1_docks='',
-    end1_time=''
+    entity=None,
+    start_names=None,
+    start_bikes=None,
+    start_times=None,
+    end_names=None,
+    end_docks=None,
+    end_times=None
     ):
     if entity.email!=None:
         sendEmail(
             to=entity.email,
-            start1_name=start1_name,
-            start1_bikes=start1_bikes,
-            start1_time=start1_time,
-            end1_name=end1_name,
-            end1_docks=end1_docks,
-            end1_time=end1_time
+            start_names=start_names,
+            start_bikes=start_bikes,
+            start_times=start_times,
+            end_names=end_names,
+            end_docks=end_docks,
+            end_times=end_times
             )
     if entity.phone!=None:
         to = str(entity.phone)+carriers[entity.carrier]
         sendSMS(
             to=to,
-            start1_name=start1_name,
-            start1_bikes=start1_bikes,
-            start1_time=start1_time,
-            end1_name=end1_name,
-            end1_docks=end1_docks,
-            end1_time=end1_time
+            start_names=start_names,
+            start_bikes=start_bikes,
+            start_times=start_times,
+            end_names=end_names,
+            end_docks=end_docks,
+            end_times=end_times
             )
 
 def generate_msg_info(
     entity
     ):
+    start_names = {}
+    start_bikes = {}
+    start_times = {}
 
-    start1=entity.start1
-    start1_status = StationStatus.query(StationStatus.station_id==start1).order(-StationStatus.date_time).get()
-    start1_bikes = start1_status.availableBikes
-    start1_time = start1_status.date_time
-    start1_time = convertTime(start1_time)
-    start1_info = StationInfo.query(StationInfo.station_id==start1).get()
-    start1_name = start1_info.name
+    end_names = {}
+    end_docks = {}
+    end_times = {}
 
-    end1=entity.end1
-    end1_status = StationStatus.query(StationStatus.station_id==end1).order(-StationStatus.date_time).get()
-    end1_docks = end1_status.availableDocks
-    end1_time = end1_status.date_time
-    end1_time = convertTime(end1_time)
-    end1_info = StationInfo.query(StationInfo.station_id==end1).get()
-    end1_name = end1_info.name
+    def generate_start_station_info(label='', start_station_id=None):
+        start_status = StationStatus.query(StationStatus.station_id==start_station_id).order(-StationStatus.date_time).get()
+        start_avail_bikes = start_status.availableBikes
+        start_time = start_status.date_time
+        start_time = convertTime(start_time)
+        start_info = StationInfo.query(StationInfo.station_id==start_station_id).get()
+        start_name = start_info.name
+
+        start_bikes.update({label:start_avail_bikes})
+        start_names.update({label:start_name})
+        start_times.update({label:start_time})
+
+    def generate_end_station_info(label='', end_station_id=None):
+        end_status = StationStatus.query(StationStatus.station_id==end_station_id).order(-StationStatus.date_time).get()
+        end_avail_docks = end_status.availableDocks
+        end_time = end_status.date_time
+        end_time = convertTime(end_time)
+        end_info = StationInfo.query(StationInfo.station_id==end_station_id).get()
+        end_name = end_info.name
+
+        end_docks.update({label:end_avail_docks})
+        end_names.update({label:end_name})
+        end_times.update({label:end_time})
+
+    if entity.start1!=None:
+        generate_start_station_info(
+            label='start1', 
+            start_station_id=entity.start1
+            )
+    if entity.start2!=None:
+        generate_start_station_info(
+            label='start2', 
+            start_station_id=entity.start2
+            )
+    if entity.start3!=None:
+        generate_start_station_info(
+            label='start3', 
+            start_station_id=entity.start3
+            )
+
+    if entity.end1!=None:
+        generate_end_station_info(
+            label='end1', 
+            end_station_id=entity.end1
+            )
+    if entity.end2!=None:
+        generate_end_station_info(
+            label='end2', 
+            end_station_id=entity.end2
+            )
+    if entity.end3!=None:
+        generate_end_station_info(
+            label='end3', 
+            end_station_id=entity.end3
+            )
 
     distribute(
         entity=entity,
-        start1_name=start1_name,
-        start1_bikes=start1_bikes,
-        start1_time=start1_time,
-        end1_name=end1_name,
-        end1_docks=end1_docks,
-        end1_time=end1_time
+        start_names=start_names,
+        start_bikes=start_bikes,
+        start_times=start_times,
+        end_names=end_names,
+        end_docks=end_docks,
+        end_times=end_times
         )
 
 class SendAlerts(webapp2.RequestHandler):
@@ -181,15 +259,23 @@ class SendAlerts(webapp2.RequestHandler):
 class CreateAlerts(webapp2.RequestHandler):
     def create_records(self):
         alert = Alert(
-            email='cristina.colon@gmail.com', 
-            start1=357, 
+            email='cristina.colon@gmail.com',
+            phone=9174552028,
+            carrier='AT&T', 
+            start1=357,
+            start2=293, 
+            start3=483,
             end1=327,
+            end2=426,
+            end3=147,
             time=datetime.time(20, 0, 0),
             days=[0, 1, 2, 3, 4, 5, 6] # every day of the week
             )
         alert.put()
         alert2 = Alert(
             email='cristina.colon@gmail.com',
+            phone=9174552028,
+            carrier='AT&T',
             start1=293,
             end1=426,
             time=datetime.time(21, 0, 0),
@@ -198,6 +284,8 @@ class CreateAlerts(webapp2.RequestHandler):
         alert2.put()
         alert3 = Alert( 
             email='cristina.colon@gmail.com', 
+            phone=9174552028,
+            carrier='AT&T',
             start1=483, 
             end1=147,
             time=datetime.time(21, 15, 0),
@@ -218,7 +306,6 @@ def convertTime(t):
     t = t.astimezone(newyork)
     t = t.strftime('%I:%M %p')
     return t
-
 
 def makeNowTime():
     # establish the time zones
