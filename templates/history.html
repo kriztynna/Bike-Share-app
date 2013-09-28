@@ -2,118 +2,127 @@
     {% block head %}
     <!--CSS-->
     <style>
-    
-    #chart_div {
-        height: 500px;
-        animation: fadein 0.5s;
-        -moz-animation: fadein 0.5s; /* Firefox */
-        -webkit-animation: fadein 0.5s; /* Safari and Chrome */
-        -o-animation: fadein 0.5s; /* Opera */
-        }
-
-    .load_text{
-        height: 40px;
-        text-align:center;
-        }
-
-    #load_text1 {
-        color: #4ECDC4;
-        animation: fadeout 0.5s;
-        -moz-animation: fadeout 0.5s; /* Firefox */
-        -webkit-animation: fadeout 0.5s; /* Safari and Chrome */
-        -o-animation: fadeout 0.5s; /* Opera */
-        }
-
-    #load_text2 {
-        color: #FF6B6B;
-        animation: fadeout 1s;
-        -moz-animation: fadeout 1s; /* Firefox */
-        -webkit-animation: fadeout 1s; /* Safari and Chrome */
-        -o-animation: fadeout 1s; /* Opera */
-        }
-
-    #load_text3 {
-        color: #C44D58;
-        animation: fadeout 2s;
-        -moz-animation: fadeout 2s; /* Firefox */
-        -webkit-animation: fadeout 2s; /* Safari and Chrome */
-        -o-animation: fadeout 2s; /* Opera */
-        }
-
-    @keyframes fadein {
-        from {
-            opacity:0;
-        }
-        to {
-            opacity:1;
-        }
-    }
-
-        @-moz-keyframes fadein { /* Firefox */
-            from {
-                opacity:0;
+        #chart_div {
+            height: 500px;
+            animation: fadein 0.5s;
+            -moz-animation: fadein 0.5s; /* Firefox */
+            -webkit-animation: fadein 0.5s; /* Safari and Chrome */
+            -o-animation: fadein 0.5s; /* Opera */
             }
-            to {
-                opacity:1;
+
+        .load_text{
+            height: 40px;
+            text-align:center;
             }
+
+        #load_text1 {
+            color: #4ECDC4;
+            animation: fadeout 0.5s;
+            -moz-animation: fadeout 0.5s; /* Firefox */
+            -webkit-animation: fadeout 0.5s; /* Safari and Chrome */
+            -o-animation: fadeout 0.5s; /* Opera */
+            }
+
+        #load_text2 {
+            color: #FF6B6B;
+            animation: fadeout 1s;
+            -moz-animation: fadeout 1s; /* Firefox */
+            -webkit-animation: fadeout 1s; /* Safari and Chrome */
+            -o-animation: fadeout 1s; /* Opera */
+            }
+
+        #load_text3 {
+            color: #C44D58;
+            animation: fadeout 2s;
+            -moz-animation: fadeout 2s; /* Firefox */
+            -webkit-animation: fadeout 2s; /* Safari and Chrome */
+            -o-animation: fadeout 2s; /* Opera */
+            }
+
+        @keyframes fadein {
+            from {opacity:0}
+            to {opacity:1;}
+            }
+
+            @-moz-keyframes fadein { /* Firefox */
+                from {opacity:0;}
+                to {opacity:1;}
+                }
+
+            @-webkit-keyframes fadein { /* Safari and Chrome */
+                from {opacity:0;}
+                to {opacity:1;}
+                }
+
+            @-o-keyframes fadein { /* Opera */
+                from {opacity:0;}
+                to {opacity:1;}
+                }​
+
+        @keyframes fadeout {
+            from {opacity:1;}
+            to {opacity:0;}
+            }
+
+            @-moz-keyframes fadeout { /* Firefox */
+                from {opacity:1;}
+                to {opacity:0;}
+                }
+
+            @-webkit-keyframes fadeout { /* Safari and Chrome */
+                from {opacity:1;}
+                to {opacity:0;}
+                }
+
+            @-o-keyframes fadeout { /* Opera */
+                from {opacity:1;}
+                to {opacity: 0;}
+                }
+
+        .ui-autocomplete {
+            list-style-type: none;
+            background-color: white;
+            width: 220px;
+            vertical-align: middle;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+
         }
 
-        @-webkit-keyframes fadein { /* Safari and Chrome */
-            from {
-                opacity:0;
-            }
-            to {
-                opacity:1;
-            }
+        .ui-helper-hidden-accessible {display:none;}
+
+        #station_search {display:none;}
+
+        input {
+            display: inline-block;
+            width: 240px;
+            height: 20px;
+            line-height: 20px;
+            padding-right: 9px;
+            padding-left: 5px;
+            margin-bottom: 10px;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            color: #555555;
+            border-radius: 4px;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            vertical-align: middle;
         }
 
-        @-o-keyframes fadein { /* Opera */
-            from {
-                opacity:0;
-            }
-            to {
-                opacity:1;
-            }
-        }​
-
-    @keyframes fadeout {
-        from {
-            opacity:1;
-        }
-        to {
-            opacity:0;
-        }
-    }
-
-        @-moz-keyframes fadeout { /* Firefox */
-            from {
-                opacity:1;
-            }
-            to {
-                opacity:0;
-            }
+        #station_dropdown {
+            display: inline-block;
+            width: 258px;
+            height: 26px;
+            line-height: 20px;
+            margin-bottom: 10px;
         }
 
-        @-webkit-keyframes fadeout { /* Safari and Chrome */
-            from {
-                opacity:1;
-            }
-            to {
-                opacity:0;
-            }
+        #time_dropdown {
+            width: 125px;
+            height: 26px;
         }
-
-        @-o-keyframes fadeout { /* Opera */
-            from {
-                opacity:1;
-            }
-            to {
-                opacity: 0;
-            }
-    }​
-
     </style>
-
         <title>busybici: history</title>
     {% endblock %}
 
@@ -121,38 +130,36 @@
         <h1>historical station data</h1>
             <p>busybici has been collecting data on NYC bike share since late June 2013. Use this page to see how each station's availability of bikes and docks has trended over time.</p>
             <form action="/history">
-                <select id="station_dropdown" name="station_req" onchange="updateChart()">
-                    {% for s in stations %}
-                        {% set sel="" %}
-                        {% if s.station_id == station_req %}
-                            {% set sel="selected" %}
-                        {% endif %}
-                        <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
-                    {% endfor %}
-                </select>
-                <select id="time_dropdown" name="time_req" onchange="updateChart()">
-                    {% for t in timespans %}
-                        {% set sel="" %}
-                        {% if t[1] == time_req %}
-                            {% set sel="selected" %}
-                        {% endif %}
-                        <option value={{t[1]}} {{sel}}>{{t[0]}}</option>
-                    {% endfor %}
-                </select>
+                <div>
+                    <select id="station_dropdown" name="station_req" onchange='updateChart("select")'>
+                        {% for s in stations %}
+                            {% set sel="" %}
+                            {% if s.station_id == station_req %}
+                                {% set sel="selected" %}
+                            {% endif %}
+                            <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
+                        {% endfor %}
+                    </select>
+                    <input id='station_search'></input>
+                    <a id='select_or_search'>select or search</a>
+                </div>
+                <div>
+                    <select id="time_dropdown" name="time_req" onchange="updateChart()">
+                        {% for t in timespans %}
+                            {% set sel="" %}
+                            {% if t[1] == time_req %}
+                                {% set sel="selected" %}
+                            {% endif %}
+                            <option value={{t[1]}} {{sel}}>{{t[0]}}</option>
+                        {% endfor %}
+                    </select>
                 <label class="checkbox">
-                    <input id="bikes_checkbox" type="checkbox" name="bikes_req" value="checked" {{bikes_req}} onchange="updateChart()">
+                    <input id="bikes_checkbox" type="checkbox" name="bikes_req" value="checked" {{bikes_req}} onchange='updateChart("checkbox")'>
                     Available bikes
                 </label>
                 <label class="checkbox" display:inline>
-                    <input id="docks_checkbox" type="checkbox" name="docks_req" value="checked" {{docks_req}} onchange="updateChart()">
+                    <input id="docks_checkbox" type="checkbox" name="docks_req" value="checked" {{docks_req}} onchange='updateChart("checkbox")'>
                     Available docks
-                </label>
-                <label class="checkbox" display:inline>
-                    <input id="errors_checkbox" type="checkbox" name="errors_req" value="checked" {{errors_req}} onchange="updateChart()">
-                    Station errors
-                </label>
-                <label class="error" display:inline>
-                    {{error_msg}}
                 </label>
             </form>
 	    <hr>
@@ -163,101 +170,17 @@
         </div>
 
         <!-- JavaScript for chart -->
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>      
-        <script type="text/javascript">
-        google.load('visualization', '1.0', {'packages':['corechart']});
-            function handleData(){
-                if (request.readyState == 4 && request.status == 200){
-                    var json_output = request.responseText;
-                    chartJSON = JSON.parse(json_output);
-
-                    var data = new google.visualization.DataTable();
-                    columns = chartJSON.dataTable.cols
-                    for (var i=0;i<columns.length;i++){
-                        data.addColumn(columns[i].type, columns[i].id);
-                    }
-
-                    rows = chartJSON.dataTable.rows
-                    rowsToAdd = new Array();
-                    for (var i=0;i<rows.length;i++){
-                        var row = new Array();
-                        for (var j=0;j<rows[i].c.length;j++){
-                            if (j==0) {
-                                var value = new Date(rows[i].c[j].v);
-                            }
-                            else {
-                                var value = rows[i].c[j].v;
-                            }
-                            row.push(value);
-                        }
-                        rowsToAdd.push(row);
-                    }
-                    data.addRows(rowsToAdd);
-
-                    var options = chartJSON.options;
-
-                    var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-                    chart.draw(data, options);
-                }
-            }
-
-            function drawChart(){
-                request = new XMLHttpRequest();
-                request.onreadystatechange = handleData;
-                var req = 'historyjson?station_req='+{{station_req}}+'&time_req='+{{time_req}}+'&bikes_req='+'{{bikes_req}}'+'&docks_req='+'{{docks_req}}'+'&errors_req='+'{{errors_req}}';
-                var encoded_req = encodeURI(req);
-                request.open("GET",encoded_req,true);
-                request.send();
-            }
-            drawChart();
-
-            function updateChart(){
-                var chart_div = document.getElementById('chart_div');
-                chart_div.innerHTML='<h3 class="load_text" id="load_text1"><br><br><br>adjusting seat...</h3><h3 class="load_text" id="load_text2"><br><br><br><br>... putting on helmet</h3><h3 class="load_text" id="load_text3"><br><br><br><br><br>... and off we go!</h3>'
-
-                var station_dropdown = document.getElementById('station_dropdown');
-                var station_req = station_dropdown.options[station_dropdown.selectedIndex].value;
-                var time_dropdown = document.getElementById('time_dropdown');
-                var time_req = time_dropdown.options[time_dropdown.selectedIndex].value;
-                
-                var bikes_checkbox = document.getElementById('bikes_checkbox');
-                var bikes_req
-                if (bikes_checkbox.checked==true){
-                    bikes_req = 'checked';
-                }
-                else {
-                    bikes_req=''
-                }
-                
-                var docks_checkbox = document.getElementById('docks_checkbox');
-                var docks_req
-                if (docks_checkbox.checked==true){
-                    docks_req = 'checked';
-                }
-                else {
-                    docks_req=''
-                }
-                
-                var errors_checkbox = document.getElementById('errors_checkbox');
-                var errors_req
-                if (errors_checkbox.checked==true){
-                    errors_req = 'checked';
-                }
-                else {
-                    errors_req=''
-                }
-
-                request = new XMLHttpRequest();
-                request.onreadystatechange = handleData;
-
-                var req = 'historyjson?station_req='+station_req+'&time_req='+time_req+'&bikes_req='+bikes_req+'&docks_req='+docks_req+'&errors_req='+errors_req;
-                var encoded_req = encodeURI(req);
-                request.open("GET",encoded_req,true);
-                request.send();
-            }
-            updateChart();
-        </script>
-
+            <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+            <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+            <script type="text/javascript">
+                var stationList = [
+                    {% for s in stations %}
+                        { label: "{{s.name|safe}}", value: {{s.station_id}} },
+                    {% endfor %}
+                    ]
+            </script>
+            <script type="text/javascript" src='/js/history.js'></script>
 
 
     {% endblock %}

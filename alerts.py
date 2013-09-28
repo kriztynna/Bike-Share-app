@@ -34,7 +34,7 @@ def sendEmail(
 
     for key in start_names:
         start_text = '%(start_name)s at %(start_time)s \n\
-Bikes: %(start_bikes)d \n' % \
+bikes: %(start_bikes)d \n' % \
             {'start_time':start_times[key], \
             'start_bikes':start_bikes[key], \
             'start_name':start_names[key]}
@@ -45,7 +45,7 @@ Bikes: %(start_bikes)d \n' % \
 
     for key in end_names:
         end_text = '%(end_name)s at %(end_time)s \n\
-Docks: %(end_docks)d \n' % \
+docks: %(end_docks)d \n' % \
             {'end_time':end_times[key], \
             'end_docks':end_docks[key], \
             'end_name':end_names[key]}
@@ -79,7 +79,7 @@ def sendSMS(
 
     for key in start_names:
         start_text = '%(start_name)s at %(start_time)s \n\
-Bikes: %(start_bikes)d\n' % \
+bikes: %(start_bikes)d\n' % \
             {'start_time':start_times[key], \
             'start_bikes':start_bikes[key], \
             'start_name':start_names[key]}
@@ -90,7 +90,7 @@ Bikes: %(start_bikes)d\n' % \
 
     for key in end_names:
         end_text = '%(end_name)s at %(end_time)s \n\
-Docks: %(end_docks)d\n' % \
+docks: %(end_docks)d\n' % \
             {'end_time':end_times[key], \
             'end_docks':end_docks[key], \
             'end_name':end_names[key]}

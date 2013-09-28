@@ -6,10 +6,10 @@ threadsafe: no
 
 libraries:
 - name: webapp2
-  version: "2.5.1"                                                              
-- name: jinja2                                                                  
-  version: latest                                                               
-- name: markupsafe                                                              
+  version: "2.5.1"
+- name: jinja2
+  version: latest
+- name: markupsafe
   version: latest
 
 builtins:
@@ -21,6 +21,8 @@ inbound_services:
 handlers:
 - url: /stylesheets
   static_dir: stylesheets
+- url: /js
+  static_dir: js
 - url: /admin/*
   script: bikeshareapp.app
   login: admin

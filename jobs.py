@@ -144,9 +144,9 @@ class UpdateStatus(UpdateAll):
 
 class UpdateSystemStats(webapp2.RequestHandler):
     def getStats(self):
-        systemstats = urllib2.Request('http://cf.datawrapper.de/CSXes/2/data')
-        # possible alternative: 
-        # systemstats = urllib2.Request('http://s3.datawrapper.de/CSXes/data')
+        systemstats = urllib2.Request('http://cf.datawrapper.de/CSXes/3/data')
+        # '3/data' returns data through 9/15. '2/data' returns data through 9/9, and so on.
+        # time data '9/10/13' does not match format '%m/%d/%Y'
         response = urllib2.urlopen(systemstats).read()
         raw_data = StringIO.StringIO(response)
         csv_data = csv.reader(raw_data)
@@ -154,7 +154,11 @@ class UpdateSystemStats(webapp2.RequestHandler):
 
         to_put = []
         for row in csv_data:
-            date = datetime.datetime.strptime(row[0], '%m/%d/%Y')
+            try:
+                date = datetime.datetime.strptime(row[0], '%m/%d/%Y')
+            except:
+                date = datetime.datetime.strptime(row[0], '%m/%d/%y')
+                
             min_date = datetime.datetime.strptime('2013-05-27', '%Y-%m-%d')
             if date < min_date:
                 continue

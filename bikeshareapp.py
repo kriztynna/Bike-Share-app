@@ -90,16 +90,6 @@ class ShowStationHistory(MainPage):
         n = StationInfo.query(StationInfo.station_id == int(station_req)).get()
         name = n.name
 
-        # and print it to the logs
-        logging.debug(
-            '%s, %s, bikes: %s, docks: %s, errors: %s',
-            name,
-            time_req,
-            bikes_req,
-            docks_req,
-            errors_req
-            )
-
         self.render(
                 'history.html',
                 bikes_req=bikes_req,
@@ -110,7 +100,6 @@ class ShowStationHistory(MainPage):
                 time_req=time_req,
                 timespans=timespans
                 )
-
     def get(self):
         self.render_show_history()
 
