@@ -1,128 +1,7 @@
 {% extends "base.html" %}
     {% block head %}
     <!--CSS-->
-    <style>
-        #chart_div {
-            height: 500px;
-            animation: fadein 0.5s;
-            -moz-animation: fadein 0.5s; /* Firefox */
-            -webkit-animation: fadein 0.5s; /* Safari and Chrome */
-            -o-animation: fadein 0.5s; /* Opera */
-            }
-
-        .load_text{
-            height: 40px;
-            text-align:center;
-            }
-
-        #load_text1 {
-            color: #4ECDC4;
-            animation: fadeout 0.5s;
-            -moz-animation: fadeout 0.5s; /* Firefox */
-            -webkit-animation: fadeout 0.5s; /* Safari and Chrome */
-            -o-animation: fadeout 0.5s; /* Opera */
-            }
-
-        #load_text2 {
-            color: #FF6B6B;
-            animation: fadeout 1s;
-            -moz-animation: fadeout 1s; /* Firefox */
-            -webkit-animation: fadeout 1s; /* Safari and Chrome */
-            -o-animation: fadeout 1s; /* Opera */
-            }
-
-        #load_text3 {
-            color: #C44D58;
-            animation: fadeout 2s;
-            -moz-animation: fadeout 2s; /* Firefox */
-            -webkit-animation: fadeout 2s; /* Safari and Chrome */
-            -o-animation: fadeout 2s; /* Opera */
-            }
-
-        @keyframes fadein {
-            from {opacity:0}
-            to {opacity:1;}
-            }
-
-            @-moz-keyframes fadein { /* Firefox */
-                from {opacity:0;}
-                to {opacity:1;}
-                }
-
-            @-webkit-keyframes fadein { /* Safari and Chrome */
-                from {opacity:0;}
-                to {opacity:1;}
-                }
-
-            @-o-keyframes fadein { /* Opera */
-                from {opacity:0;}
-                to {opacity:1;}
-                }​
-
-        @keyframes fadeout {
-            from {opacity:1;}
-            to {opacity:0;}
-            }
-
-            @-moz-keyframes fadeout { /* Firefox */
-                from {opacity:1;}
-                to {opacity:0;}
-                }
-
-            @-webkit-keyframes fadeout { /* Safari and Chrome */
-                from {opacity:1;}
-                to {opacity:0;}
-                }
-
-            @-o-keyframes fadeout { /* Opera */
-                from {opacity:1;}
-                to {opacity: 0;}
-                }
-
-        .ui-autocomplete {
-            list-style-type: none;
-            background-color: white;
-            width: 220px;
-            vertical-align: middle;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size: 14px;
-
-        }
-
-        .ui-helper-hidden-accessible {display:none;}
-
-        #station_search {display:none;}
-
-        input {
-            display: inline-block;
-            width: 240px;
-            height: 20px;
-            line-height: 20px;
-            padding-right: 9px;
-            padding-left: 5px;
-            margin-bottom: 10px;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size: 14px;
-            color: #555555;
-            border-radius: 4px;
-            -webkit-border-radius: 4px;
-            -moz-border-radius: 4px;
-            vertical-align: middle;
-        }
-
-        #station_dropdown {
-            display: inline-block;
-            width: 258px;
-            height: 26px;
-            line-height: 20px;
-            margin-bottom: 10px;
-        }
-
-        #time_dropdown {
-            width: 125px;
-            height: 26px;
-        }
-    </style>
+        <link rel="stylesheet" type="text/css" href="/static/stylesheets/history.css"/>
         <title>busybici: history</title>
     {% endblock %}
 
@@ -180,7 +59,7 @@
                     {% endfor %}
                     ]
             </script>
-            <script type="text/javascript" src='/js/history.js'></script>
+            <script type="text/javascript" src='/static/js/history.js'></script>
 
 
     {% endblock %}
