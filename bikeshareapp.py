@@ -94,10 +94,6 @@ class ShowStationHistory(MainPage):
 		if bikes_req == "" and docks_req == "" and errors_req == "":
 			bikes_req = "checked"
 
-		# find the name of the station for the provided ID
-		n = StationInfo.query(StationInfo.station_id == int(station_req)).get()
-		name = n.name
-
 		self.render(
 			'history.html',
 			bikes_req=bikes_req,
@@ -281,6 +277,82 @@ class HistoryChartJSONHandler(ShowStationHistory):
 			errors_req=errors_req
 		)
 
+class UsageHistory(MainPage):
+	def render_usage_chart(
+			self,
+			view='trips'
+	):
+		# options for the dropdown menu of data sets
+		datasets = [
+			['trips', 'trips'],
+			['miles', 'miles'],
+			['miles_per_trip', 'miles_per_trip'],
+			['members', 'members'],
+			['signups', 'signups'],
+			['day_passes', 'day_passes'],
+			['week_passes', 'week_passes']
+		]
+
+		self.render(
+			'usage.html',
+			datasets=datasets,
+			view=view
+		)
+
+	def get(self):
+		self.render_usage_chart()
+
+
+class UsageChartJSONHandler(UsageHistory):
+	def render_usage_chart_json(
+			self,
+			view=""
+	):
+
+		# fetch the data for the requested view
+		# sort from old to new
+		usage = SystemStats.query().order(SystemStats.date)
+
+		# prep options for insertion
+		options = dict(height=500, fontSize=14, fontName='Arial', lineWidth=3, isStacked='true')
+		options.update(backgroundColor=dict(stroke="#FFFFFF"))
+		options.update(legend=dict(position="top"))
+		options.update(chartArea=dict(left=35, top=50, width="80%", height="80%"))
+		options.update(hAxis=dict(baselineColor="#FFFFFF", gridlines=dict(color="#FFFFFF")))
+		options.update(vAxis=dict(baselineColor="#556270", gridlines=dict(color="#556270", format="#")))
+		options.update(title=view)
+		options.update()
+
+		# prep data structure
+		cols = []
+		rows = []
+		time_col = dict(id='Time', type='datetime')
+		cols.append(time_col)
+
+		# populate data rows and columns
+		cols.append(dict(id=view,type='number'))
+		for u in usage:
+			tj = makeJavaScriptDateForCharts(u)
+			row = [dict(v=tj), dict(v=getattr(u, view))]
+			c = dict(c=row)
+			rows.append(c)
+		options.update(colors=['#4ECDC4'])
+
+		# prep json variables
+		chartType = 'LineChart'
+		containerID = 'chart_div'
+		dataTable = dict(cols=cols, rows=rows)
+		# options already prepared
+
+		dict_output = dict(chartType=chartType, containerID=containerID, dataTable=dataTable, options=options)
+		json_output = json.dumps(dict_output)
+		self.response.out.write(json_output)
+
+	def get(self):
+		view = self.request.get('view')
+		self.render_usage_chart_json(
+			view=view
+		)
 
 class TotalBikesAndDocks(MainPage):
 	def render_show_totals(
@@ -353,8 +425,8 @@ class TotalChartJSONHandler(ShowStationHistory):
 
 		history = ndb.gql(
 			"SELECT * FROM Totals \
-             WHERE date_time > :1 \
-             ORDER BY date_time ASC",
+			WHERE date_time > :1 \
+			ORDER BY date_time ASC",
 			min_time
 		)
 
@@ -380,11 +452,7 @@ class TotalChartJSONHandler(ShowStationHistory):
 			cols.append(dict(id='Total errors', type='number'))
 			for h in history:
 				tj = makeJavaScriptTimeForCharts(h)
-				row = []
-				row.append(dict(v=tj))
-				row.append(dict(v=h.bikes))
-				row.append(dict(v=h.docks))
-				row.append(dict(v=h.errors))
+				row = [dict(v=tj), dict(v=h.bikes), dict(v=h.docks), dict(v=h.errors)]
 				c = dict(c=row)
 				rows.append(c)
 				options.update(colors=['#4ECDC4', '#FF6B6B', '#C44D58'])
@@ -394,36 +462,27 @@ class TotalChartJSONHandler(ShowStationHistory):
 			cols.append(dict(id='Total docks', type='number'))
 			for h in history:
 				tj = makeJavaScriptTimeForCharts(h)
-				row = []
-				row.append(dict(v=tj))
-				row.append(dict(v=h.bikes))
-				row.append(dict(v=h.docks))
+				row = [dict(v=tj), dict(v=h.bikes), dict(v=h.docks)]
 				c = dict(c=row)
 				rows.append(c)
 				options.update(colors=['#4ECDC4', '#FF6B6B'])
 
-		elif bikes_req == "checked" and errors_req == "checked":
+		elif bikes_req == 'checked' and errors_req == 'checked':
 			cols.append(dict(id='Total bikes', type='number'))
 			cols.append(dict(id='Total errors', type='number'))
 			for h in history:
 				tj = makeJavaScriptTimeForCharts(h)
-				row = []
-				row.append(dict(v=tj))
-				row.append(dict(v=h.bikes))
-				row.append(dict(v=h.errors))
+				row = [dict(v=tj), dict(v=h.bikes), dict(v=h.errors)]
 				c = dict(c=row)
 				rows.append(c)
 				options.update(colors=['#4ECDC4', '#C44D58'])
 
-		elif docks_req == "checked" and errors_req == "checked":
+		elif docks_req == 'checked' and errors_req == 'checked':
 			cols.append(dict(id='Total docks', type='number'))
 			cols.append(dict(id='Total errors', type='number'))
 			for h in history:
 				tj = makeJavaScriptTimeForCharts(h)
-				row = []
-				row.append(dict(v=tj))
-				row.append(dict(v=h.docks))
-				row.append(dict(v=h.errors))
+				row = [dict(v=tj), dict(v=h.docks), dict(v=h.errors)]
 				c = dict(c=row)
 				rows.append(c)
 				options.update(colors=['#FF6B6B', '#C44D58'])
@@ -432,9 +491,7 @@ class TotalChartJSONHandler(ShowStationHistory):
 			cols.append(dict(id='Total bikes', type='number'))
 			for h in history:
 				tj = makeJavaScriptTimeForCharts(h)
-				row = []
-				row.append(dict(v=tj))
-				row.append(dict(v=h.bikes))
+				row = [dict(v=tj), dict(v=h.bikes)]
 				c = dict(c=row)
 				rows.append(c)
 				options.update(colors=['#4ECDC4'])
@@ -443,9 +500,7 @@ class TotalChartJSONHandler(ShowStationHistory):
 			cols.append(dict(id='Total docks', type='number'))
 			for h in history:
 				tj = makeJavaScriptTimeForCharts(h)
-				row = []
-				row.append(dict(v=tj))
-				row.append(dict(v=h.docks))
+				row = [dict(v=tj), dict(v=h.docks)]
 				c = dict(c=row)
 				rows.append(c)
 				options.update(colors=['#FF6B6B'])
@@ -454,9 +509,7 @@ class TotalChartJSONHandler(ShowStationHistory):
 			cols.append(dict(id='Total errors', type='number'))
 			for h in history:
 				tj = makeJavaScriptTimeForCharts(h)
-				row = []
-				row.append(dict(v=tj))
-				row.append(dict(v=h.errors))
+				row = [dict(v=tj), dict(v=h.errors)]
 				c = dict(c=row)
 				rows.append(c)
 				options.update(colors=['#C44D58'])
@@ -465,9 +518,7 @@ class TotalChartJSONHandler(ShowStationHistory):
 			cols.append(dict(id='', type='number'))
 			for h in history:
 				tj = makeJavaScriptTimeForCharts(h)
-				row = []
-				row.append(dict(v=tj))
-				row.append(dict(v=0))
+				row = [dict(v=tj), dict(v=0)]
 				c = dict(c=row)
 				rows.append(c)
 				options.update(colors=['#FFFFFF'])
@@ -627,6 +678,10 @@ def makeJavaScriptTimeForCharts(entity):
 	t_UNIX = t.strftime('%s') + '000' #convert to UNIX time in milliseconds from Python date_time obj
 	return int(t_UNIX)
 
+def makeJavaScriptDateForCharts(entity):
+	t = entity.date #extract date from the SystemStats class
+	t_UNIX = t.strftime('%s') + '000' #convert to UNIX time in milliseconds from Python date_time obj
+	return int(t_UNIX)
 
 def makeDayOfWeek():
 	# establish the time zones
@@ -642,19 +697,23 @@ def makeDayOfWeek():
 	return day_of_week
 
 
-app = webapp2.WSGIApplication([('/', MainPage),
-                               ('/about', AboutPage),
-                               ('/alerts', AlertsPage),
-                               ('/history', ShowStationHistory),
-                               ('/historyjson', HistoryChartJSONHandler),
-                               ('/superlatives', SuperlativesPage),
-                               ('/totals', TotalBikesAndDocks),
-                               ('/totalsjson', TotalChartJSONHandler),
-                               ('/admin/updatestatus', UpdateStatus),
-                               ('/admin/updateall', UpdateAll),
-                               ('/admin/updatesystemstats', UpdateSystemStats),
-                               ('/admin/createalerts', CreateAlerts),
-                               ('/admin/managealertslistq', ManageAlertsListQ),
-                               ('/admin/sendalerts', SendAlerts)
-                              ],
-                              debug=True)
+app = webapp2.WSGIApplication(
+	[
+		('/', MainPage),
+		('/about', AboutPage),
+		('/alerts', AlertsPage),
+		('/history', ShowStationHistory),
+		('/historyjson', HistoryChartJSONHandler),
+		('/usage', UsageHistory),
+		('/usagejson', UsageChartJSONHandler),
+		('/superlatives', SuperlativesPage),
+		('/totals', TotalBikesAndDocks),
+		('/totalsjson', TotalChartJSONHandler),
+		('/admin/updatestatus', UpdateStatus),
+		('/admin/updateall', UpdateAll),
+		('/admin/updatesystemstats', UpdateSystemStats),
+		('/admin/createalerts', CreateAlerts),
+		('/admin/managealertslistq', ManageAlertsListQ),
+		('/admin/sendalerts', SendAlerts)
+	],
+	debug=True)

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+    {% block head %}
+    <!--CSS-->
+        <!--remember to make new stylesheet for this later-->
+        <link rel="stylesheet" type="text/css" href="/static/stylesheets/history.css"/>
+        <title>busybici: usage</title>
+    {% endblock %}
+
+    {% block body %}
+        <h1>system usage data</h1>
+            <p>Use this page to see how usage of the NYC bike share has trended over time.</p>
+            <form action="/usage">
+                <select id="datasets_dropdown" name="datasets_dropdown" onchange="updateChart()">
+                    {% for d in datasets %}
+                        {% set sel="" %}
+                        {% if d[0] == view %}
+                            {% set sel="selected" %}
+                        {% endif %}
+                        <option value={{d[0]}} {{sel}}>{{d[1]}}</option>
+                    {% endfor %}
+                </select>
+            </form>
+	    <hr>
+	    <div id="chart_div">
+            <h3 class="load_text" id="load_text1"><br><br><br>adjusting seat...</h3>
+            <h3 class="load_text" id="load_text2"><br><br><br><br>... putting on helmet</h3>
+            <h3 class="load_text" id="load_text3"><br><br><br><br><br>... and off we go!</h3>
+        </div>
+
+        <!-- JavaScript for chart -->
+            <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+            <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+            <script type="text/javascript" src='/static/js/usage.js'></script>
+
+    {% endblock %}
