@@ -284,13 +284,13 @@ class UsageHistory(MainPage):
 	):
 		# options for the dropdown menu of data sets
 		datasets = [
-			['trips', 'trips'],
-			['miles', 'miles'],
-			['miles_per_trip', 'miles_per_trip'],
-			['members', 'members'],
-			['signups', 'signups'],
-			['day_passes', 'day_passes'],
-			['week_passes', 'week_passes']
+			['trips', 'Trips'],
+			['miles', 'Miles'],
+			['miles_per_trip', 'Miles per trip'],
+			['members', 'Annual members'],
+			['signups', 'Member sign-ups'],
+			['day_passes', '24-hr passes'],
+			['week_passes', '7-day passes']
 		]
 
 		self.render(
@@ -316,11 +316,10 @@ class UsageChartJSONHandler(UsageHistory):
 		# prep options for insertion
 		options = dict(height=500, fontSize=14, fontName='Arial', lineWidth=3, isStacked='true')
 		options.update(backgroundColor=dict(stroke="#FFFFFF"))
-		options.update(legend=dict(position="top"))
-		options.update(chartArea=dict(left=35, top=50, width="80%", height="80%"))
+		options.update(legend=dict(position="none"))
+		options.update(chartArea=dict(left=65, top=10, width="80%", height="90%"))
 		options.update(hAxis=dict(baselineColor="#FFFFFF", gridlines=dict(color="#FFFFFF")))
 		options.update(vAxis=dict(baselineColor="#556270", gridlines=dict(color="#556270", format="#")))
-		options.update(title=view)
 		options.update()
 
 		# prep data structure
@@ -350,6 +349,7 @@ class UsageChartJSONHandler(UsageHistory):
 
 	def get(self):
 		view = self.request.get('view')
+		title = self.request.get('title')
 		self.render_usage_chart_json(
 			view=view
 		)

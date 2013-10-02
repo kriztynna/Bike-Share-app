@@ -150,7 +150,7 @@ class UpdateStatus(UpdateAll):
 
 class UpdateSystemStats(webapp2.RequestHandler):
 	def getStats(self):
-		systemstats = urllib2.Request('http://cf.datawrapper.de/CSXes/3/data')
+		systemstats = urllib2.Request('http://cf.datawrapper.de/CSXes/6/data')
 		# '3/data' returns data through 9/15. '2/data' returns data through 9/9, and so on.
 		# time data '9/10/13' does not match format '%m/%d/%Y'
 		response = urllib2.urlopen(systemstats).read()
@@ -172,13 +172,13 @@ class UpdateSystemStats(webapp2.RequestHandler):
 				made_key = datetime.datetime.strftime(date, '%Y/%m/%d')
 				exists = SystemStats.query(SystemStats.date == date).get()
 				if exists == None:
-					trips = int(row[1])
+					trips = float(row[1])
 					cum_trips = int(row[2])
 
 					if row[3] == '':
 						miles = 0
 					else:
-						miles = int(row[3])
+						miles = float(row[3])
 
 					cum_miles = int(row[4])
 
@@ -191,6 +191,8 @@ class UpdateSystemStats(webapp2.RequestHandler):
 					day_passes = int(row[7])
 					week_passes = int(row[8])
 					miles_per_trip = miles / trips
+					trips = int(trips)
+					miles = int(miles)
 
 					stat = SystemStats(
 						id=made_key,
