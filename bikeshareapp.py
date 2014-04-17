@@ -577,20 +577,17 @@ class SuperlativesPage(Handler):
 		most_day_passes_date = most_day_passes.date.strftime('%A, %B %d, %Y')
 		most_day_passes_amt = '{:,}'.format(most_day_passes.day_passes)
 
-		min_time = datetime.datetime.strptime('2013-06-02', '%Y-%m-%d')
-		fewest_day_passes = query.filter(SystemStats.date >= min_time).order(SystemStats.date,
-		                                                                     SystemStats.day_passes).get()
-		fewest_day_passes_date = fewest_day_passes.date.strftime('%A, %B %d, %Y')
-		fewest_day_passes_amt = '{:,}'.format(fewest_day_passes.day_passes)
+		fewest_day_passes = query.order(SystemStats.day_passes).fetch(1,offset=6)
+		fewest_day_passes_date = fewest_day_passes[0].date.strftime('%A, %B %d, %Y')
+		fewest_day_passes_amt = '{:,}'.format(fewest_day_passes[0].day_passes)
 
 		most_week_passes = query.order(-SystemStats.week_passes).get()
 		most_week_passes_date = most_week_passes.date.strftime('%A, %B %d, %Y')
 		most_week_passes_amt = '{:,}'.format(most_week_passes.week_passes)
 
-		fewest_week_passes = query.filter(SystemStats.date >= min_time).order(SystemStats.date,
-		                                                                      SystemStats.week_passes).get()
-		fewest_week_passes_date = fewest_week_passes.date.strftime('%A, %B %d, %Y')
-		fewest_week_passes_amt = '{:,}'.format(fewest_week_passes.week_passes)
+		fewest_week_passes = query.order(SystemStats.week_passes).fetch(1,offset=6)
+		fewest_week_passes_date = fewest_week_passes[0].date.strftime('%A, %B %d, %Y')
+		fewest_week_passes_amt = '{:,}'.format(fewest_week_passes[0].week_passes)
 
 		most_member_signups = query.order(-SystemStats.signups).get()
 		most_member_signups_date = most_member_signups.date.strftime('%A, %B %d, %Y')
