@@ -150,9 +150,11 @@ class UpdateStatus(UpdateAll):
 
 class UpdateSystemStats(webapp2.RequestHandler):
 	def getStats(self):
-		systemstats = urllib2.Request('http://cf.datawrapper.de/CSXes/6/data')
-		# '3/data' returns data through 9/15. '2/data' returns data through 9/9, and so on.
-		# time data '9/10/13' does not match format '%m/%d/%Y'
+		#systemstats = urllib2.Request('http://cf.datawrapper.de/CSXes/9/data')
+		# for 4Q2013
+		# systemstats = urllib2.Request('http://cf.datawrapper.de/0FwJZ/27/data.csv')
+		# for 1Q2014
+		systemstats = urllib2.Request('http://cf.datawrapper.de/1hJ2T/16/data.csv')
 		response = urllib2.urlopen(systemstats).read()
 		raw_data = StringIO.StringIO(response)
 		csv_data = csv.reader(raw_data)
@@ -163,24 +165,40 @@ class UpdateSystemStats(webapp2.RequestHandler):
 			try:
 				date = datetime.datetime.strptime(row[0], '%m/%d/%Y')
 			except:
-				date = datetime.datetime.strptime(row[0], '%m/%d/%y')
+				try:
+					date = datetime.datetime.strptime(row[0], '%m/%d/%y')
+				
+				except:
+					date = datetime.datetime.strptime('10/01/2099', '%m/%d/%Y')
+					#this is how we know there was an error - the year 2099
 
-			min_date = datetime.datetime.strptime('2013-05-27', '%Y-%m-%d')
+			min_date = datetime.datetime.strptime('2014-01-01', '%Y-%m-%d')
 			if date < min_date:
 				continue
 			else:
 				made_key = datetime.datetime.strftime(date, '%Y/%m/%d')
 				exists = SystemStats.query(SystemStats.date == date).get()
 				if exists == None:
-					trips = float(row[1])
-					cum_trips = int(row[2])
+					try:
+						trips = float(row[1])
+					except:
+						trips = 0
+						logging.debug('Trips scrape failed for')
+						logging.debug(row)
+
+					try:
+						cum_trips = int(row[2])
+					except:
+						cum_trips = 0
+						logging.debug('Cum_trips scrape failed for')
+						logging.debug(row)
 
 					if row[3] == '':
 						miles = 0
 					else:
 						miles = float(row[3])
 
-					cum_miles = int(row[4])
+					cum_miles = float(row[4])
 
 					try:
 						members = int(row[5])
@@ -193,6 +211,7 @@ class UpdateSystemStats(webapp2.RequestHandler):
 					miles_per_trip = miles / trips
 					trips = int(trips)
 					miles = int(miles)
+					cum_miles = int(cum_miles)
 
 					stat = SystemStats(
 						id=made_key,
