@@ -665,6 +665,7 @@ class ManageAlertsListQ(webapp2.RequestHandler):
 		logging.debug('ManageAlertsListQ successfully initiated.')
 		self.response.out.write('ManageAlertsListQ successfully initiated.')
 
+
 ########## This is where the utils go ##########
 def makeJavaScriptTimeForCharts(entity):
 	t = entity.date_time #extract date_time from a data store object
