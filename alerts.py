@@ -11,12 +11,13 @@ import jinja2
 import pytz
 import urllib2
 import webapp2
+
 from google.appengine.ext import ndb
 from google.appengine.ext import deferred
 from google.appengine.api import mail
 from google.appengine.api.taskqueue import Task
 
-
+########## All the code in this section is for the regularly scheduled alerts ##########
 def sendEmail(
 		to=None,
 		start_names=None,
@@ -260,7 +261,6 @@ class SendAlerts(webapp2.RequestHandler):
 		self.response.out.write('SendAlerts successfully initiated.')
 		self.send_alerts()
 
-
 class CreateAlerts(webapp2.RequestHandler):
 	def create_records(self):
 		alert = Alert(
@@ -300,6 +300,34 @@ class CreateAlerts(webapp2.RequestHandler):
 
 	def get(self):
 		self.create_records()
+
+########## All the code in this section is to send the confirmation emails ##########
+def sendConfirmEmail(
+		to=None,
+		alert_id=None,
+		start_names=None,
+		start_bikes=None,
+		start_times=None,
+		end_names=None,
+		end_docks=None,
+		end_times=None
+):
+	body_contents = []
+	body_contents.append('thanks for signing up! please review your selections and click the below link to confirm them.')
+	print alert_id
+	confirm_url = 'http://bikeshareapp.appspot.com/confirm/'+str(alert_id)
+	body_contents.append('\n')
+	body_contents.append(confirm_url)
+
+	body = ''.join(body_contents)
+	message = mail.EmailMessage(
+		sender='busybici <busybici@bikeshareapp.appspotmail.com>',
+		#subject='confirm your alert selections',
+		subject=confirm_url, #change back later
+		to=to,
+		body=body
+	)
+	message.send()
 
 
 ########## Utils ##########

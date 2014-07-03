@@ -71,6 +71,8 @@ class Alert(ndb.Model):
 	# As the convention in Python, 0 is Sunday and 6 is Saturday.
 	days = ndb.IntegerProperty(repeated=True)
 
+	confirmed = ndb.BooleanProperty(default=False)
+
 
 class AlertLog(ndb.Model):
 	email = ndb.StringProperty(required=False)

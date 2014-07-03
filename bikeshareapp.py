@@ -6,10 +6,13 @@ import time
 from models import *
 from jobs import *
 from alerts import *
+from forms import *
+
 import jinja2
 import pytz
 import urllib2
 import webapp2
+
 from google.appengine.ext import ndb
 from google.appengine.ext import deferred
 from google.appengine.api.taskqueue import Task
@@ -49,14 +52,6 @@ class AboutPage(Handler):
 
 	def get(self):
 		self.render_about()
-
-
-class AlertsPage(Handler):
-	def render_alerts(self):
-		self.render('alerts.html')
-
-	def get(self):
-		self.render_alerts()
 
 
 class ShowStationHistory(MainPage):
@@ -646,18 +641,19 @@ class ManageAlertsListQ(webapp2.RequestHandler):
 		query = Alert.query(Alert.days.IN([day_of_week]))
 		to_put = []
 		for q in query:
-			alert_today = AlertLog(
-				email=q.email,
-				phone=q.phone,
-				carrier=q.carrier,
-				start1=q.start1,
-				start2=q.start2,
-				start3=q.start3,
-				end1=q.end1,
-				end2=q.end2,
-				end3=q.end3,
-				time=q.time
-			)
+			if q.confirmed:
+				alert_today = AlertLog(
+					email=q.email,
+					phone=q.phone,
+					carrier=q.carrier,
+					start1=q.start1,
+					start2=q.start2,
+					start3=q.start3,
+					end1=q.end1,
+					end2=q.end2,
+					end3=q.end3,
+					time=q.time
+				)
 			to_put.append(alert_today)
 		ndb.put_multi(to_put)
 		logging.debug("Prepared today's list of alerts to send.")
@@ -693,12 +689,14 @@ def makeDayOfWeek():
 	day_of_week = int(n.strftime('%w'))
 	return day_of_week
 
-
 app = webapp2.WSGIApplication(
 	[
 		('/', MainPage),
 		('/about', AboutPage),
 		('/alerts', AlertsPage),
+		('/awaitconfirm', AwaitConfirmPage),
+		('/confirm/(\d+)', ConfirmAlertPage),
+		('/cancel/(\d+)', CancelAlertPage),
 		('/history', ShowStationHistory),
 		('/historyjson', HistoryChartJSONHandler),
 		('/usage', UsageHistory),

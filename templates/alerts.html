@@ -1,14 +1,151 @@
 {% extends "base.html" %}
     {% block head %}
-        <title>busybici</title>
+        <title>busybici: alerts</title>
     {% endblock%}
 
     {% block body %}
         <h1>alerts</h1>
           <p>
-          Coming soon!
+          Sign up for scheduled updates on your favorite Citibike stations. You will receive a confirmation request over email before any alerts are distributed. </p>
+          <p>
+          Fields required except where noted otherwise.
           </p>
+          <form action="/alerts" method="post">
+			<div>email: 
+				<input name="email" value="{{email}}">
+				<label style="color: red;">{{email_error}}</label>
+			</div>
+			<div>alert type:
+				<select id="alert_type" name="alert_type"> <!--onchange='updateChart("select")'-->
+					<option value=email {{email_sel}}>email</option>
+					<option value=textmsg {{text_sel}}>text message</option>
+					<option value=both {{both_sel}}>email and text</option>
+				</select>
+			</div>
+			<div>phone: 
+				<input name="phone" value="{{phone}}">
+				<label style="color: red;">{{phone_error}}</label>
+			</div>
+			<div>carrier: 
+				<select id="carrier" name="carrier">
+					<option value=''></option>
+					<option value=AT&T>AT&T</option>
+					<option value=T-Mobile>T-Mobile</option>
+					<option value=Verizon>Verizon</option>
+					<option value=Qwest>Qwest</option>
+					<option value=Sprint>Sprint</option>
+					<option value=Virgin Mobile>Virgin Mobile</option>
+					<option value=Nextel>Nextel</option>
+					<option value=Alltel>Alltel</option>
+					<option value=Metro PCS>Metro PCS</option>
+					<option value=Powertel>Powertel</option>
+					<option value=Boost Mobile>Boost Mobile</option>
+					<option value=Suncom>Suncom</option>
+					<option value=Tracfone>Tracfone</option>
+					<option value=U.S. Cellular>U.S. Cellular</option>
+				</select>
+				<label style="color: red;">{{carrier_error}}</label>
+			</div>
+			<div>starting station: 
+				<select id="start1_dropdown" name="start1">
+				<option value=''></option>
+					{% for id, name in stations_dict.iteritems() %}
+						{% set sel="" %}
+						{% if id == start1|int %}
+							{% set sel="selected" %}
+						{% endif %}
+						<option value={{id}} {{sel}}>{{name}}</option>
+					{% endfor %}
+				</select>
+				<label style="color: red;">{{start1_error}}</label>
+			</div>
+			<div>starting station (2nd choice): 
+				<select id="start2_dropdown" name="start2">
+				<option value=''></option>
+					{% for id, name in stations_dict.iteritems() %}
+						{% set sel="" %}
+						{% if id == start2|int %}
+							{% set sel="selected" %}
+						{% endif %}
+						<option value={{id}} {{sel}}>{{name}}</option>
+					{% endfor %}
+				</select>
+				<label style="color: red;">{{start2_error}}</label>
+			</div>
+			<div>starting station (3rd choice): 
+				<select id="start3_dropdown" name="start3">
+				<option value=''></option>
+					{% for id, name in stations_dict.iteritems() %}
+						{% set sel="" %}
+						{% if id == start3|int %}
+							{% set sel="selected" %}
+						{% endif %}
+						<option value={{id}} {{sel}}>{{name}}</option>
+					{% endfor %}
+				</select>
+				<label style="color: red;">{{start3_error}}</label>
+			</div>
 
+			<div>ending station: 
+				<select id="end1_dropdown" name="end1">
+				<option value=''></option>
+					{% for id, name in stations_dict.iteritems() %}
+						{% set sel="" %}
+						{% if id == end1|int %}
+							{% set sel="selected" %}
+						{% endif %}
+						<option value={{id}} {{sel}}>{{name}}</option>
+					{% endfor %}
+				</select>
+				<label style="color: red;">{{end1_error}}</label>
+			</div>
+			<div>ending station (2nd choice): 
+				<select id="end2_dropdown" name="end2">
+				<option value=''></option>
+					{% for id, name in stations_dict.iteritems() %}
+						{% set sel="" %}
+						{% if id == end2|int %}
+							{% set sel="selected" %}
+						{% endif %}
+						<option value={{id}} {{sel}}>{{name}}</option>
+					{% endfor %}
+				</select>
+				<label style="color: red;">{{end2_error}}</label>
+			</div>
+			<div>ending station (3rd choice): 
+				<select id="end3_dropdown" name="end3">
+				<option value=''></option>
+					{% for id, name in stations_dict.iteritems() %}
+						{% set sel="" %}
+						{% if id == end3|int %}
+							{% set sel="selected" %}
+						{% endif %}
+						<option value={{id}} {{sel}}>{{name}}</option>
+					{% endfor %}
+				</select>
+				<label style="color: red;">{{end3_error}}</label>
+			</div>
+			<div>days to send alert: <br>
+				<input type="checkbox" name="su" value="0" {{checked}}>Sunday
+				<input type="checkbox" name="mo" value="1" {{checked}}>Monday
+				<input type="checkbox" name="tu" value="2" {{checked}}>Tuesday
+				<input type="checkbox" name="we" value="3" {{checked}}>Wednesday
+				<input type="checkbox" name="th" value="4" {{checked}}>Thursday
+				<input type="checkbox" name="fr" value="5" {{checked}}>Friday
+				<input type="checkbox" name="sa" value="6" {{checked}}>Saturday
+				<label style="color: red;">{{days_error}}</label>
+			</div>
+			<div>time: 
+				<input name="hour" value="{{hour}}">
+				<input name="minute" value="{{minute}}">
+				<select id="AMPM" name="AMPM">
+					<option value=AM>AM</option> <!--add remaining carriers-->
+					<option value=PM>PM</option>
+				</select>
+				<label style="color: red;">{{time_error}}</label>
+			</div>
+
+			<div><input type="submit" value="Submit"></div>
 
     {% endblock %}
 </html>
