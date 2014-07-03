@@ -53,6 +53,10 @@ docks: %(end_docks)d \n' % \
 
 	body_contents.append('\nenjoy your journey!\n-busybici')
 
+	#cancel_link='http://bikesharepp.appspot.com/delete/'+str(alert_id)+'.'
+	#body_contents.append('\n To cancel this alert, click ')
+	#body_contents.append(cancel_link)
+
 	body = ''.join(body_contents)
 	message = mail.EmailMessage(
 		sender='busybici <busybici@bikeshareapp.appspotmail.com>',
@@ -95,7 +99,6 @@ docks: %(end_docks)d\n' % \
 		            'end_docks': end_docks[key], \
 		            'end_name': end_names[key]}
 		body_contents.append(end_text)
-
 	body_contents.append('\n-busybici')
 
 	body = ''.join(body_contents)
@@ -314,7 +317,6 @@ def sendConfirmEmail(
 ):
 	body_contents = []
 	body_contents.append('thanks for signing up! please review your selections and click the below link to confirm them.')
-	print alert_id
 	confirm_url = 'http://bikeshareapp.appspot.com/confirm/'+str(alert_id)
 	body_contents.append('\n')
 	body_contents.append(confirm_url)
@@ -322,8 +324,7 @@ def sendConfirmEmail(
 	body = ''.join(body_contents)
 	message = mail.EmailMessage(
 		sender='busybici <busybici@bikeshareapp.appspotmail.com>',
-		#subject='confirm your alert selections',
-		subject=confirm_url, #change back later
+		subject='confirm your alert selections',
 		to=to,
 		body=body
 	)
