@@ -643,6 +643,7 @@ class ManageAlertsListQ(webapp2.RequestHandler):
 		for q in query:
 			if q.confirmed:
 				alert_today = AlertLog(
+					alert_id=q.key.id(),
 					email=q.email,
 					phone=q.phone,
 					carrier=q.carrier,
@@ -664,16 +665,6 @@ class ManageAlertsListQ(webapp2.RequestHandler):
 
 		logging.debug('ManageAlertsListQ successfully initiated.')
 		self.response.out.write('ManageAlertsListQ successfully initiated.')
-
-class DeleteAlertsLog(webapp2.RequestHandler):
-	def get(self):
-		query = AlertLog.query()
-		to_delete = []
-		for q in query:
-			to_delete.append(q.key)
-		logging.debug(to_delete)
-		ndb.delete_multi(to_delete)
-		logging.debug('all old alertlog objects are removed')
 
 ########## This is where the utils go ##########
 def makeJavaScriptTimeForCharts(entity):
@@ -719,7 +710,6 @@ app = webapp2.WSGIApplication(
 		('/admin/updatesystemstats', UpdateSystemStats),
 		('/admin/createalerts', CreateAlerts),
 		('/admin/managealertslistq', ManageAlertsListQ),
-		('/admin/sendalerts', SendAlerts),
-		('/admin/deletelogs', DeleteAlertsLog)
+		('/admin/sendalerts', SendAlerts)
 	],
 	debug=True)

@@ -75,6 +75,7 @@ class Alert(ndb.Model):
 
 
 class AlertLog(ndb.Model):
+	alert_id = ndb.IntegerProperty(required=False)
 	email = ndb.StringProperty(required=False)
 
 	phone = ndb.IntegerProperty(required=False)
