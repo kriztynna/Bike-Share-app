@@ -43,11 +43,8 @@ class AlertsForm(Handler):
 		end1="",
 		end2="",
 		end3="",
-		time="",
-		hour="",
-		minute="",
-		AMPM="",
 		days="",
+		time="",
 		email_error="",
 		phone_error="",
 		carrier_error="",
@@ -81,10 +78,8 @@ class AlertsForm(Handler):
 			end1=end1,
 			end2=end2,
 			end3=end3,
-			hour=hour,
-			minute=minute,
-			AMPM=AMPM,
 			days=days,
+			time=time,
 			email_error=email_error,
 			phone_error=phone_error,
 			carrier_error=carrier_error,
@@ -144,9 +139,7 @@ class AlertsForm(Handler):
 			return finalists
 		days = generate_days()
 
-		self.hour = self.request.get('hour')
-		self.minute = self.request.get('minute')
-		self.AMPM = self.request.get('AMPM')
+		self.time = self.request.get('time')
 
 		### Validation ###
 		email_error = ""
@@ -155,7 +148,7 @@ class AlertsForm(Handler):
 		valid_carrier = verifyCarrier(self.alert_type, self.carrier)
 
 		valid_days = verifyDays(days)
-		valid_time = verifyTime(self.hour, self.minute, self.AMPM)
+		valid_time = verifyTime(self.time)
 		valid_stations = verifyStations(self.start1, self.start2, self.start3, self.end1, self.end2, self.end3)
 
 		if not (valid_email and valid_phone and valid_carrier and valid_days and valid_time and valid_stations): 
@@ -174,7 +167,7 @@ class AlertsForm(Handler):
 			if valid_days != True:
 				days_error = daysError(days)
 			if valid_time != True:
-				time_error = timeError(self.hour, self.minute, self.AMPM)
+				time_error = timeError(self.time)
 			if valid_stations != True:
 				start1_error, start2_error, start3_error, end1_error, end2_error, end3_error = stationsError(self.start1, self.start2, self.start3, self.end1, self.end2, self.end3)
 			self.render_alerts_form( 
@@ -196,8 +189,7 @@ class AlertsForm(Handler):
 				end1_error=end1_error,
 				end2_error=end2_error,
 				end3_error=end3_error,
-				hour=self.hour,
-				minute=self.minute,
+				time=self.time,
 				days_error=days_error,
 				time_error=time_error,
 				email_sel=self.email_sel,
@@ -222,14 +214,11 @@ class AlertsPage(AlertsForm):
 		days = generate_days()
 
 		def generate_time():
-			hour=int(self.hour)
-			minute=int(self.minute)
-			if hour==12:
-				if self.AMPM=='AM':
-					hour-=12
-			elif self.AMPM=='PM':
-				hour+=12
-			time=datetime.time(hour, minute, 0)
+			form_time = self.time
+			time_array = form_time.split(":")
+			hour = int(time_array[0])
+			minute = int(time_array[1])
+			time = datetime.time(hour, minute, 0)
 			return time
 		time = generate_time()
 
@@ -251,8 +240,13 @@ class AlertsPage(AlertsForm):
 			)
 		for k, v in properties.iteritems():
 			if v!='':
-				if 'start' in k or 'end' in k or 'phone' in k:
+				if 'start' in k or 'end' in k:
 					int_v = int(v)
+					setattr(a, k, int_v)
+				elif 'phone' in k:
+					decimal_only = re.compile(r'[^\d]+')
+					clean_v = decimal_only.sub('',v)
+					int_v = int(clean_v)
 					setattr(a, k, int_v)
 				else:
 					setattr(a, k, v)
@@ -265,10 +259,6 @@ class AlertsPage(AlertsForm):
 		self.redirect("/awaitconfirm")
 
 class AwaitConfirmPage(Handler):
-	def get(self):
-		self.render('awaitconfirm.html')
-
-class EditAlertPage(Handler):
 	def get(self):
 		self.render('awaitconfirm.html')
 
@@ -434,19 +424,15 @@ def daysError(days):
 	return days_error
 
 ##### Time validation #####
-INTEGER_RE = re.compile(r'[^\d]+')
-def verifyTime(hour, minute, AMPM):
-	try:
-		time=datetime.time(int(hour), int(minute), 0)
+def verifyTime(time):
+	if (time!=None and time!=''):
 		return True
-	except:
-		print 'invalid time'
 
-def timeError(hour, minute, AMPM):
-	if (hour=='' or int(hour)>12 or int(hour<1) or minute=='' or int(minute)>59 or int(minute)<0):
-		time_error = 'Please enter valid numbers of hours (1-12) and minutes (0-59).'
+def timeError(time):
+	if (time!=None or time!=''):
+		time_error = 'Please enter the time of day to receive the alert.'
 	else:
-		time_error = 'Please enter a valid time in 12-hour format.'
+		time_error = 'There was an error with the time entered. Please try again.'
 	return time_error
 
 ##### Stations validation ######
