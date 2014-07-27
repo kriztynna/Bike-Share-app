@@ -1,7 +1,7 @@
 {% extends "base.html" %}
     {% block head %}
         <!--CSS-->
-        <link rel="stylesheet" type="text/css" href="/static/stylesheets/alerts.css"/>
+        <!--<link rel="stylesheet" type="text/css" href="/static/stylesheets/alerts.css"/>-->
         <title>busybici: alerts</title>
     {% endblock%}
 
@@ -50,21 +50,14 @@
 					</td>
 					<td>
 						<select id="carrier" name="carrier">
-							<option value=''></option>
-							<option value=AT&T>AT&T</option>
-							<option value=T-Mobile>T-Mobile</option>
-							<option value=Verizon>Verizon</option>
-							<option value=Qwest>Qwest</option>
-							<option value=Sprint>Sprint</option>
-							<option value=Virgin Mobile>Virgin Mobile</option>
-							<option value=Nextel>Nextel</option>
-							<option value=Alltel>Alltel</option>
-							<option value=Metro PCS>Metro PCS</option>
-							<option value=Powertel>Powertel</option>
-							<option value=Boost Mobile>Boost Mobile</option>
-							<option value=Suncom>Suncom</option>
-							<option value=Tracfone>Tracfone</option>
-							<option value=U.S. Cellular>U.S. Cellular</option>
+						<option value=''></option>
+							{% for c in carriers_list %}
+								{% set sel="" %}
+								{% if c == carrier %}
+									{% set sel="selected" %}
+								{% endif %}
+								<option value={{c}} {{sel}}>{{c}}</option>
+							{% endfor %}
 						</select>
 						<label style="color: red;">{{carrier_error}}</label>
 					</td>
@@ -159,14 +152,63 @@
 					</td>
 					<td>
 						<div class="checkbox">
-						<label><input type="checkbox" name="su" value="0" {{checked}}>Sunday</label>
-						<label><input type="checkbox" name="mo" value="1" {{checked}}>Monday</label>
-						<label><input type="checkbox" name="tu" value="2" {{checked}}>Tuesday</label>
-						<label><input type="checkbox" name="we" value="3" {{checked}}>Wednesday</label>
-						<label><input type="checkbox" name="th" value="4" {{checked}}>Thursday</label>
-						<label><input type="checkbox" name="fr" value="5" {{checked}}>Friday</label>
-						<label><input type="checkbox" name="sa" value="6" {{checked}}>Saturday</label>
-						<label style="color: red;">{{days_error}}</label>
+							<label>
+								{% if "0" in days %}
+									{% set checked="checked" %}
+								{% else %}
+									{% set checked="" %}
+								{% endif %}
+								<input type="checkbox" name="su" value="0" {{checked}}>Sunday
+							</label>
+							<label>
+								{% if '1' in days %}
+									{% set checked="checked" %}
+								{% else %}
+									{% set checked="" %}
+								{% endif %}
+								<input type="checkbox" name="mo" value="1" {{checked}}>Monday
+							</label>
+							<label>
+								{% if '2' in days %}
+									{% set checked="checked" %}
+								{% else %}
+									{% set checked="" %}
+								{% endif %}
+								<input type="checkbox" name="tu" value="2" {{checked}}>Tuesday
+							</label>
+							<label>
+								{% if '3' in days %}
+									{% set checked="checked" %}
+								{% else %}
+									{% set checked="" %}
+								{% endif %}
+								<input type="checkbox" name="we" value="3" {{checked}}>Wednesday
+							</label>
+							<label>
+								{% if '4' in days %}
+									{% set checked="checked" %}
+								{% else %}
+									{% set checked="" %}
+								{% endif %}
+								<input type="checkbox" name="th" value="4" {{checked}}>Thursday
+							</label>
+							<label>
+								{% if '5' in days %}
+									{% set checked="checked" %}
+								{% else %}
+									{% set checked="" %}
+								{% endif %}
+								<input type="checkbox" name="fr" value="5" {{checked}}>Friday
+							</label>
+							<label>
+								{% if '6' in days %}
+									{% set checked="checked" %}
+								{% else %}
+									{% set checked="" %}
+								{% endif %}
+								<input type="checkbox" name="sa" value="6" {{checked}}>Saturday
+							</label>
+							<label style="color: red;">{{days_error}}</label>
 						</div>
 					</td>
 				</tr>
@@ -188,4 +230,4 @@
 			</table>
 		</form>
     {% endblock %}
-</html>
+

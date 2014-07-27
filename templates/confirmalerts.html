@@ -1,32 +1,93 @@
 {% extends "base.html" %}
-    {% block head %}
-        <title>busybici</title>
+	{% block head %}
+
+    <!--CSS-->
+    <style>
+    .title {
+      color: #4ECDC4;
+    }
+    </style>
+
+		<title>busybici</title>
     {% endblock%}
 
     {% block body %}
-        <h1>success!</h1>
-          <p>
-          Here is the alert you just signed up for:
-          </p>
-          email: {{email}} <br>
-          phone: {{phone}}<br>
-          carrier: {{carrier}}<br>
-          starting station: {{start1}}<br>
-          starting station, 2nd choice: {{start2}}<br>
-          starting station, 3rd choice: {{start3}}<br>
-          ending station: {{end1}}<br>
-          ending station, 2nd choice: {{end2}}<br>
-          ending station, 3rd choice: {{end3}}<br>
-          days: {{days}}<br>
-          time: {{time}}<br>
-          id: {{alert_id}}<br><br>
-
-         <p>
-         Please allow a day for the alert to go into effect.
-         </p>
-         <p>
-         To delete this alert, click <a href='/cancel/{{alert_id}}'>here</a>.
-         </p>
+    	<h1>success!</h1>
+    	<p>
+    		Here is the alert you just signed up for:
+    	</p>
+    		<table class="table">
+          		<tr>
+          			<td class="title">
+          				email:
+          			</td>
+          			<td>
+          				{{email}}
+          			</td>
+          		</tr>
+          		<tr>
+          			<td class="title">
+          				phone:
+          			</td>
+          			<td>
+          				{{phone}}
+          			</td>
+          		</tr>
+          		<tr>
+          			<td class="title">
+          				carrier:
+          			</td>
+          			<td>
+          				{{carrier}}
+          			</td>
+          		</tr>
+          		<tr>
+          			<td class="title">
+          				starting stations:
+          			</td>
+          			<td>
+          				{{start_names}}
+          			</td>
+          		</tr>
+          		<tr>
+          			<td class="title">
+          				ending stations:
+          			</td>
+          			<td>
+          				{{end_names}}
+          			</td>
+          		</tr>
+          		<tr>
+          			<td class="title">
+          				days:
+          			</td>
+          			<td>
+          				{{days}}
+          			</td>
+          		</tr>
+          		<tr>
+          			<td class="title">
+          				time:
+          			</td>
+          			<td>
+          				{{time}}
+          			</td>
+          		</tr>
+          		<tr>
+          			<td class="title">
+          				id:
+          			</td>
+          			<td>
+          				{{alert_id}}
+          			</td>
+          		</tr>
+          	</table>
+	         <p>
+	         Please allow a day for the alert to go into effect.
+	         </p>
+	         <p>
+	         To cancel this alert, click <a href='/cancel/{{alert_id}}'>here</a>.
+	         </p>
 
     {% endblock %}
 </html>

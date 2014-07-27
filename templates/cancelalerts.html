@@ -1,32 +1,103 @@
 {% extends "base.html" %}
-    {% block head %}
-        <title>busybici</title>
-    {% endblock%}
+  {% block head %}
+    <!--CSS-->
+      <style>
+      .title {
+        color: #C44D58;
+        font-size: 14px;
+        cursor: default;
+      }
 
-    {% block body %}
-        <h1>alert canceled</h1>
-          <p>
-          You will no longer receive the following alert:
-          </p>
-          email: {{email}} <br>
-          phone: {{phone}}<br>
-          carrier: {{carrier}}<br>
-          starting station: {{start1}}<br>
-          starting station, 2nd choice: {{start2}}<br>
-          starting station, 3rd choice: {{start3}}<br>
-          ending station: {{end1}}<br>
-          ending station, 2nd choice: {{end2}}<br>
-          ending station, 3rd choice: {{end3}}<br>
-          days: {{days}}<br>
-          time: {{time}}<br>
-          id: {{alert_id}}<br><br>
+      .row-fluid {
+        padding: 8px;
+        height: 20px;
+        text-align: left;
+        vertical-align: top;
+      }
 
-         <p>
-         Please allow a day for the cancellation to go into effect.
-         </p>
-         <p>
-         To restore this alert, click <a href='/delete/{{alert_id}}'>here</a>.
-         </p>
-         
-    {% endblock %}
+      .span12 {
+        margin-left: 0px;
+      }
+
+      </style>
+      <title>busybici</title>
+  {% endblock%}
+
+  {% block body %}
+      <h1>alert canceled</h1>
+        <p>
+        You will no longer receive the following alert:
+        </p>
+        <div class="span12">
+            <div class="row-fluid">
+              <div class="span2">
+                <label class="title">email:</label>
+              </div><!--/span-->
+              <div class="span6">
+                {{email}}
+              </div><!--/span-->
+            </div><!--/span-->
+            <div class="row-fluid">
+              <div class="span2">
+                <label class="title">phone:</label>
+              </div><!--/span-->
+              <div class="span6">
+                {{phone}}
+              </div><!--/span-->
+            </div><!--/span-->
+            <div class="row-fluid">
+              <div class="span2">
+                <label class="title">carrier:</label>
+              </div><!--/span-->
+              <div class="span6">
+                {{carrier}}
+              </div><!--/span-->
+            </div><!--/span-->
+            <div class="row-fluid">
+              <div class="span2">
+                <label class="title">starting stations:</label>
+              </div><!--/span-->
+              <div class="span6">
+                {{start_names}}
+              </div><!--/span-->
+            </div><!--/span-->
+            <div class="row-fluid">
+              <div class="span2">
+                <label class="title">ending stations:</label>
+              </div><!--/span-->
+              <div class="span6">
+                {{end_names}}
+              </div><!--/span-->
+            </div><!--/span-->
+            <div class="row-fluid">
+              <div class="span2">
+                <label class="title">days:</label>
+              </div><!--/span-->
+              <div class="span6">
+                {{days}}
+              </div><!--/span-->
+            </div><!--/span-->
+            <div class="row-fluid">
+              <div class="span2">
+                <label class="title">time:</label>
+              </div><!--/span-->
+              <div class="span6">
+                {{time}}
+              </div><!--/span-->
+            </div><!--/span-->
+            <div class="row-fluid">
+              <div class="span2">
+                <label class="title">id:</label>
+              </div><!--/span-->
+              <div class="span6">
+                {{alert_id}}
+              </div><!--/span-->
+            </div><!--/span-->
+          </div><!--/span-->
+       <div>
+       Please allow a day for the alert to be disabled.
+       To restore this alert, click <a href='/confirm/{{alert_id}}'>here</a>.
+       </div>
+       <br>
+  {% endblock %}
 </html>

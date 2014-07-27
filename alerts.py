@@ -56,10 +56,6 @@ docks: %(end_docks)d \n' % \
 	body_contents.append('\n\nto unsubscribe click http://bikesharepp.appspot.com/cancel/')
 	body_contents.append(alert_id)
 
-	#cancel_link='http://bikesharepp.appspot.com/delete/'+str(alert_id)+'.'
-	#body_contents.append('\n To cancel this alert, click ')
-	#body_contents.append(cancel_link)
-
 	body = ''.join(body_contents)
 	message = mail.EmailMessage(
 		sender='busybici <busybici@bikeshareapp.appspotmail.com>',

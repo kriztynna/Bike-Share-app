@@ -66,6 +66,8 @@ class AlertsForm(Handler):
 		stations_dict = dict()
 		for s in stations:
 			stations_dict[s.station_id] = s.name
+		carriers_list = ["AT&T", "T-Mobile", "Verizon", "Qwest", "Sprint", "Virgin Mobile", "Nextel", "Alltel", "Metro PCS", "Powertel", "Boost Mobile", "Suncom", "Tracfone", "U.S. Cellular"]
+
 		self.render(
 			'alerts.html', 
 			email=email, 
@@ -94,7 +96,8 @@ class AlertsForm(Handler):
 			email_sel=email_sel,
 			text_sel=text_sel,
 			both_sel=both_sel,
-			stations_dict=stations_dict
+			stations_dict=stations_dict,
+			carriers_list=carriers_list
 			)
 	def get(self):
 		self.render_alerts_form()
@@ -113,6 +116,8 @@ class AlertsForm(Handler):
 
 		self.phone = self.request.get('phone')
 		self.carrier = self.request.get('carrier')
+		print 'here is the carrier found in the form'
+		print self.carrier
 
 		self.start1 = self.request.get('start1')
 		self.start2 = self.request.get('start2')
@@ -134,7 +139,6 @@ class AlertsForm(Handler):
 			finalists=[]
 			for c in candidates:
 				if c!='':
-					c = int(c)
 					finalists.append(c)
 			return finalists
 		days = generate_days()
@@ -170,6 +174,7 @@ class AlertsForm(Handler):
 				time_error = timeError(self.time)
 			if valid_stations != True:
 				start1_error, start2_error, start3_error, end1_error, end2_error, end3_error = stationsError(self.start1, self.start2, self.start3, self.end1, self.end2, self.end3)
+
 			self.render_alerts_form( 
 				email=self.email,
 				phone=self.phone,
@@ -190,6 +195,7 @@ class AlertsForm(Handler):
 				end2_error=end2_error,
 				end3_error=end3_error,
 				time=self.time,
+				days=days,
 				days_error=days_error,
 				time_error=time_error,
 				email_sel=self.email_sel,
@@ -263,6 +269,41 @@ class AwaitConfirmPage(Handler):
 		self.render('awaitconfirm.html')
 
 class ConfirmAlertPage(Handler):
+	def getStationNames(self, station_id_1, station_id_2, station_id_3):
+		names_list=[]
+		s = StationInfo.query(StationInfo.station_id == int(station_id_1)).get()
+		names_list.append(s.name)
+		if station_id_2!='':
+			s = StationInfo.query(StationInfo.station_id == int(station_id_2)).get()
+			names_list.append(s.name)
+		if station_id_3!='':
+			s = StationInfo.query(StationInfo.station_id == int(station_id_3)).get()
+			names_list.append(s.name)
+		if len(names_list)==3:
+			names_list.insert(1, ', ')
+			names_list.insert(len(names_list)-1, ', and ')
+		elif len(names_list)==2:
+			names_list.insert(1, ' and ')
+		station_names = ''.join(names_list)
+		return station_names
+
+	def getDays(self, days):
+		days_list = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+		i=0
+		names_list = []
+		while i<=6:
+			if i in days:
+				if len(names_list)!=0:
+					names_list.append(', ')
+				names_list.append(days_list[i])
+			i+=1
+		if len(names_list)==2:
+			names_list.insert(1,' and ')
+		elif len(names_list)>2:
+			names_list.insert(len(names_list)-1, ' and ')
+		days = ''.join(names_list)
+		return days
+
 	def render_confirm_alerts_page(
 		self,
 		alert_id
@@ -282,26 +323,18 @@ class ConfirmAlertPage(Handler):
 		email = values['email']
 		phone = values['phone']
 		carrier = values['carrier']
-		start1=values['start1']
-		start2=values['start2']
-		start3=values['start3']
-		end1=values['end1']
-		end2=values['end2']
-		end3=values['end3']
-		days = values['days']
-		time = values['time']
+		start_names = self.getStationNames(values['start1'], values['start2'], values['start3'])
+		end_names = self.getStationNames(values['end1'], values['end2'], values['end3'])
+		days = self.getDays(values['days'])
+		time = datetime.time.strftime(values['time'], '%I:%M %p')
 
 		self.render(
 			'confirmalerts.html', 
 			email=email, 
 			phone=phone,
 			carrier=carrier,
-			start1=start1,
-			start2=start2,
-			start3=start3,
-			end1=end1,
-			end2=end2,
-			end3=end3,
+			start_names=start_names,
+			end_names=end_names,
 			days=days,
 			time=time,
 			alert_id=alert_id
@@ -309,7 +342,7 @@ class ConfirmAlertPage(Handler):
 	def get(self, alert_id):
 		self.render_confirm_alerts_page(alert_id)
 
-class CancelAlertPage(Handler):
+class CancelAlertPage(ConfirmAlertPage):
 	def render_cancel_alerts_page(
 		self,
 		alert_id
@@ -329,26 +362,18 @@ class CancelAlertPage(Handler):
 		email = values['email']
 		phone = values['phone']
 		carrier = values['carrier']
-		start1=values['start1']
-		start2=values['start2']
-		start3=values['start3']
-		end1=values['end1']
-		end2=values['end2']
-		end3=values['end3']
-		days = values['days']
-		time = values['time']
+		start_names = self.getStationNames(values['start1'], values['start2'], values['start3'])
+		end_names = self.getStationNames(values['end1'], values['end2'], values['end3'])
+		days = self.getDays(values['days'])
+		time = datetime.time.strftime(values['time'], '%I:%M %p')
 		
 		self.render(
 			'cancelalerts.html', 
 			email=email, 
 			phone=phone,
 			carrier=carrier,
-			start1=start1,
-			start2=start2,
-			start3=start3,
-			end1=end1,
-			end2=end2,
-			end3=end3,
+			start_names=start_names,
+			end_names=end_names,
 			days=days,
 			time=time,
 			alert_id=alert_id
@@ -454,8 +479,10 @@ def verifyStations(start1, start2, start3, end1, end2, end3):
 
 def stationsError(start1, start2, start3, end1, end2, end3):
 	stations = [start1, start2, start3, end1, end2, end3]
+	print 'here are the stations'
 	print stations
 	errors = ['', '', '', '', '', '']
+	print 'here are the station errors'
 	print errors
 	#first make sure start1 and end1 are populated
 	if (start1=='' or end1==''):
@@ -472,6 +499,7 @@ def stationsError(start1, start2, start3, end1, end2, end3):
 				if n==None:
 					errors[i]='No station found with this ID.'
 			i+=1
+	print 'here are some other station errors'
 	print errors
 	return errors[0], errors[1], errors[2], errors[3], errors[4], errors[5]			
 
