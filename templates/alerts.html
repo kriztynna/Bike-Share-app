@@ -1,7 +1,23 @@
 {% extends "base.html" %}
     {% block head %}
-        <!--CSS-->
+        <!--deactivate link to CSS for now-->
         <!--<link rel="stylesheet" type="text/css" href="/static/stylesheets/alerts.css"/>-->
+
+        <!--playing around with the google maps plug-in-->
+        <style>
+        	#map_canvas {
+        	width: 500px;
+        	height: 400px;
+        	display:none;
+        	background:red;
+			position:absolute;
+			top:50%;
+			left:50%;
+			margin-top:-200px; /* negative half the size of height */
+			margin-left:-250px; /* negative half the size of width */
+        	}
+
+        </style>
         <title>busybici: alerts</title>
     {% endblock%}
 
@@ -28,7 +44,7 @@
 						<label for="alert_type">alert type:</label>
 					</td>
 					<td>
-						<select class="form-control" id="alert_type" name="alert_type">
+						<select class="form-control"  class="form-control" id="alert_type" name="alert_type">
 							<option value=email {{email_sel}}>email</option>
 							<option value=textmsg {{text_sel}}>text message</option>
 							<option value=both {{both_sel}}>email and text</option>
@@ -49,7 +65,7 @@
 						<label for="carrier">carrier:</label>
 					</td>
 					<td>
-						<select id="carrier" name="carrier">
+						<select class="form-control" id="carrier" name="carrier">
 						<option value=''></option>
 							{% for c in carriers_list %}
 								{% set sel="" %}
@@ -67,7 +83,7 @@
 						<label>starting stations</label>
 					</td>
 					<td>
-						<select name="start1">
+						<select class="form-control" name="start1">
 						<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
@@ -78,7 +94,7 @@
 							{% endfor %}
 						</select>
 
-						<select name="start2">
+						<select class="form-control"  name="start2">
 						<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
@@ -89,7 +105,7 @@
 							{% endfor %}
 						</select>
 
-						<select id="start3_dropdown" name="start3">
+						<select class="form-control"  id="start3_dropdown" name="start3">
 						<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
@@ -102,14 +118,15 @@
 						<label style="color: red;">{{start1_error}}</label>
 						<label style="color: red;">{{start2_error}}</label>
 						<label style="color: red;">{{start3_error}}</label>
+						<label><a id='show_map'>map</a></label>
+						<div id="map_canvas"></div>
 					</td>
 				</tr>
-				<tr>
 					<td>
 						<label>ending stations</label>
 					</td>
 					<td>
-						<select name="end1">
+						<select class="form-control"  name="end1">
 						<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
@@ -120,7 +137,7 @@
 							{% endfor %}
 						</select>
 						
-						<select name="end2">
+						<select class="form-control"  name="end2">
 						<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
@@ -131,7 +148,7 @@
 							{% endfor %}
 						</select>
 
-						<select name="end3">
+						<select class="form-control"  name="end3">
 						<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
@@ -229,5 +246,51 @@
 				</tr>
 			</table>
 		</form>
+		
+
+		<!--Javascript-->
+		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js"></script>
+        
+		<script type="text/javascript">
+
+			var map = new google.maps.Map(document.getElementById('map_canvas'), {
+				zoom: 12,
+				center: new google.maps.LatLng(40.729063, -73.984344),
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			});
+
+			var infowindow = new google.maps.InfoWindow();
+
+			var locations = {{stations_map|safe}}
+
+        	var marker, i;
+
+        	for (i = 0; i < locations.length; i++) {
+        		marker = new google.maps.Marker({
+        			position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+        			map: map
+        		});
+
+        		google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        			return function() {
+        				infowindow.setContent(locations[i][0]);
+        				infowindow.open(map, marker);
+        			}
+        		})(marker, i));
+        	}
+
+        	// JQuery
+			$('#show_map').click(function(){
+					$('#map_canvas').toggle();
+			        var center = map.getCenter();
+			        google.maps.event.trigger(map, "resize");
+			        map.setCenter(center);
+			    });
+
+		</script>
+
     {% endblock %}
 

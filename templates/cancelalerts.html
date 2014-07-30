@@ -9,8 +9,8 @@
       }
 
       .row-fluid {
-        padding: 8px;
-        height: 20px;
+        padding: 2px;
+        height: 21px;
         text-align: left;
         vertical-align: top;
       }
@@ -28,72 +28,72 @@
         <p>
         You will no longer receive the following alert:
         </p>
-        <div class="span12">
-            <div class="row-fluid">
-              <div class="span2">
+        <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-2">
                 <label class="title">email:</label>
               </div><!--/span-->
-              <div class="span6">
+              <div class="col-md-4">
                 {{email}}
               </div><!--/span-->
-            </div><!--/span-->
-            <div class="row-fluid">
-              <div class="span2">
+            </div><!--/row-->
+            <div class="row">
+              <div class="col-md-2">
                 <label class="title">phone:</label>
               </div><!--/span-->
-              <div class="span6">
+              <div class="col-md-4">
                 {{phone}}
               </div><!--/span-->
-            </div><!--/span-->
-            <div class="row-fluid">
-              <div class="span2">
+            </div><!--/row-->
+            <div class="row">
+              <div class="col-md-2">
                 <label class="title">carrier:</label>
               </div><!--/span-->
-              <div class="span6">
+              <div class="col-md-4">
                 {{carrier}}
               </div><!--/span-->
-            </div><!--/span-->
-            <div class="row-fluid">
-              <div class="span2">
+            </div><!--/row-->
+            <div class="row">
+              <div class="col-md-2">
                 <label class="title">starting stations:</label>
               </div><!--/span-->
-              <div class="span6">
+              <div class="col-md-4">
                 {{start_names}}
               </div><!--/span-->
-            </div><!--/span-->
-            <div class="row-fluid">
-              <div class="span2">
+            </div><!--/row-->
+            <div class="row">
+              <div class="col-md-2">
                 <label class="title">ending stations:</label>
               </div><!--/span-->
-              <div class="span6">
+              <div class="col-md-4">
                 {{end_names}}
               </div><!--/span-->
-            </div><!--/span-->
-            <div class="row-fluid">
-              <div class="span2">
+            </div><!--/row-->
+            <div class="row">
+              <div class="col-md-2">
                 <label class="title">days:</label>
               </div><!--/span-->
-              <div class="span6">
+              <div class="col-md-4">
                 {{days}}
               </div><!--/span-->
-            </div><!--/span-->
-            <div class="row-fluid">
-              <div class="span2">
+            </div><!--/row-->
+            <div class="row">
+              <div class="col-md-2">
                 <label class="title">time:</label>
               </div><!--/span-->
-              <div class="span6">
+              <div class="col-md-4">
                 {{time}}
               </div><!--/span-->
-            </div><!--/span-->
-            <div class="row-fluid">
-              <div class="span2">
+            </div><!--/row-->
+            <div class="row">
+              <div class="col-md-2">
                 <label class="title">id:</label>
               </div><!--/span-->
-              <div class="span6">
+              <div class="col-md-4">
                 {{alert_id}}
               </div><!--/span-->
-            </div><!--/span-->
-          </div><!--/span-->
+            </div><!--/row-->
+          </div><!--/container-->
        <div>
        Please allow a day for the alert to be disabled.
        To restore this alert, click <a href='/confirm/{{alert_id}}'>here</a>.
