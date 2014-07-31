@@ -8,39 +8,41 @@
     {% block body %}
         <h1>historical station data</h1>
             <p>busybici has been collecting data on NYC bike share since late June 2013. Use this page to see how each station's availability of bikes and docks has trended over time.</p>
-            <form action="/history">
-                <div>
-                    <select id="station_dropdown" name="station_req" onchange='updateChart("select")'>
-                        {% for s in stations %}
-                            {% set sel="" %}
-                            {% if s.station_id == station_req %}
-                                {% set sel="selected" %}
-                            {% endif %}
-                            <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
-                        {% endfor %}
-                    </select>
-                    <input id='station_search'></input>
-                    <a id='select_or_search'>select or search</a>
-                </div>
-                <div>
-                    <select id="time_dropdown" name="time_req" onchange="updateChart()">
-                        {% for t in timespans %}
-                            {% set sel="" %}
-                            {% if t[1] == time_req %}
-                                {% set sel="selected" %}
-                            {% endif %}
-                            <option value={{t[1]}} {{sel}}>{{t[0]}}</option>
-                        {% endfor %}
-                    </select>
-                <label class="checkbox">
-                    <input id="bikes_checkbox" type="checkbox" name="bikes_req" value="checked" {{bikes_req}} onchange='updateChart("checkbox")'>
-                    Available bikes
-                </label>
-                <label class="checkbox" display:inline>
-                    <input id="docks_checkbox" type="checkbox" name="docks_req" value="checked" {{docks_req}} onchange='updateChart("checkbox")'>
-                    Available docks
-                </label>
-            </form>
+            <div>
+                <select class="form-control" id="station_dropdown" name="station_req" onchange='updateChart("select")'>
+                    {% for s in stations %}
+                        {% set sel="" %}
+                        {% if s.station_id == station_req %}
+                            {% set sel="selected" %}
+                        {% endif %}
+                        <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
+                    {% endfor %}
+                </select>
+                <input id='station_search'></input>
+                <a id='select_or_search'>select or search</a>
+            </div>
+            <div>
+                <select class="form-control" id="time_dropdown" name="time_req" onchange="updateChart()">
+                    {% for t in timespans %}
+                        {% set sel="" %}
+                        {% if t[1] == time_req %}
+                            {% set sel="selected" %}
+                        {% endif %}
+                        <option value={{t[1]}} {{sel}}>{{t[0]}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <label class="title" for="bikes_checkbox">
+            <input type="checkbox" id="bikes_checkbox" name="bikes_req" value="checked" {{bikes_req}} onchange='updateChart("checkbox")'>
+                Available bikes
+            </label>
+            
+            <label class="title" for="docks_checkbox">
+            <input type="checkbox" id="docks_checkbox" name="docks_req" value="checked" {{docks_req}} onchange='updateChart("checkbox")'>
+                Available docks
+            </label>
+
 	    <hr>
 	    <div id="chart_div">
             <h3 class="load_text" id="load_text1"><br><br><br>adjusting seat...</h3>

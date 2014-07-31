@@ -7,7 +7,7 @@
     {% block body %}
         <h1>total bikes and docks</h1>
             <p>This page shows total bikes available and total docks available, and how these have changed over a recent period of time. I'm still working on making this data set more useful. One of the things I'd like to be able to do is show an estimate of the total bikes in circulation over time.</p>
-                <select id="time_dropdown" name="time_req" onchange="updateChart()">
+                <select class="form-control" id="time_dropdown" name="time_req" onchange="updateChart()">
                     {% for t in timespans %}
                         {% set sel="" %}
                         {% if t[1] == time_req %}
@@ -16,11 +16,11 @@
                         <option value={{t[1]}} {{sel}}>{{t[0]}}</option>
                     {% endfor %}
                 </select>
-                <label class="checkbox">
+                <label class="title" for="bikes_checkbox">
                     <input type="checkbox" id="bikes_checkbox" name="bikes_req" value="checked" {{bikes_req}} onchange="updateChart()">
                     Available bikes
                 </label>
-                <label class="checkbox" display:inline>
+                <label class="title" for="docks_checkbox">
                     <input type="checkbox" id="docks_checkbox" name="docks_req" value="checked" {{docks_req}} onchange="updateChart()">
                     Available docks
                 </label>
