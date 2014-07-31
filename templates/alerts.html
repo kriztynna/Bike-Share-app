@@ -5,13 +5,6 @@
 
         <!--playing around with the google maps plug-in-->
         <style>
-        	#map_canvas {
-        		position: absolute;
-        		display: inline;
-        		width: 40%;
-        		height: 60%;
-        	}
-
         	.error-msg {
         		color: red;
         		font-weight: normal;
@@ -21,8 +14,15 @@
         		font-weight: normal;
         	}
 
-        	#form-table {
+        	#map_canvas {
+        		position: absolute;
+        		display: inline;
         		width: 40%;
+        		height: 60%;
+        	}
+
+        	#form-div {
+        		width: 50%;
         		display: inline-table;
         	}
 
@@ -35,9 +35,9 @@
           <p>
           Sign up for scheduled updates on your favorite Citibike stations. You will receive a confirmation request over email before any alerts are distributed.
           </p>
-          <div id="form-table">
-          <form class="form-inline" role="form" action="/alerts" method="post">
-          	<table class="table" id="form-table">
+          <div id="form-div">
+          <form class="form-horizontal" role="form" action="/alerts" method="post">
+          	<table class="table">
 	          	<tr>
 	          		<td>
 						<label class="title" for="email">email:</label>
