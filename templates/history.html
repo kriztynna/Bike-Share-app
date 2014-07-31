@@ -9,7 +9,7 @@
         <h1>historical station data</h1>
             <p>busybici has been collecting data on NYC bike share since late June 2013. Use this page to see how each station's availability of bikes and docks has trended over time.</p>
             <div>
-                <select class="form-control" id="station_dropdown" name="station_req" onchange='updateChart("select")'>
+                <select class="form-control" id="station_dropdown" name="station_req" onchange='updateChart("select")' style="width:20%">
                     {% for s in stations %}
                         {% set sel="" %}
                         {% if s.station_id == station_req %}
@@ -18,7 +18,7 @@
                         <option value={{s.station_id}} {{sel}}>{{s.name}}</option>
                     {% endfor %}
                 </select>
-                <input id='station_search'></input>
+                <input class="form-control" id='station_search' style="width:20%"></input>
                 <a id='select_or_search'>select or search</a>
             </div>
             <div>
