@@ -4,42 +4,36 @@
     {% endblock%}
 
     {% block body %}
-        <h1>busybici</h1>
-        <p>welcome! click around to see nyc bike share data in pretty charts</p>
-         <!-- Carousel
-            ================================================== -->
-            <div id="myCarousel" class="carousel slide">
-              <div class="carousel-inner">
-                <div class="item active">
-                  <img src="static/images/history.png" alt="">
-                  <div class="container">
-                    <div class="carousel-caption">
-                      <h1><a class="link" href="/history">Historical station data</a></h1>
-                      <p class="lead">Browse historical data for any station. View available bikes, available docks, and out of order stuff, separately or combined. Watch how they've changed over different time spans.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="item">
-                  <img src="static/images/errors.png" alt="">
-                  <div class="container">
-                    <div class="carousel-caption">
-                      <h1><a href="/errors">Screen for system stress</a></h1>
-                      <p class="lead">When the data don't add up, there are bikes and docks out of order. busybici shows you which stations have the largest number of bad bikes, docks, and errors at the moment.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="item">
-                  <img src="static/images/totals.png" alt="">
-                  <div class="container">
-                    <div class="carousel-caption">
-                      <h1><a href="/totals">Watch bike share usage in aggregate</a></h1>
-                      <p class="lead">busybici adds up the data from each station to show you in the state of the overall bike share system. Track the availability of bikes, docks, and the incidence of issues through time.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
-              <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
-            </div><!-- /.carousel -->
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <div class="container">
+          <h1>busybici</h1>
+          <p>A new way to stay informed about available CitiBike bikes and docks in your area. Made for and by users of New York City's bike share program.</p>
+        </div>
+      </div>
+
+      <div class="container">
+        <!-- Example row of columns -->
+        <div class="row">
+          <div class="col-md-4">
+            <h2>Plan your journey</h2>
+            <p>Do you use CitiBike regularly? busybici can help you avoid surprises. Tell it what stations you use and when you need to hear about them. When the time comes, it will send you a quick email or text with the quantity of available bikes (or docks) at your station choices. Think of busybici as a minimalist personal assistant: it does one little thing to nudge your day in the right direction.</p>
+            <p><a class="btn btn-default" href="/alerts" role="button">sign up for busybici alerts &raquo;</a></p>
+          </div>
+          <div class="col-md-4">
+            <h2>Availability of bikes and docks in time series</h2>
+            <p>busybici is always keeping tabs on each station's available bikes and docks, so it can show you some interesting trends. Have a look at your nearest station's available bikes over time, for example, and finally figure out when it usually gets restocked. Or just look at pretty charts for their own sake.</p>
+            <p><a class="btn btn-default" href="/history" role="button">look at pretty charts &raquo;</a></p>
+         </div>
+          <div class="col-md-4">
+            <h2>Other fun stuff</h2>
+            <p>busybici has been collecting data on New York City's bike share program since June 2013, shortly after the program launched. It has kept track of system-wide stats and station-specific details alike. It keeps tally of things like record-setting days and the aggregate amounts of bikes and docks available across time. Yeah, you could say busybici gets a little restless sometimes.</p>
+            <p><a class="btn btn-default" href="/superlatives" role="button">view superlatives &raquo;</a></p>
+            <p><a class="btn btn-default" href="/totals" role="button">view aggregate data &raquo;</a></p>
+          </div>
+        </div>
+
+        <hr>
+
     {% endblock %}
 </html>
