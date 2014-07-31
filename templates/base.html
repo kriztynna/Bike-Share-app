@@ -2,62 +2,79 @@
 <html>
 	<head>
 		<!-- Bootstrap -->
-	    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+	    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 		{% block head %}
 		{% endblock %}
+		<!-- styles -->
+		<style>
+			.container-fluid {
+				margin-left: 35px;
+			}
+
+			.navbar {
+				margin-left: 20px
+			}
+
+			h1 {
+				margin-left: 0px;
+				margin-top: 0px;
+				margin-bottom: 5px;
+			}
+
+			body {
+				padding: 20px;
+			}
+
+		</style>
 	</head>
 	<body>
 	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	    <!-- styles -->
-		    <style>
-		      body {
-		        padding: 20px; /* for some padding all the way around */
-		      }
-		    </style>
+	    
     {% block header %}
-		<div class="navbar navbar navbar-fixed-top">
-			<div class="navbar-inner">
-				<div class="container">
-					<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
+    	<nav class="navbar navbar-default" role="navigation">
+			<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+						<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
 					</button>
-
-					<a class="brand" href="/">busybici</a>
-					<div class="nav-collapse collapse">
-						<ul class = "nav">
-							<li><a href="/history">station history</a></li>
-							<li><a href="/totals">totals</a></li>
-                            <li><a href="/usage">usage</a></li>
-							<li><a href="/superlatives">superlatives</a></li>
-							<li><a href="/alerts">alerts</a></li>
-							<li><a href="/about">about</a></li>
-						</ul>
-					</div><!--/.nav-collapse -->
+					<a class="navbar-brand" href="/">busybici</a>
 				</div>
-			</div>
-		</div>
+				<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	  			<ul class="nav navbar-nav">
+	    			<li><a href="/history">station history</a></li>
+					<li><a href="/totals">totals</a></li>
+	                <li><a href="/usage">usage</a></li>
+					<li><a href="/superlatives">superlatives</a></li>
+					<li><a href="/alerts">alerts</a></li>
+					<li><a href="/about">about</a></li>
+				</ul>
+			</div><!--/.nav-collapse -->
+			</nav>
 	{% endblock %}
-	<br>
-	<div class="container">
+
+	<div class="container-fluid">
 		{% block body %}
 		{% endblock %}
 	</div>
+
 	<div id="footer">
-		<div class="container">	
+		<div class="container-fluid">	
 			{%- block footer -%}
 				<p class="muted credit">&copy; Copyright 2013 by a devoted nyc bike sharer.</p>
 			{%- endblock -%}
 		</div>
 	</div>
+
 	<!-- Javascript -->
 		<script src="http://code.jquery.com/jquery.js"></script>
-		<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
 	<!-- AddThis Button BEGIN -->
-	<div class="addthis_toolbox addthis_floating_style addthis_16x16_style" style="left:25px;top:50px;">
+	<div class="addthis_toolbox addthis_floating_style addthis_16x16_style" style="left: 35px;top: 95px;">
 		<a class="addthis_button_preferred_1"></a>
 		<a class="addthis_button_preferred_2"></a>
 		<a class="addthis_button_preferred_3"></a>

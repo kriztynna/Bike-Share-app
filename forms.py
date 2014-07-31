@@ -60,12 +60,14 @@ class AlertsForm(Handler):
 		text_sel="",
 		both_sel=""
 		):
-		stations = ndb.gql("SELECT station_id, name \
+		stations = ndb.gql("SELECT station_id, name, coordinates \
                 FROM StationInfo \
                 ORDER BY name ASC")
 		stations_dict = dict()
+		stations_map = []
 		for s in stations:
 			stations_dict[s.station_id] = s.name
+			stations_map.append([str(s.name), s.coordinates.lat, s.coordinates.lon])
 		carriers_list = ["AT&T", "T-Mobile", "Verizon", "Qwest", "Sprint", "Virgin Mobile", "Nextel", "Alltel", "Metro PCS", "Powertel", "Boost Mobile", "Suncom", "Tracfone", "U.S. Cellular"]
 
 		self.render(
@@ -97,6 +99,7 @@ class AlertsForm(Handler):
 			text_sel=text_sel,
 			both_sel=both_sel,
 			stations_dict=stations_dict,
+			stations_map=stations_map,
 			carriers_list=carriers_list
 			)
 	def get(self):

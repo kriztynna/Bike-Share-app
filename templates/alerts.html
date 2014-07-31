@@ -1,31 +1,55 @@
 {% extends "base.html" %}
     {% block head %}
-        <!--CSS-->
+        <!--deactivate link to CSS for now-->
         <!--<link rel="stylesheet" type="text/css" href="/static/stylesheets/alerts.css"/>-->
+
+        <!--playing around with the google maps plug-in-->
+        <style>
+        	.error-msg {
+        		color: red;
+        		font-weight: normal;
+        	}
+
+        	.title {
+        		font-weight: normal;
+        	}
+
+        	#map_canvas {
+        		position: absolute;
+        		display: inline;
+        		width: 40%;
+        		height: 60%;
+        	}
+
+        	#form-div {
+        		width: 50%;
+        		display: inline-table;
+        	}
+
+        </style>
         <title>busybici: alerts</title>
     {% endblock%}
 
     {% block body %}
         <h1>alerts</h1>
           <p>
-          Sign up for scheduled updates on your favorite Citibike stations. You will receive a confirmation request over email before any alerts are distributed. </p>
-          <p>
-          Fields required except where noted otherwise.
+          Sign up for scheduled updates on your favorite Citibike stations. You will receive a confirmation request over email before any alerts are distributed.
           </p>
-          <form class="form-inline" role="form" action="/alerts" method="post">
+          <div id="form-div">
+          <form class="form-horizontal" role="form" action="/alerts" method="post">
           	<table class="table">
 	          	<tr>
 	          		<td>
-						<label for="email">email:</label>
+						<label class="title" for="email">email:</label>
 					</td>
 					<td>
 					<input type="email" class="form-control" name="email" placeholder="required" value="{{email}}">
-					<label style="color: red;">{{email_error}}</label>
+					<label class="error-msg">{{email_error}}</label>
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<label for="alert_type">alert type:</label>
+						<label class="title" for="alert_type">alert type:</label>
 					</td>
 					<td>
 						<select class="form-control" id="alert_type" name="alert_type">
@@ -37,19 +61,19 @@
 				</tr>
 				<tr>
 					<td>
-						<label for="phone">phone:</label>
+						<label class="title" for="phone">phone:</label>
 					</td>
 					<td>
 						<input type="tel" class="form-control" name="phone" value="{{phone}}">
-						<label style="color: red;">{{phone_error}}</label>
+						<label class="error-msg">{{phone_error}}</label>
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<label for="carrier">carrier:</label>
+						<label class="title" for="carrier">carrier:</label>
 					</td>
 					<td>
-						<select id="carrier" name="carrier">
+						<select class="form-control" id="carrier" name="carrier">
 						<option value=''></option>
 							{% for c in carriers_list %}
 								{% set sel="" %}
@@ -59,16 +83,16 @@
 								<option value={{c}} {{sel}}>{{c}}</option>
 							{% endfor %}
 						</select>
-						<label style="color: red;">{{carrier_error}}</label>
+						<label class="error-msg">{{carrier_error}}</label>
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<label>starting stations</label>
+						<label class="title" >starting stations</label>
 					</td>
 					<td>
-						<select name="start1">
-						<option value=''></option>
+						<select class="form-control" name="start1">
+							<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
 								{% if id == start1|int %}
@@ -78,8 +102,8 @@
 							{% endfor %}
 						</select>
 
-						<select name="start2">
-						<option value=''></option>
+						<select class="form-control"  name="start2">
+							<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
 								{% if id == start2|int %}
@@ -89,8 +113,8 @@
 							{% endfor %}
 						</select>
 
-						<select id="start3_dropdown" name="start3">
-						<option value=''></option>
+						<select class="form-control"  id="start3_dropdown" name="start3">
+							<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
 								{% if id == start3|int %}
@@ -99,18 +123,17 @@
 								<option value={{id}} {{sel}}>{{name}}</option>
 							{% endfor %}
 						</select>
-						<label style="color: red;">{{start1_error}}</label>
-						<label style="color: red;">{{start2_error}}</label>
-						<label style="color: red;">{{start3_error}}</label>
+						<label class="error-msg">{{start1_error}}</label>
+						<label class="error-msg">{{start2_error}}</label>
+						<label class="error-msg">{{start3_error}}</label>
 					</td>
 				</tr>
-				<tr>
 					<td>
-						<label>ending stations</label>
+						<label class="title" >ending stations</label>
 					</td>
 					<td>
-						<select name="end1">
-						<option value=''></option>
+						<select class="form-control"  name="end1">
+							<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
 								{% if id == end1|int %}
@@ -120,8 +143,8 @@
 							{% endfor %}
 						</select>
 						
-						<select name="end2">
-						<option value=''></option>
+						<select class="form-control"  name="end2">
+							<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
 								{% if id == end2|int %}
@@ -131,8 +154,8 @@
 							{% endfor %}
 						</select>
 
-						<select name="end3">
-						<option value=''></option>
+						<select class="form-control"  name="end3">
+							<option value=''></option>
 							{% for id, name in stations_dict.iteritems() %}
 								{% set sel="" %}
 								{% if id == end3|int %}
@@ -141,14 +164,14 @@
 								<option value={{id}} {{sel}}>{{name}}</option>
 							{% endfor %}
 						</select>
-						<label style="color: red;">{{end1_error}}</label>
-						<label style="color: red;">{{end2_error}}</label>
-						<label style="color: red;">{{end3_error}}</label>
+						<label class="error-msg">{{end1_error}}</label>
+						<label class="error-msg">{{end2_error}}</label>
+						<label class="error-msg">{{end3_error}}</label>
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<label>days to send alert:</label>
+						<label class="title">days to send alert:</label>
 					</td>
 					<td>
 						<div class="checkbox">
@@ -158,7 +181,7 @@
 								{% else %}
 									{% set checked="" %}
 								{% endif %}
-								<input type="checkbox" name="su" value="0" {{checked}}>Sunday
+								<input type="checkbox" name="su" value="0" {{checked}}> Sunday  
 							</label>
 							<label>
 								{% if '1' in days %}
@@ -166,7 +189,7 @@
 								{% else %}
 									{% set checked="" %}
 								{% endif %}
-								<input type="checkbox" name="mo" value="1" {{checked}}>Monday
+								<input type="checkbox" name="mo" value="1" {{checked}}> Monday  
 							</label>
 							<label>
 								{% if '2' in days %}
@@ -174,7 +197,7 @@
 								{% else %}
 									{% set checked="" %}
 								{% endif %}
-								<input type="checkbox" name="tu" value="2" {{checked}}>Tuesday
+								<input type="checkbox" name="tu" value="2" {{checked}}> Tuesday  
 							</label>
 							<label>
 								{% if '3' in days %}
@@ -182,7 +205,7 @@
 								{% else %}
 									{% set checked="" %}
 								{% endif %}
-								<input type="checkbox" name="we" value="3" {{checked}}>Wednesday
+								<input type="checkbox" name="we" value="3" {{checked}}> Wednesday  
 							</label>
 							<label>
 								{% if '4' in days %}
@@ -190,7 +213,7 @@
 								{% else %}
 									{% set checked="" %}
 								{% endif %}
-								<input type="checkbox" name="th" value="4" {{checked}}>Thursday
+								<input type="checkbox" name="th" value="4" {{checked}}> Thursday  
 							</label>
 							<label>
 								{% if '5' in days %}
@@ -198,7 +221,7 @@
 								{% else %}
 									{% set checked="" %}
 								{% endif %}
-								<input type="checkbox" name="fr" value="5" {{checked}}>Friday
+								<input type="checkbox" name="fr" value="5" {{checked}}> Friday  
 							</label>
 							<label>
 								{% if '6' in days %}
@@ -206,19 +229,19 @@
 								{% else %}
 									{% set checked="" %}
 								{% endif %}
-								<input type="checkbox" name="sa" value="6" {{checked}}>Saturday
+								<input type="checkbox" name="sa" value="6" {{checked}}> Saturday  
 							</label>
-							<label style="color: red;">{{days_error}}</label>
+							<label class="error-msg">{{days_error}}</label>
 						</div>
 					</td>
 				</tr>
 				<tr>
 	          		<td>
-						<label for="time">time:</label>
+						<label class="title" for="time">time:</label>
 					</td>
 					<td>
 					<input type="time" class="form-control" name="time" value="{{time}}">
-					<label style="color: red;">{{time_error}}</label>
+					<label class="error-msg">{{time_error}}</label>
 					</td>
 				</tr>
 				<tr>
@@ -229,5 +252,53 @@
 				</tr>
 			</table>
 		</form>
+		</div>
+		<div id="map_canvas"></div>
+		
+
+		<!--Javascript-->
+		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js"></script>
+        
+		<script type="text/javascript">
+
+			var map = new google.maps.Map(document.getElementById('map_canvas'), {
+				zoom: 12,
+				center: new google.maps.LatLng(40.729063, -73.984344),
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			});
+
+			var infowindow = new google.maps.InfoWindow();
+
+			var locations = {{stations_map|safe}}
+
+        	var marker, i;
+
+        	for (i = 0; i < locations.length; i++) {
+        		marker = new google.maps.Marker({
+        			position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+        			map: map
+        		});
+
+        		google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        			return function() {
+        				infowindow.setContent(locations[i][0]);
+        				infowindow.open(map, marker);
+        			}
+        		})(marker, i));
+        	}
+
+        	// JQuery
+			$('#show_map').click(function(){
+					$('#map_canvas').toggle();
+			        var center = map.getCenter();
+			        google.maps.event.trigger(map, "resize");
+			        map.setCenter(center);
+			    });
+
+		</script>
+
     {% endblock %}
 

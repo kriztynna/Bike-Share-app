@@ -1,3 +1,19 @@
+input[type="checkbox"] {
+    height:12px;
+    width:12px;
+    padding-right: 4px;
+    vertical-align: top; 
+}
+
+label {
+    margin-top: 4px;
+    display: block;
+}
+
+.title {
+    font-weight: normal;
+}
+
 #chart_div {
     height: 500px;
     animation: fadein 0.5s;
