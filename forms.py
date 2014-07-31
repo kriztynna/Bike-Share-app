@@ -410,7 +410,7 @@ def phoneError(alert_type, phone):
 		if alert_type!='email':
 			phone_error = "Phone number field cannot be blank if you've elected to receive text message alerts."
 		else:
-			phone_error = "Make sure you've elected an email only address, or fill out this field."
+			phone_error = "Make sure you've elected an email-only alerts, or fill out this field."
 	else:
 		phone_digitizer = re.compile(r'[^\d]+') #only digits allowed, no other characters
 		new_phone = phone_digitizer.sub('', phone)
