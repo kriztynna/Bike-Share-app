@@ -1,19 +1,35 @@
-input[type="checkbox"] {
-    height:12px;
-    width:12px;
-    padding-right: 4px;
-    vertical-align: top; 
-}
-
+/* formatting the form */
 label {
-    margin-top: 4px;
     display: block;
-}
-
-.title {
     font-weight: normal;
 }
 
+.ui-autocomplete {
+    background-color: white;
+    list-style-type: none;
+}
+
+.ui-helper-hidden-accessible {display:none;}
+
+#station_search {
+    display:none;
+    width: 260px; /* same as #station_dropdown */
+    margin-bottom: 5px;
+}
+
+#station_dropdown {
+    display: inline-block;
+    width: 260px; /* making a fixed width, so it looks the same as #station_search */
+    margin-bottom: 5px;
+}
+
+#time_dropdown {
+    display: inline-block;
+    width: auto;
+    margin-bottom: 5px;
+}
+
+/* Chart formatting and animation */
 #chart_div {
     height: 500px;
     animation: fadein 0.5s;
@@ -91,46 +107,3 @@ label {
         to {opacity: 0;}
         }
 
-.ui-autocomplete {
-    list-style-type: none;
-    background-color: white;
-    width: 220px;
-    vertical-align: middle;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 14px;
-
-}
-
-.ui-helper-hidden-accessible {display:none;}
-
-#station_search {display:none;}
-
-input {
-    display: inline-block;
-    width: 240px;
-    height: 20px;
-    line-height: 20px;
-    padding-right: 9px;
-    padding-left: 5px;
-    margin-bottom: 10px;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    color: #555555;
-    border-radius: 4px;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    vertical-align: middle;
-}
-
-#station_dropdown {
-    display: inline-block;
-    width: 258px;
-    height: 26px;
-    line-height: 20px;
-    margin-bottom: 10px;
-}
-
-#time_dropdown {
-    width: 125px;
-    height: 26px;
-}

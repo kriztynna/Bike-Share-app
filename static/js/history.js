@@ -39,8 +39,9 @@ function handleData(){
 function drawChart(){
     request = new XMLHttpRequest();
     request.onreadystatechange = handleData;
-    current_station = 357;
-    var req = 'historyjson?station_req=357&time_req=86400&bikes_req=checked&docks_req=';
+    // default setting is to load station 281, Grand Army Plaza & Central Park S
+    current_station = 281;
+    var req = 'historyjson?station_req=281&time_req=86400&bikes_req=checked&docks_req=';
     var encoded_req = encodeURI(req);
     request.open("GET",encoded_req,true);
     request.send();

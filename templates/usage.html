@@ -8,7 +8,6 @@
 
     {% block body %}
         <h1>system usage data</h1>
-            <p>Use this page to see how usage of the NYC bike share has trended over time.</p>
             <form action="/usage">
                 <select class="form-control" id="datasets_dropdown" name="datasets_dropdown" onchange="updateChart()" style="width: auto">
                     {% for d in datasets %}

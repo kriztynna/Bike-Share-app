@@ -1,17 +1,15 @@
+/* formatting the form */
 label {
     display: block;
-}
-
-    .title {
     font-weight: normal;
 }
 
 #time_dropdown {
     width: 125px;
-    height: 26px;
     margin-bottom: 5px;
 }
 
+/* chart formatting and animation */
 #chart_div {
     height: 500px;
     }
