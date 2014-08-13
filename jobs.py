@@ -154,7 +154,9 @@ class UpdateSystemStats(webapp2.RequestHandler):
 		# for 4Q2013
 		# systemstats = urllib2.Request('http://cf.datawrapper.de/0FwJZ/27/data.csv')
 		# for 1Q2014
-		systemstats = urllib2.Request('http://cf.datawrapper.de/1hJ2T/16/data.csv')
+		# systemstats = urllib2.Request('http://cf.datawrapper.de/SGjhr/1/data.csv')
+		# for 2Q2014 (to-date)
+		systemstats = urllib2.Request('http://cf.datawrapper.de/1hJ2T/67/data.csv')
 		response = urllib2.urlopen(systemstats).read()
 		raw_data = StringIO.StringIO(response)
 		csv_data = csv.reader(raw_data)
@@ -196,9 +198,13 @@ class UpdateSystemStats(webapp2.RequestHandler):
 					if row[3] == '':
 						miles = 0
 					else:
-						miles = float(row[3])
+						miles_s = row[3]
+						miles = miles_s.replace(',', '')
+						miles = float(miles)
 
-					cum_miles = float(row[4])
+					cum_miles_s = row[4]
+					cum_miles = cum_miles_s.replace(',','')
+					cum_miles = float(cum_miles)
 
 					try:
 						members = int(row[5])

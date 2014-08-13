@@ -40,6 +40,7 @@ function drawChart(){
     request = new XMLHttpRequest();
     request.onreadystatechange = handleData;
     // default setting is to load station 281, Grand Army Plaza & Central Park S
+    // if you change it here, change it in the bikeshareapp python script too
     current_station = 281;
     var req = 'historyjson?station_req=281&time_req=86400&bikes_req=checked&docks_req=';
     var encoded_req = encodeURI(req);

@@ -79,11 +79,13 @@ class ShowStationHistory(MainPage):
 		# seems to only work with at least two fields projected.
 		stations = ndb.gql("SELECT station_id, name \
                 FROM StationInfo \
-                ORDER BY station_id ASC")
+                ORDER BY name ASC")
 
 		# set defaults
 		if station_req == "":
-			station_req = 357
+			# default station is Grand Army Plaza and Central Park S
+			# if you change it here, change it in history.js too
+			station_req = 281
 		if time_req == "":
 			time_req = timespans[0][1]
 		if bikes_req == "" and docks_req == "" and errors_req == "":
