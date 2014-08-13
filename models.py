@@ -94,6 +94,11 @@ class AlertLog(ndb.Model):
 	complete = ndb.BooleanProperty(required=True, default=False)
 	sent = ndb.DateTimeProperty(required=False)
 
+class AdminEmail(ndb.Model):
+	email = ndb.StringProperty(required=True)
+	# this app uses the AdminEmail entity in the inboundmail.py file
+	# use this property to store the email address to which the app will forward inbound email traffic
+	# for best results, store only one email address. that's all this is configured to work with.
 
 
 

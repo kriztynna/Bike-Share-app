@@ -698,8 +698,8 @@ app = webapp2.WSGIApplication(
 		('/about', AboutPage),
 		('/alerts', AlertsPage),
 		('/awaitconfirm', AwaitConfirmPage),
-		('/confirm/(\d+)', ConfirmAlertPage),
 		('/cancel/(\d+)', CancelAlertPage),
+		('/confirm/(\d+)', ConfirmAlertPage),
 		('/history', ShowStationHistory),
 		('/historyjson', HistoryChartJSONHandler),
 		('/usage', UsageHistory),
@@ -710,7 +710,6 @@ app = webapp2.WSGIApplication(
 		('/admin/updatestatus', UpdateStatus),
 		('/admin/updateall', UpdateAll),
 		('/admin/updatesystemstats', UpdateSystemStats),
-		('/admin/createalerts', CreateAlerts),
 		('/admin/managealertslistq', ManageAlertsListQ),
 		('/admin/sendalerts', SendAlerts)
 	],

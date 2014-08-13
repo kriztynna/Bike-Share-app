@@ -265,45 +265,6 @@ class SendAlerts(webapp2.RequestHandler):
 		self.response.out.write('SendAlerts successfully initiated.')
 		self.send_alerts()
 
-class CreateAlerts(webapp2.RequestHandler):
-	def create_records(self):
-		alert = Alert(
-			email='cristina.colon@gmail.com',
-			phone=9174552028,
-			carrier='AT&T',
-			start1=357,
-			start2=293,
-			start3=483,
-			end1=327,
-			end2=426,
-			end3=147,
-			time=datetime.time(20, 0, 0),
-			days=[0, 1, 2, 3, 4, 5, 6] # every day of the week
-		)
-		alert.put()
-		alert2 = Alert(
-			email='cristina.colon@gmail.com',
-			phone=9174552028,
-			carrier='AT&T',
-			start1=293,
-			end1=426,
-			time=datetime.time(21, 0, 0),
-			days=[0, 6] # weekends
-		)
-		alert2.put()
-		alert3 = Alert(
-			email='cristina.colon@gmail.com',
-			phone=9174552028,
-			carrier='AT&T',
-			start1=483,
-			end1=147,
-			time=datetime.time(21, 15, 0),
-			days=[1, 2, 3, 4, 5] # weekdays
-		)
-		alert3.put()
-
-	def get(self):
-		self.create_records()
 
 ########## All the code in this section is to send the confirmation emails ##########
 def sendConfirmEmail(
