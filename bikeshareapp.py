@@ -657,7 +657,9 @@ class ManageAlertsListQ(webapp2.RequestHandler):
 					end3=q.end3,
 					time=q.time
 				)
-			to_put.append(alert_today)
+				to_put.append(alert_today)
+			else:
+				continue # used for debugging
 		ndb.put_multi(to_put)
 		logging.debug("Prepared today's list of alerts to send.")
 		time.sleep(5) # give it 5 seconds for the new data to take
