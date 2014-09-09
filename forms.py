@@ -119,8 +119,6 @@ class AlertsForm(Handler):
 
 		self.phone = self.request.get('phone')
 		self.carrier = self.request.get('carrier')
-		print 'here is the carrier found in the form'
-		print self.carrier
 
 		self.start1 = self.request.get('start1')
 		self.start2 = self.request.get('start2')
@@ -222,14 +220,7 @@ class AlertsPage(AlertsForm):
 			return finalists
 		days = generate_days()
 
-		def generate_time():
-			form_time = self.time
-			time_array = form_time.split(":")
-			hour = int(time_array[0])
-			minute = int(time_array[1])
-			time = datetime.time(hour, minute, 0)
-			return time
-		time = generate_time()
+		time = generate_time(self.time)
 
 		a = Alert(
 			email = self.email,
@@ -414,8 +405,6 @@ def phoneError(alert_type, phone):
 	else:
 		phone_digitizer = re.compile(r'[^\d]+') #only digits allowed, no other characters
 		new_phone = phone_digitizer.sub('', phone)
-		print new_phone
-		print len(str(new_phone))
 		if len(str(new_phone))!=10:
 			phone_error="Please enter a valid 10-digit phone number."
 		else:
@@ -452,15 +441,46 @@ def daysError(days):
 	return days_error
 
 ##### Time validation #####
+def generate_time(time):
+	logging.debug(time)
+	time_array = time.split(":")
+	logging.debug(time_array)
+	hour = int(time_array[0])
+	logging.debug(hour)
+	try:
+		minute = int(time_array[1])
+		time = datetime.time(hour, minute, 0)
+		logging.debug(time)
+	except:
+		logging.debug('this is not something I can parse into a minute :(')
+		logging.debug(time_array[1])
+		minute = int(time_array[1])
+		time = datetime.time(hour, minute, 0)
+		logging.debug(time)
+	return time
+
 def verifyTime(time):
 	if (time!=None and time!=''):
-		return True
+		try:
+			time_check = generate_time(time)
+			return True
+		except:
+			logging.debug('A time was submitted in an invalid format:')
+			logging.debug(time)
+			return False
 
 def timeError(time):
-	if (time!=None or time!=''):
+	if (time==None or time==''):
 		time_error = 'Please enter the time of day to receive the alert.'
 	else:
-		time_error = 'There was an error with the time entered. Please try again.'
+		try:
+			time_check = generate_time(time)
+			logging.debug(time_check)
+			time_error = ''
+		except:
+			logging.debug('A time was submitted in an invalid format:')
+			logging.debug(time)
+			time_error = 'Please enter a valid time in the 24-hour format, e.g., 17:30 for 5:30 PM.'
 	return time_error
 
 ##### Stations validation ######
@@ -482,11 +502,7 @@ def verifyStations(start1, start2, start3, end1, end2, end3):
 
 def stationsError(start1, start2, start3, end1, end2, end3):
 	stations = [start1, start2, start3, end1, end2, end3]
-	print 'here are the stations'
-	print stations
 	errors = ['', '', '', '', '', '']
-	print 'here are the station errors'
-	print errors
 	#first make sure start1 and end1 are populated
 	if (start1=='' or end1==''):
 		if start1=='':
@@ -502,9 +518,5 @@ def stationsError(start1, start2, start3, end1, end2, end3):
 				if n==None:
 					errors[i]='No station found with this ID.'
 			i+=1
-	print 'here are some other station errors'
-	print errors
 	return errors[0], errors[1], errors[2], errors[3], errors[4], errors[5]			
-
-
 
