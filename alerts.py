@@ -53,7 +53,7 @@ docks: %(end_docks)d \n' % \
 		body_contents.append(end_text)
 
 	body_contents.append('\nenjoy your journey!\n-busybici')
-	body_contents.append('\n\nto unsubscribe click http://bikesharepp.appspot.com/cancel/')
+	body_contents.append('\n\nto unsubscribe click http://www.busybici.com/cancel/')
 	body_contents.append(alert_id)
 
 	body = ''.join(body_contents)
@@ -140,8 +140,7 @@ def distribute(
 			start_times=start_times,
 			end_names=end_names,
 			end_docks=end_docks,
-			end_times=end_times,
-			alert_id=str(entity.alert_id)
+			end_times=end_times
 		)
 
 
