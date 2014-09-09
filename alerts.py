@@ -78,27 +78,25 @@ def sendSMS(
 	body_contents = []
 
 	if len(start_names) > 0:
-		body_contents.append('starting stations:\n')
+		body_contents.append('bikes at\n')
 
 	for key in start_names:
-		start_text = '%(start_name)s at %(start_time)s \n\
-bikes: %(start_bikes)d\n' % \
-		             {'start_time': start_times[key], \
-		              'start_bikes': start_bikes[key], \
+		start_text = '-%(start_name)s: %(start_bikes)d\n' % \
+		             {'start_bikes': start_bikes[key], \
 		              'start_name': start_names[key]}
 		body_contents.append(start_text)
 
 	if len(end_names) > 0:
-		body_contents.append('\nending stations:\n')
+		body_contents.append('\ndocks at\n')
 
 	for key in end_names:
-		end_text = '%(end_name)s at %(end_time)s \n\
-docks: %(end_docks)d\n' % \
-		           {'end_time': end_times[key], \
-		            'end_docks': end_docks[key], \
+		end_text = '-%(end_name)s: %(end_docks)d\n' % \
+		           {'end_docks': end_docks[key], \
 		            'end_name': end_names[key]}
 		body_contents.append(end_text)
-	body_contents.append('\n-busybici')
+
+	body_contents.append('\nlast update: ')
+	body_contents.append(start_times['start1'])
 
 	body = ''.join(body_contents)
 
