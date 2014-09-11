@@ -223,6 +223,47 @@ def generate_msg_info(
 
 
 class SendAlerts(webapp2.RequestHandler):
+	def requestFreshData(self, alert_time):
+		# first see if the new data is even needed
+		# by checking when the last update was
+		last_update_query = StationStatus.query().order(-StationStatus.date_time).get()
+		naive_last_update_time = last_update_query.date_time
+		last_update_time = assignTimeZone(naive_last_update_time)
+		today = datetime.date.today()
+		year = int(today.strftime('%Y'))
+		month = int(today.strftime('%m'))
+		day = int(today.strftime('%d'))
+		alert_hour = int(alert_time.strftime('%H'))
+		alert_minute = int(alert_time.strftime('%M'))
+		datefied_alert_time = datetime.datetime(year, month, day, alert_hour, alert_minute)
+		datefied_alert_time = assignNYCTimeZone(datefied_alert_time)
+		gap = datefied_alert_time - last_update_time
+		gap_seconds = gap.total_seconds()
+		
+		# then by comparing the last update time to the scheduled alert time
+		if gap_seconds > 240: # gap greater than 4 minutes, or 240 seconds
+			logging.debug('Requesting fresh data.')
+			need_fresh_data = True
+		else:
+			need_fresh_data = False
+			logging.debug('Already have the most current data.')
+
+		# then if you need it, try to get it
+		if need_fresh_data:
+			try:
+				time_before_request = datetime.datetime.now()
+				update_request = urllib2.Request('http://www.busybici.com/admin/updatestatus')
+				time_after_request = datetime.datetime.now()
+				req_time_elapsed = time_after_request - time_after_request
+				logging.debug('It took %s to get make the request', req_time_elapsed)
+				urllib2.urlopen(update_request)
+				open_time_elapsed = datetime.datetime.now() - time_after_request
+				logging.debug('and it took %s to open the page', open_time_elapsed)
+				logging.debug('Got it.')
+			except:
+				logging.debug('Timed out.')
+		time.sleep(10) # regardless, give the new data a moment to propagate
+	
 	def send_alerts(self, wait=0):
 		todays_alerts = AlertLog.query()
 
@@ -236,6 +277,7 @@ class SendAlerts(webapp2.RequestHandler):
 				a = current_alerts.get()
 				now = makeNowTime()
 				if a.time <= now:
+					self.requestFreshData(a.time)
 					generate_msg_info(a)
 					logging.debug(
 						'I sent an alert that was scheduled for %s.',
@@ -276,7 +318,7 @@ def sendConfirmEmail(
 ):
 	body_contents = []
 	body_contents.append('thanks for signing up! click the confirmation link below to begin receiving your alerts.')
-	confirm_url = 'http://bikeshareapp.appspot.com/confirm/'+str(alert_id)
+	confirm_url = 'http://www.busybici.com/confirm/'+str(alert_id)
 	body_contents.append('\n')
 	body_contents.append(confirm_url)
 
@@ -293,7 +335,7 @@ def sendConfirmEmail(
 ########## Utils ##########
 def convertTime(t):
 	# takes a naive datetime, assigns it the UTC time zone,
-	# then converts to NY time
+	# converts to NY time, then returns it formatted as a string
 	utc = pytz.timezone('UTC')
 	newyork = pytz.timezone('America/New_York')
 	t = utc.localize(t)
@@ -301,6 +343,18 @@ def convertTime(t):
 	t = t.strftime('%I:%M %p')
 	return t
 
+def assignTimeZone(t):
+	# same as convertTime but returns a datetime object instead of a string
+	utc = pytz.timezone('UTC')
+	newyork = pytz.timezone('America/New_York')
+	t = utc.localize(t)
+	t = t.astimezone(newyork)
+	return t
+
+def assignNYCTimeZone(t):
+	newyork = pytz.timezone('America/New_York')
+	t = newyork.localize(t)
+	return t
 
 def makeNowTime():
 	# establish the time zones
