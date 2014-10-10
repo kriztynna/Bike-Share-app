@@ -251,14 +251,10 @@ class SendAlerts(webapp2.RequestHandler):
 		# then if you need it, try to get it
 		if need_fresh_data:
 			try:
-				time_before_request = datetime.datetime.now()
 				update_request = urllib2.Request('http://www.busybici.com/admin/updatestatus')
-				time_after_request = datetime.datetime.now()
-				req_time_elapsed = time_after_request - time_after_request
-				logging.debug('It took %s to get make the request', req_time_elapsed)
-				urllib2.urlopen(update_request)
-				open_time_elapsed = datetime.datetime.now() - time_after_request
-				logging.debug('and it took %s to open the page', open_time_elapsed)
+				req_time = datetime.datetime.now()
+				open_time = datetime.datetime.now() - req_time
+				logging.debug('Time to open URL: %s', open_time)
 				logging.debug('Got it.')
 			except:
 				logging.debug('Timed out.')
