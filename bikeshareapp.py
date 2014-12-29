@@ -43,6 +43,10 @@ class MainPage(Handler):
 		self.render('front.html')
 
 	def get(self):
+		referral_spam_domains = ['ilovevitaly.co', 'ilovevitaly.com', 'econom.co', 'shopping.ilovevitaly.com', 'iedit.ilovevitaly.com', 'forum.topic43089039.darodar.com']
+		if referer!=None and referer in referral_spam_domains:
+			self.error(404)
+            return
 		self.render_front()
 
 
